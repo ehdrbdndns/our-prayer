@@ -1,6 +1,7 @@
 import { Text, View } from "react-native";
 
 export default function Index() {
+
   return (
     <View
       style={{
@@ -9,7 +10,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+      <Text>왜 이미지가 적용이 안될까?</Text>
     </View>
   );
 }
