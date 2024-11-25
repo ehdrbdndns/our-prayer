@@ -20,3 +20,6 @@ export const moderateScale = (size: number, factor = 0.5) => size + (scale(size)
 
 // Normalize the font size based on the screen width
 export const normalizeFontSize = (size: number) => Math.round(size * widthRatio);
+
+// Get the letter spacing based on the scaled font size
+export const getLetterSpacing = (scaledFontSize: number, percent: number) => scaledFontSize * (percent / 100);
