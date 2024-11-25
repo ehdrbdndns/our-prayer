@@ -10,7 +10,7 @@ const widthRatio = deviceWidth / BASE_WIDTH;
 const heightRatio = deviceHeight / BASE_HEIGHT;
 
 // Scale the size of the component based on the screen size
-export const scale = (size: number) => widthRatio * size;
+const scale = (size: number) => widthRatio * size;
 
 // Scale the size of the component based on the screen height
 export const verticalScale = (size: number) => heightRatio * size;
