@@ -6,6 +6,7 @@ import {
 } from '@expo-google-fonts/noto-sans-kr';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
+import { setStatusBarStyle } from "expo-status-bar";
 import { useEffect, useState } from "react";
 
 SplashScreen.preventAutoHideAsync();
@@ -25,6 +26,14 @@ export default function RootLayout() {
 
   const [isAppReady, setAppReady] = useState(false);
 
+  // Set the status bar style to light
+  useEffect(() => {
+    setTimeout(() => {
+      setStatusBarStyle('light');
+    }, 0)
+  }, [])
+
+  // Hide the splash screen when the app is ready
   useEffect(() => {
     if (fontsLoaded) {
       setTimeout(() => {
@@ -40,6 +49,7 @@ export default function RootLayout() {
 
   return (
     <Stack>
+      <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
