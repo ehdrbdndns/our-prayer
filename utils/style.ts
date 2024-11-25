@@ -10,13 +10,13 @@ const widthRatio = deviceWidth / BASE_WIDTH;
 const heightRatio = deviceHeight / BASE_HEIGHT;
 
 // Scale the size of the component based on the screen size
-const scale = (size: number) => widthRatio * size;
+const scaleWidth = (size: number) => widthRatio * size;
 
 // Scale the size of the component based on the screen height
-export const verticalScale = (size: number) => heightRatio * size;
+export const scaleHeight = (size: number) => heightRatio * size;
 
 // Scale the size of the component based on the screen width with a factor( default is 0.5 )
-export const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
+export const moderateScale = (size: number, factor = 0.5) => size + (scaleWidth(size) - size) * factor;
 
 // Normalize the font size based on the screen width
 export const normalizeFontSize = (size: number) => Math.round(size * widthRatio);
