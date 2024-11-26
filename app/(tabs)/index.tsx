@@ -1,22 +1,53 @@
+import Search from "@/assets/images/search.svg";
+import Logo from "@/assets/images/text-s-logo.svg";
+import Header from "@/components/Header";
+import { moderateScale } from "@/utils/style";
 import { Link } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>왜 이미지가 적용이 안될까??</Text>
-      <Link href={"/login"} asChild>
-        <Pressable>
-          <Text>로그인 페이지로 이동</Text>
-        </Pressable>
-      </Link>
-    </View>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <Header
+        prefix={
+          <Link href="/login">
+            <Logo
+              style={{ marginLeft: moderateScale(4) }}
+              width={moderateScale(82)}
+              height={moderateScale(18)}
+            />
+          </Link>
+        }
+        suffix={
+          <Search
+            width={moderateScale(24)}
+            height={moderateScale(24)}
+          />
+        }
+      />
+
+      {/* Hello! */}
+
+      {/* 연속 기도일수 & 오늘의 기도 시간 */}
+
+      {/* 오늘의 말씀 */}
+
+      {/* 나의 기도 기록 */}
+
+      {/* 기도 플랜 */}
+
+      {/* 공유 카드 */}
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
+});

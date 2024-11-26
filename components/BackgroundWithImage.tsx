@@ -19,5 +19,5 @@ export default function BackgroundWithImage({ children }: PropsWithChildren) {
 const styles = StyleSheet.create({
   image: {
     flex: 1
-  }
+  },
 })
