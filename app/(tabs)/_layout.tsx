@@ -1,40 +1,24 @@
-import { Ionicons } from '@expo/vector-icons';
+import TabBar from '@/components/TabBar';
 import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
   return (
     <Tabs
+      tabBar={props => <TabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: '#ffd33d',
-        headerStyle: {
-          backgroundColor: '#25292e',
-        },
         headerShown: false,
         headerShadowVisible: false,
         headerTintColor: '#fff',
         tabBarStyle: {
-          backgroundColor: '#25292e',
+          backgroundColor: '#161B29',
         },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
-          )
-        }}
-      />
-      <Tabs.Screen
-        name="plan"
-        options={{
-          title: 'Plan',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
-          )
-        }}
-      />
+      <Tabs.Screen name="index" />
+      <Tabs.Screen name="plan" />
+      <Tabs.Screen name="prayer" />
+      <Tabs.Screen name="question" />
+      <Tabs.Screen name="mypage" />
     </Tabs>
   );
 }
