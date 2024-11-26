@@ -4,7 +4,7 @@ import {
   NotoSansKR_700Bold,
   useFonts,
 } from '@expo-google-fonts/noto-sans-kr';
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setStatusBarStyle } from "expo-status-bar";
 import { useEffect, useState } from "react";
@@ -49,8 +49,8 @@ export default function RootLayout() {
 
   return (
     <Stack>
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="login" options={{ headerShown: false, animation: "fade" }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "fade" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
