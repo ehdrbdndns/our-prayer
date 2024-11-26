@@ -21,7 +21,5 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     paddingHorizontal: moderateScale(26),
-    width: "100%",
-    height: "100%",
   }
 })
