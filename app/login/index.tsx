@@ -1,3 +1,4 @@
+import Kakao from "@/assets/images/kakao-logo.svg";
 import BackgroundWithImage from "@/components/BackgroundWithImage";
 import CustomButton from "@/components/button/CustomButton";
 import PrimaryButton from "@/components/button/PrimaryButton";
@@ -79,15 +80,13 @@ export default function Index() {
           {/* KakaoButton */}
           <CustomButton onPress={onPressKakao} style={{ backgroundColor: '#FEE500' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Image
-                source={require('@/assets/images/kakao-logo.svg')}
+              <Kakao
+                width={18}
+                height={18}
                 style={{
-                  width: moderateScale(18),
-                  height: moderateScale(18),
                   position: 'absolute',
                   left: moderateScale(-28),
                 }}
-                contentFit="fill"
               />
               <MediumText
                 fontSize={15}

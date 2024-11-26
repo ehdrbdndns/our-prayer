@@ -44,6 +44,9 @@
     },
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "packagerOpts": {
+      "config": "metro.config.js"
     }
   }
 }
