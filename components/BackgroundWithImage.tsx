@@ -1,5 +1,4 @@
 
-import { moderateScale } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { PropsWithChildren } from "react";
 import { StyleSheet } from "react-native";
@@ -19,7 +18,6 @@ export default function BackgroundWithImage({ children }: PropsWithChildren) {
 
 const styles = StyleSheet.create({
   image: {
-    flex: 1,
-    paddingHorizontal: moderateScale(26),
+    flex: 1
   }
 })
