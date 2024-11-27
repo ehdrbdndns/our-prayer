@@ -1,12 +1,16 @@
 import { moderateScale } from "@/utils/style";
 import { PropsWithChildren } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
-type HeaderProps = PropsWithChildren<{ prefix: JSX.Element, suffix: JSX.Element }>
+type HeaderProps = PropsWithChildren<{
+  prefix: JSX.Element;
+  suffix: JSX.Element;
+  style?: StyleProp<ViewStyle>;
+}>;
 
-export default function Header({ prefix, children, suffix }: HeaderProps) {
+export default function Header({ prefix, children, suffix, style }: HeaderProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       {/* Prefix */}
       <View>
         {prefix}
@@ -22,7 +26,7 @@ export default function Header({ prefix, children, suffix }: HeaderProps) {
         {suffix}
       </View>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -31,8 +35,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-
     paddingLeft: moderateScale(16),
     paddingRight: moderateScale(20),
-  }
-})
+    paddingVertical: moderateScale(14),
+  },
+});
