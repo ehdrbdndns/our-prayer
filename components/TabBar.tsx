@@ -1,8 +1,8 @@
-import Home from "@/assets/images/tab/home.svg";
-import MyPage from "@/assets/images/tab/mypage.svg";
-import Plan from "@/assets/images/tab/plan.svg";
-import Prayer from "@/assets/images/tab/prayer.svg";
-import Question from "@/assets/images/tab/question.svg";
+import Home from "@/assets/images/icon/tab/home.svg";
+import MyPage from "@/assets/images/icon/tab/mypage.svg";
+import Plan from "@/assets/images/icon/tab/plan.svg";
+import Prayer from "@/assets/images/icon/tab/prayer.svg";
+import Question from "@/assets/images/icon/tab/question.svg";
 import { moderateScale } from "@/utils/style";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Pressable, StyleSheet, View } from "react-native";
