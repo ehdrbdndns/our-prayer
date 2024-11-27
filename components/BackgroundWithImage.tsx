@@ -1,4 +1,4 @@
-import { ImageBackground } from 'expo-image';
+import { Image } from 'expo-image';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
 import { Animated, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
@@ -25,16 +25,14 @@ export default function BackgroundWithImage({ children, style, animation }: Back
   }, [fadeAnim, animation]);
 
   return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.imageContainer, { opacity: fadeAnim }]}>
-        <ImageBackground
-          style={[styles.image, style]}
-          source={BackgroundImage}
-        >
-          {children}
-        </ImageBackground>
-      </Animated.View>
-    </View>
+    <View style={[styles.container, style]}>
+      <View style={[styles.imageContainer]}>
+        <Animated.View style={[StyleSheet.absoluteFill, { opacity: fadeAnim }]}>
+          <Image source={BackgroundImage} style={{ position: 'absolute', top: 0, width: "100%", height: "100%" }} />
+        </Animated.View>
+        {children}
+      </View>
+    </View >
   );
 }
 
@@ -45,8 +43,5 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     flex: 1,
-  },
-  image: {
-    flex: 1,
-  },
+  }
 });
