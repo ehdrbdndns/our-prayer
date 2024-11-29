@@ -1,53 +1,151 @@
-import Search from "@/assets/images/search.svg";
+import Fire from "@/assets/images/icon/fire.svg";
+import Search from "@/assets/images/icon/search.svg";
+import Star from "@/assets/images/icon/star.svg";
 import Logo from "@/assets/images/text-s-logo.svg";
 import Header from "@/components/Header";
+import PrayerPlan from "@/components/PrayerPlan";
+import PrayerRecord from "@/components/PrayerRecord";
+import PrayerState from "@/components/PrayerState";
+import ShareCard from "@/components/ShareCard";
+import { BoldText } from "@/components/text/BoldText";
+import TodayVerse from "@/components/TodayVerse";
 import { moderateScale } from "@/utils/style";
 import { Link } from "expo-router";
-import { StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <Header
-        prefix={
-          <Link href="/login">
-            <Logo
-              style={{ marginLeft: moderateScale(4) }}
-              width={moderateScale(82)}
-              height={moderateScale(18)}
+    <ScrollView style={styles.scrollViewContent}>
+      <SafeAreaView style={styles.container}>
+        {/* Header */}
+        <Header
+          style={styles.header}
+          prefix={
+            <Link href="/login">
+              <Logo
+                style={{ marginLeft: moderateScale(4) }}
+                width={moderateScale(82)}
+                height={moderateScale(18)}
+              />
+            </Link>
+          }
+          suffix={
+            <Search
+              width={moderateScale(24)}
+              height={moderateScale(24)}
             />
-          </Link>
-        }
-        suffix={
-          <Search
-            width={moderateScale(24)}
-            height={moderateScale(24)}
+          }
+        />
+
+        {/* Content */}
+        <View style={styles.content}>
+          <BoldText style={styles.intro} fontSize={24} lineHeight={36} letterSpacingPercent={-1}>
+            {"안녕하세요, 동규우운님,\n오늘의 기도를 시작해보세요."}
+          </BoldText>
+        </View>
+
+        {/* 기도 데이터 */}
+        <View style={styles.content}>
+          <View style={styles.prayerStateList}>
+            {/* 연속 기도 일수 */}
+            <PrayerState
+              style={styles.prayerState}
+              title={"연속 기도일 수"}
+              icon={<Fire width={moderateScale(24)} height={moderateScale(24)} />}
+              data={134}
+              unit={"일"}
+            />
+
+            {/* 오늘의 기도 시간 */}
+            <PrayerState
+              style={styles.prayerState}
+              title={"오늘의 기도 시간"}
+              icon={<Star width={moderateScale(24)} height={moderateScale(24)} />}
+              data={14}
+              unit={"분"}
+            />
+          </View>
+        </View>
+
+        {/* 오늘의 말씀 */}
+        <View style={styles.content}>
+          <TodayVerse
+            subTitle="마가복음 11:24"
+            content="그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"
           />
-        }
-      />
+        </View>
 
-      {/* Hello! */}
+        {/* 기도 일자 데이터 */}
+        <View style={styles.content}>
+          <PrayerRecord />
+        </View>
 
-      {/* 연속 기도일수 & 오늘의 기도 시간 */}
+        {/* 기도 플랜 */}
+        <View style={[styles.content, { paddingRight: 0 }]}>
+          <PrayerPlan />
+        </View>
 
-      {/* 오늘의 말씀 */}
-
-      {/* 나의 기도 기록 */}
-
-      {/* 기도 플랜 */}
-
-      {/* 공유 카드 */}
-    </SafeAreaView>
+        {/* 공유 카드 */}
+        <ShareCard />
+      </SafeAreaView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  header: {
+    marginBottom: moderateScale(42),
+  },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+  },
+  content: {
+    paddingHorizontal: moderateScale(24),
+  },
+  scrollViewContent: {
+    paddingBottom: 0
+  },
+
+  // 인트로(안녕하세요, {name}님...)
+  intro: {
+    marginBottom: moderateScale(16),
+  },
+
+  // 기도 데이터
+  prayerStateList: {
+    flexDirection: "row",
+    marginBottom: moderateScale(40),
+  },
+  prayerState: {
+    flex: 1
+  },
+
+  // 오늘의 말씀
+  todayVerse: {
+    marginBottom: moderateScale(36),
+  },
+  todayVerseTitle: {
+    marginBottom: moderateScale(12),
+  },
+  todayVerseCard: {
+    paddingVertical: moderateScale(18),
+    paddingHorizontal: moderateScale(16),
+    borderRadius: moderateScale(10),
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  todayVerseCardSection: {
+    marginBottom: moderateScale(4),
+  },
+  todayVerseCardContent: {
+    marginBottom: moderateScale(20),
+  },
+  todayVerseCardButton: {
+    width: 'auto',
+    alignSelf: 'flex-start',
+    backgroundColor: '#0F141A',
+    paddingVertical: moderateScale(12),
+    paddingHorizontal: moderateScale(24)
   }
 });
