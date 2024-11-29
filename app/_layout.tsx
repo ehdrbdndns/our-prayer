@@ -1,3 +1,4 @@
+import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';
 import { Inter_600SemiBold } from '@expo-google-fonts/inter';
 import {
   NotoSansKR_400Regular,
@@ -23,7 +24,8 @@ export default function RootLayout() {
     NotoSansKR_400Regular,
     NotoSansKR_500Medium,
     NotoSansKR_700Bold,
-    Inter_600SemiBold
+    Inter_600SemiBold,
+    IBMPlexMono_400Regular
   });
 
   const [isAppReady, setAppReady] = useState(false);
