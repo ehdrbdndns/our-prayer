@@ -16,6 +16,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo-google-fonts/ibm-plex-mono": "^0.2.3",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo-google-fonts/noto-sans-kr": "^0.2.3",
     "@expo/vector-icons": "^14.0.2",
