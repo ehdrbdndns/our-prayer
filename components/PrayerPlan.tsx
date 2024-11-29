@@ -10,7 +10,7 @@ const DefaultCardImage = require("@/assets/images/card/default-background.png");
 
 export default function PrayerPlan() {
   return (
-    <View>
+    <View style={styles.container}>
       {/* Title */}
       <BoldText
         style={styles.title}
@@ -80,6 +80,9 @@ export default function PrayerPlan() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    marginBottom: moderateScale(40),
+  },
   title: {
     marginBottom: moderateScale(16),
   },
