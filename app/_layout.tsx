@@ -1,10 +1,12 @@
+import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';
+import { Inter_600SemiBold } from '@expo-google-fonts/inter';
 import {
   NotoSansKR_400Regular,
   NotoSansKR_500Medium,
   NotoSansKR_700Bold,
   useFonts,
 } from '@expo-google-fonts/noto-sans-kr';
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setStatusBarStyle } from "expo-status-bar";
 import { useEffect, useState } from "react";
@@ -22,6 +24,8 @@ export default function RootLayout() {
     NotoSansKR_400Regular,
     NotoSansKR_500Medium,
     NotoSansKR_700Bold,
+    Inter_600SemiBold,
+    IBMPlexMono_400Regular
   });
 
   const [isAppReady, setAppReady] = useState(false);
@@ -49,8 +53,8 @@ export default function RootLayout() {
 
   return (
     <Stack>
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="login" options={{ headerShown: false, animation: "fade" }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "fade" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
