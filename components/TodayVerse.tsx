@@ -14,7 +14,7 @@ interface TodayVerseProps {
 
 export default function TodayVerse({ subTitle, content, onPress }: TodayVerseProps) {
   return (
-    <View>
+    <View style={styles.container}>
       {/* Title */}
       <BoldText
         style={styles.title}
@@ -69,6 +69,9 @@ export default function TodayVerse({ subTitle, content, onPress }: TodayVersePro
 };
 
 const styles = StyleSheet.create({
+  container: {
+    marginBottom: moderateScale(40),
+  },
   title: {
     marginBottom: moderateScale(12),
   },

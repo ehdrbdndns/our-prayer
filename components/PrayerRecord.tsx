@@ -57,7 +57,7 @@ export default function PrayerRecord() {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       {/* Title */}
       <BoldText
         style={styles.title}
@@ -116,6 +116,9 @@ export default function PrayerRecord() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    marginBottom: moderateScale(40),
+  },
   title: {
     marginBottom: moderateScale(16)
   },
