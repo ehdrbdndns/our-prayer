@@ -1,6 +1,7 @@
 import { moderateScale } from '@/utils/style';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import CustomButton from './button/CustomButton';
 import { BoldText } from "./text/BoldText";
 import CustomText from "./text/CustomText";
 import { MediumText } from "./text/MediumText";
@@ -99,6 +100,17 @@ export default function PrayerRecord() {
           </View>
         ))}
       </View>
+      {/* Button */}
+      <CustomButton style={styles.button}>
+        <BoldText
+          color="#FFFFFF"
+          fontSize={14}
+          lineHeight={22}
+          letterSpacingPercent={-1}
+        >
+          기도 기록 전체보기
+        </BoldText>
+      </CustomButton>
     </View>
   );
 }
@@ -108,7 +120,8 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(16)
   },
   record: {
-    gap: moderateScale(8)
+    gap: moderateScale(8),
+    marginBottom: moderateScale(16)
   },
   row: {
     flexDirection: "row",
@@ -142,5 +155,12 @@ const styles = StyleSheet.create({
 
     // android
     elevation: 4
+  },
+  button: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    paddingVertical: moderateScale(12),
+    paddingHorizontal: moderateScale(24),
   }
 });
