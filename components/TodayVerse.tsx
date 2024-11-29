@@ -3,19 +3,18 @@ import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import { moderateScale } from "@/utils/style";
 import React from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import CustomButton from "./button/CustomButton";
 
 interface TodayVerseProps {
   subTitle: string;
   content: string;
-  style?: StyleProp<ViewStyle>;
   onPress?: () => void;
 }
 
-export default function TodayVerse({ subTitle, content, style, onPress }: TodayVerseProps) {
+export default function TodayVerse({ subTitle, content, onPress }: TodayVerseProps) {
   return (
-    <View style={[styles.container, style]}>
+    <View>
       {/* Title */}
       <BoldText
         style={styles.title}
@@ -70,9 +69,6 @@ export default function TodayVerse({ subTitle, content, style, onPress }: TodayV
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: moderateScale(36),
-  },
   title: {
     marginBottom: moderateScale(12),
   },
