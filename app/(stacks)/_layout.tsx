@@ -3,9 +3,8 @@ import { Stack } from "expo-router";
 import { PropsWithChildren } from "react";
 
 export default function RootLayout() {
-
   const ScreenLayout = ({ children }: PropsWithChildren) => (
-    <BackgroundWithImage>
+    <BackgroundWithImage animation='fade'>
       {children}
     </BackgroundWithImage>
   );
@@ -16,6 +15,9 @@ export default function RootLayout() {
         headerShown: false
       }}
       screenLayout={ScreenLayout}
-    />
+    >
+      <Stack.Screen name="search" />
+      <Stack.Screen name="login" />
+    </Stack>
   )
 }

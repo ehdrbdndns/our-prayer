@@ -8,6 +8,7 @@ import { RegularText } from "@/components/text/RegularText";
 import { moderateScale } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { useRef } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,6 +24,10 @@ export default function PlanPage() {
       textInputRef.current.focus();
     }
   };
+
+  const onPressArchive = () => {
+    router.push("/search");
+  }
 
   return (
     <FlatList
