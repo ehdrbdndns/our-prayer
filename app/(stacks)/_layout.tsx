@@ -12,11 +12,12 @@ export default function RootLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false
+        headerShown: false,
+        headerShadowVisible: false,
       }}
       screenLayout={ScreenLayout}
     >
-      <Stack.Screen name="search" />
+      <Stack.Screen name="archive" />
       <Stack.Screen name="login" />
     </Stack>
   )

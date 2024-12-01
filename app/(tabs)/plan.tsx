@@ -26,7 +26,7 @@ export default function PlanPage() {
   };
 
   const onPressArchive = () => {
-    router.push("/search");
+    router.push("/archive");
   }
 
   return (
@@ -51,7 +51,11 @@ export default function PlanPage() {
                 />
               </View>
             }
-            suffix={<Archive />}
+            suffix={
+              <Pressable onPress={onPressArchive}>
+                <Archive />
+              </Pressable>
+            }
           />
 
           {/* 현재 진행중인 기도 */}
@@ -158,9 +162,7 @@ export default function PlanPage() {
       renderItem={() => <PlanCard />}
       numColumns={2}
       columnWrapperStyle={styles.columnWrapper}
-    >
-
-    </FlatList>
+    />
   )
 }
 
@@ -216,6 +218,7 @@ const styles = StyleSheet.create({
   },
   tabList: {
     marginLeft: moderateScale(24),
+    marginBottom: moderateScale(12),
     gap: moderateScale(8)
   },
   tab: {
@@ -232,6 +235,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(24),
     gap: moderateScale(8),
     marginBottom: moderateScale(8),
-    marginTop: moderateScale(12)
   }
 });
