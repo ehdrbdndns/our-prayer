@@ -10,12 +10,13 @@ import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRef } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const DefaultCardImage = require("@/assets/images/card/default-background.png");
 
 export default function PlanPage() {
   const textInputRef = useRef<TextInput>(null);
+  const insets = useSafeAreaInsets();
 
   const handleSearchPress = () => {
     if (textInputRef.current) {
@@ -28,7 +29,7 @@ export default function PlanPage() {
       data={[1, 2, 3, 4, 5]}
       showsHorizontalScrollIndicator={false}
       ListHeaderComponent={(
-        <SafeAreaView>
+        <View style={{ paddingTop: insets.top }}>
           {/* Header */}
           <Header
             style={styles.header}
@@ -147,7 +148,7 @@ export default function PlanPage() {
 
             {/* Card List */}
           </View>
-        </SafeAreaView>
+        </View>
       )}
       renderItem={() => <PlanCard />}
       numColumns={2}
@@ -225,6 +226,7 @@ const styles = StyleSheet.create({
   columnWrapper: {
     paddingHorizontal: moderateScale(24),
     gap: moderateScale(8),
-    marginBottom: moderateScale(8)
+    marginBottom: moderateScale(8),
+    marginTop: moderateScale(12)
   }
 });
