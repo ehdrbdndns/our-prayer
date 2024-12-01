@@ -1,30 +1,24 @@
 import { moderateScale } from "@/utils/style";
-import { PropsWithChildren } from "react";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
-type HeaderProps = PropsWithChildren<{
-  prefix: JSX.Element;
-  suffix: JSX.Element;
+type HeaderProps = {
+  prefix?: JSX.Element;
+  infix?: JSX.Element;
+  suffix?: JSX.Element;
   style?: StyleProp<ViewStyle>;
-}>;
+}
 
-export default function Header({ prefix, children, suffix, style }: HeaderProps) {
+export default function Header({ prefix, infix, suffix, style }: HeaderProps) {
   return (
     <View style={[styles.container, style]}>
       {/* Prefix */}
-      <View>
-        {prefix}
-      </View>
+      {prefix}
 
       {/* Content */}
-      <View>
-        {children}
-      </View>
+      {infix}
 
       {/* Suffix */}
-      <View>
-        {suffix}
-      </View>
+      {suffix}
     </View>
   );
 }
