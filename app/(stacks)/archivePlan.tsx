@@ -7,7 +7,7 @@ import { router } from "expo-router";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function Archive() {
+export default function ArchivePlan() {
   const insets = useSafeAreaInsets();
 
   const onPressLeftArrow = () => {

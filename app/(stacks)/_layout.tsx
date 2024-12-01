@@ -17,7 +17,7 @@ export default function RootLayout() {
       }}
       screenLayout={ScreenLayout}
     >
-      <Stack.Screen name="archive" />
+      <Stack.Screen name="archivePlan" />
       <Stack.Screen name="login" />
     </Stack>
   )

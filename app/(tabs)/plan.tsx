@@ -26,7 +26,7 @@ export default function PlanPage() {
   };
 
   const onPressArchive = () => {
-    router.push("/archive");
+    router.push("/archivePlan");
   }
 
   return (
