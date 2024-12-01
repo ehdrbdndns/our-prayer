@@ -1,4 +1,5 @@
 import Archive from "@/assets/images/icon/archive.svg";
+import LeftArrow from "@/assets/images/icon/leftArrow.svg";
 import Search from "@/assets/images/icon/search.svg";
 import Header from "@/components/Header";
 import PlanCard from "@/components/PlanCard";
@@ -9,7 +10,7 @@ import { moderateScale } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -17,6 +18,8 @@ const DefaultCardImage = require("@/assets/images/card/default-background.png");
 
 export default function PlanPage() {
   const textInputRef = useRef<TextInput>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const insets = useSafeAreaInsets();
 
   const handleSearchPress = () => {
@@ -25,8 +28,19 @@ export default function PlanPage() {
     }
   };
 
+  const handleSearchSubmit = () => {
+    if (searchQuery !== "") {
+      setIsSearchActive(true);
+    }
+  };
+
   const onPressArchive = () => {
     router.push("/archivePlan");
+  }
+
+  const onPressLeftArrow = () => {
+    setIsSearchActive(false);
+    setSearchQuery("");
   }
 
   return (
@@ -38,6 +52,14 @@ export default function PlanPage() {
           {/* Header */}
           <Header
             style={styles.header}
+            prefix={
+              <Pressable
+                onPress={onPressLeftArrow}
+                style={[styles.headerPrefix, !isSearchActive && styles.hidden]}
+              >
+                <LeftArrow />
+              </Pressable>
+            }
             infix={
               <View style={styles.searchBar}>
                 <Pressable onPress={handleSearchPress}>
@@ -46,6 +68,9 @@ export default function PlanPage() {
                 <TextInput
                   ref={textInputRef}
                   style={styles.searchInput}
+                  onChangeText={setSearchQuery}
+                  onSubmitEditing={handleSearchSubmit}
+                  value={searchQuery}
                   placeholder="더 많은 기도 플랜을 찾아보세요"
                   placeholderTextColor={"#B3B3B3"}
                 />
@@ -59,7 +84,7 @@ export default function PlanPage() {
           />
 
           {/* 현재 진행중인 기도 */}
-          <View style={styles.container}>
+          <View style={[styles.container, isSearchActive && styles.hidden]}>
             {/* Title */}
             <BoldText
               style={styles.title}
@@ -105,7 +130,7 @@ export default function PlanPage() {
           </View>
 
           {/* 기도 플랜 찾기 */}
-          <View>
+          <View style={isSearchActive && styles.hidden}>
             {/* Title */}
             <BoldText
               style={[styles.title, { paddingHorizontal: moderateScale(24) }]}
@@ -157,6 +182,15 @@ export default function PlanPage() {
 
             {/* Card List */}
           </View>
+
+          <View style={[styles.searchText, !isSearchActive && styles.hidden]}>
+            <RegularText
+              fontSize={16}
+              lineHeight={24}
+            >
+              '{searchQuery}'에 대한 검색결과입니다.
+            </RegularText>
+          </View>
         </View>
       )}
       renderItem={() => <PlanCard />}
@@ -167,6 +201,16 @@ export default function PlanPage() {
 }
 
 const styles = StyleSheet.create({
+  headerPrefix: {
+    marginRight: moderateScale(16),
+  },
+  searchText: {
+    paddingHorizontal: moderateScale(24),
+    marginBottom: moderateScale(16),
+  },
+  hidden: {
+    display: "none",
+  },
   header: {
     marginBottom: moderateScale(24),
   },
