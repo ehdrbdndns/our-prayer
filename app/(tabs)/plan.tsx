@@ -1,4 +1,5 @@
 import Archive from "@/assets/images/icon/archive.svg";
+import LeftArrow from "@/assets/images/icon/leftArrow.svg";
 import Search from "@/assets/images/icon/search.svg";
 import Header from "@/components/Header";
 import PlanCard from "@/components/PlanCard";
@@ -8,14 +9,18 @@ import { RegularText } from "@/components/text/RegularText";
 import { moderateScale } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRef } from "react";
+import { router } from "expo-router";
+import { useRef, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const DefaultCardImage = require("@/assets/images/card/default-background.png");
 
 export default function PlanPage() {
   const textInputRef = useRef<TextInput>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleSearchPress = () => {
     if (textInputRef.current) {
@@ -23,15 +28,38 @@ export default function PlanPage() {
     }
   };
 
+  const handleSearchSubmit = () => {
+    if (searchQuery !== "") {
+      setIsSearchActive(true);
+    }
+  };
+
+  const onPressArchive = () => {
+    router.push("/archivePlan");
+  }
+
+  const onPressLeftArrow = () => {
+    setIsSearchActive(false);
+    setSearchQuery("");
+  }
+
   return (
     <FlatList
       data={[1, 2, 3, 4, 5]}
       showsHorizontalScrollIndicator={false}
       ListHeaderComponent={(
-        <SafeAreaView>
+        <View style={{ paddingTop: insets.top }}>
           {/* Header */}
           <Header
             style={styles.header}
+            prefix={
+              <Pressable
+                onPress={onPressLeftArrow}
+                style={[styles.headerPrefix, !isSearchActive && styles.hidden]}
+              >
+                <LeftArrow />
+              </Pressable>
+            }
             infix={
               <View style={styles.searchBar}>
                 <Pressable onPress={handleSearchPress}>
@@ -40,16 +68,23 @@ export default function PlanPage() {
                 <TextInput
                   ref={textInputRef}
                   style={styles.searchInput}
+                  onChangeText={setSearchQuery}
+                  onSubmitEditing={handleSearchSubmit}
+                  value={searchQuery}
                   placeholder="더 많은 기도 플랜을 찾아보세요"
                   placeholderTextColor={"#B3B3B3"}
                 />
               </View>
             }
-            suffix={<Archive />}
+            suffix={
+              <Pressable onPress={onPressArchive}>
+                <Archive />
+              </Pressable>
+            }
           />
 
           {/* 현재 진행중인 기도 */}
-          <View style={styles.container}>
+          <View style={[styles.container, isSearchActive && styles.hidden]}>
             {/* Title */}
             <BoldText
               style={styles.title}
@@ -95,7 +130,7 @@ export default function PlanPage() {
           </View>
 
           {/* 기도 플랜 찾기 */}
-          <View>
+          <View style={isSearchActive && styles.hidden}>
             {/* Title */}
             <BoldText
               style={[styles.title, { paddingHorizontal: moderateScale(24) }]}
@@ -147,18 +182,35 @@ export default function PlanPage() {
 
             {/* Card List */}
           </View>
-        </SafeAreaView>
+
+          <View style={[styles.searchText, !isSearchActive && styles.hidden]}>
+            <RegularText
+              fontSize={16}
+              lineHeight={24}
+            >
+              '{searchQuery}'에 대한 검색결과입니다.
+            </RegularText>
+          </View>
+        </View>
       )}
       renderItem={() => <PlanCard />}
       numColumns={2}
       columnWrapperStyle={styles.columnWrapper}
-    >
-
-    </FlatList>
+    />
   )
 }
 
 const styles = StyleSheet.create({
+  headerPrefix: {
+    marginRight: moderateScale(16),
+  },
+  searchText: {
+    paddingHorizontal: moderateScale(24),
+    marginBottom: moderateScale(16),
+  },
+  hidden: {
+    display: "none",
+  },
   header: {
     marginBottom: moderateScale(24),
   },
@@ -210,6 +262,7 @@ const styles = StyleSheet.create({
   },
   tabList: {
     marginLeft: moderateScale(24),
+    marginBottom: moderateScale(12),
     gap: moderateScale(8)
   },
   tab: {
@@ -225,6 +278,6 @@ const styles = StyleSheet.create({
   columnWrapper: {
     paddingHorizontal: moderateScale(24),
     gap: moderateScale(8),
-    marginBottom: moderateScale(8)
+    marginBottom: moderateScale(8),
   }
 });
