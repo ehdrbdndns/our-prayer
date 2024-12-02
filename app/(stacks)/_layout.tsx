@@ -19,6 +19,7 @@ export default function RootLayout() {
     >
       <Stack.Screen name="archivePlan" />
       <Stack.Screen name="login" />
+      <Stack.Screen name="planDetail" />
     </Stack>
   )
 }
