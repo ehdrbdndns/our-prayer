@@ -43,6 +43,16 @@ export default function PlanPage() {
     setSearchQuery("");
   }
 
+  const onPressPlan = (params: {
+    id: string;
+    title: string;
+    desc: string;
+    banner: string;
+  }) => {
+    const { id, title, desc, banner } = params;
+    router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}`);
+  }
+
   return (
     <FlatList
       data={[1, 2, 3, 4, 5]}
@@ -95,7 +105,14 @@ export default function PlanPage() {
             </BoldText>
 
             {/* Card */}
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => onPressPlan({
+                id: "1",
+                title: "30분 기도",
+                desc: "기도는 신과의 깊은 교감을 나누는 시간입니다. 이 30분 기도는 우리의 마음과 영혼을 하나님께 드리는 소중한 순간입니다. 바쁜 일상 속에서 잠시 멈추고, 하나님과의 관계를 더욱 깊게 하는 기회를 제공하고자 합니다.",
+                banner: "default"
+              })}
+            >
               <View style={styles.opacityBackground}>
                 {/* Image */}
                 <ImageBackground
