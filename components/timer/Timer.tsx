@@ -3,11 +3,12 @@ import Next from "@/assets/images/icon/next.svg";
 import Pause from "@/assets/images/icon/pause.svg";
 import Prev from "@/assets/images/icon/prev.svg";
 import { moderateScale } from "@/utils/style";
-import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useCountdown } from "react-native-countdown-circle-timer";
+import PrimaryButton from "../button/PrimaryButton";
 import { BoldText } from "../text/BoldText";
 import CustomText from "../text/CustomText";
+import { MediumText } from "../text/MediumText";
 import { RegularText } from "../text/RegularText";
 import CircleProgress from "./CircleProgress";
 
@@ -15,6 +16,7 @@ type TimerProps = {
   duration: number;
   initialRemainingTime: number;
   isPlaying: boolean;
+  repeatCount: number;
   onPressNext: (remainingTime: number) => void;
   onPressPrev: (remainingTime: number) => void;
   onPressPlay: () => void;
@@ -26,13 +28,12 @@ export default function Timer(props: TimerProps) {
     duration,
     initialRemainingTime,
     isPlaying,
+    repeatCount,
     onPressNext,
     onPressPrev,
     onPressPlay,
     onComplete
   } = props as TimerProps;
-
-  const [repeatCount, setRepeatCount] = useState(0);
 
   let countdown = useCountdown({
     duration,
@@ -46,19 +47,21 @@ export default function Timer(props: TimerProps) {
   });
 
   const formatRemainingTime = (remainingTime: number) => {
-    const minutes = Math.floor(remainingTime / 60)
-    const seconds = remainingTime % 60
+    const time = repeatCount > 0
+      ? (Math.floor(duration * (repeatCount - 1) + countdown.elapsedTime))
+      : remainingTime;
 
+    const minutes = Math.floor(time / 60)
+    const seconds = time % 60
     const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
 
-
-    return `${minutes}:${formattedSeconds}`;
+    return `${repeatCount > 0 ? '+' : ''}${minutes}:${formattedSeconds}`;
   };
 
   return (
     <View style={styles.timer}>
       {/* Circle Progress */}
-      <CircleProgress {...countdown} duration={duration} />
+      <CircleProgress {...countdown} repeatCount={repeatCount} />
 
       {/* Remaining Time */}
       <CustomText
@@ -91,32 +94,49 @@ export default function Timer(props: TimerProps) {
       </RegularText>
 
       {/* Controller */}
-      <View style={styles.controller}>
-        <Pressable
-          style={styles.button}
-          onPress={() => onPressPrev(countdown.remainingTime)}
-        >
-          <Prev />
-        </Pressable>
+      {
+        repeatCount > 0
+          ? (
+            <View style={[styles.controller, { width: moderateScale(320) }]}>
+              <PrimaryButton style={{ paddingVerticle: moderateScale(12) }}>
+                <MediumText
+                  fontSize={14}
+                >
+                  기도 기록 남기기
+                </MediumText>
+              </PrimaryButton>
+            </View>
+          )
+          : (
+            <View style={styles.controller}>
+              <Pressable
+                style={styles.button}
+                onPress={() => onPressPrev(countdown.remainingTime)}
+              >
+                <Prev />
+              </Pressable>
 
-        <Pressable
-          style={styles.button}
-          onPress={onPressPlay}
-        >
-          {
-            isPlaying
-              ? <Pause />
-              : <Play />
-          }
-        </Pressable>
+              <Pressable
+                style={styles.button}
+                onPress={onPressPlay}
+              >
+                {
+                  isPlaying
+                    ? <Pause />
+                    : <Play />
+                }
+              </Pressable>
 
-        <Pressable
-          style={styles.button}
-          onPress={() => onPressNext(countdown.remainingTime)}
-        >
-          <Next />
-        </Pressable>
-      </View>
+              <Pressable
+                style={styles.button}
+                onPress={() => onPressNext(countdown.remainingTime)}
+              >
+                <Next />
+              </Pressable>
+            </View>
+          )
+      }
+
     </View>
   )
 }
