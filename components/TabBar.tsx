@@ -25,7 +25,7 @@ const ImageSourceDict: {
   },
   question: {
     image: ({ color }) => <Question width={moderateScale(24)} height={moderateScale(24)} color={color} />,
-    text: '질문',
+    text: '질문하기',
   },
   mypage: {
     image: ({ color }) => <MyPage width={moderateScale(24)} height={moderateScale(24)} color={color} />,
