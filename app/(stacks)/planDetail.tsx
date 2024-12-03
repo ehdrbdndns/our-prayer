@@ -12,7 +12,7 @@ import { moderateScale } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const DefaultBanner = require('@/assets/images/plan/default-banner.png');
@@ -34,6 +34,11 @@ export default function PlanDetailPage() {
 
   const onPressLeftArrow = () => {
     router.back();
+  }
+
+  const onPressLecture = () => {
+    // Todo - add params
+    router.push("/prayer");
   }
 
   return (
@@ -172,7 +177,10 @@ export default function PlanDetailPage() {
 
             {/* List */}
             <View>
-              <View style={[styles.card, styles.lecture]}>
+              <TouchableOpacity
+                onPress={onPressLecture}
+                style={[styles.card, styles.lecture]}
+              >
                 {/* CheckBox */}
                 <CheckedCircle
                   width={moderateScale(22)}
@@ -200,8 +208,8 @@ export default function PlanDetailPage() {
                   width={moderateScale(38)}
                   height={moderateScale(38)}
                 />
-              </View>
-              <View style={[styles.card, styles.lecture]}>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.card, styles.lecture]}>
                 {/* CheckBox */}
                 <UnCheckedCircle
                   width={moderateScale(22)}
@@ -229,7 +237,7 @@ export default function PlanDetailPage() {
                   width={moderateScale(38)}
                   height={moderateScale(38)}
                 />
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
         </View>

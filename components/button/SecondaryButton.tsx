@@ -1,4 +1,5 @@
-import { StyleSheet, TouchableOpacity, TouchableOpacityProps } from "react-native";
+import { TouchableOpacityProps } from "react-native";
+import CustomButton from "./CustomButton";
 
 interface SecondaryButtonProps extends TouchableOpacityProps {
   children: React.ReactNode;
@@ -7,22 +8,11 @@ interface SecondaryButtonProps extends TouchableOpacityProps {
 
 export default function SecondaryButton({ children, style, ...props }: SecondaryButtonProps) {
   return (
-    <TouchableOpacity
-      style={[styles.button, style]}
+    <CustomButton
+      style={[{ backgroundColor: '#0F141A' }, style]}
       {...props}
     >
       {children}
-    </TouchableOpacity>
+    </CustomButton>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    width: '100%',
-    backgroundColor: '#4F5FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
-    paddingVertical: 9,
-  }
-});

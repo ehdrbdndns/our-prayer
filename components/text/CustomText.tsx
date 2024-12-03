@@ -8,7 +8,9 @@ export type CustomTextProps = PropsWithChildren<{
   letterSpacingPercent?: number;
   color?: string;
   fontFamily?: string;
+  textAlign?: 'left' | 'center' | 'right';
   style?: any;
+  [key: string]: any;
 }>
 
 export default function CustomText({
@@ -18,6 +20,7 @@ export default function CustomText({
   letterSpacingPercent = -1,
   color = '#FFFFFF',
   fontFamily = 'NotoSansKR_500Medium',
+  textAlign = "left",
   style,
   ...props
 }: CustomTextProps) {
@@ -31,6 +34,7 @@ export default function CustomText({
           fontSize: normalizedFontSize,
           lineHeight: normalizeFontSize(lineHeight || fontSize * 1.5),
           letterSpacing: getLetterSpacing(normalizedFontSize, letterSpacingPercent),
+          textAlign,
           color,
           fontFamily,
         },

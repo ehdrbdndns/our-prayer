@@ -19,7 +19,9 @@ export default function RootLayout() {
     >
       <Stack.Screen name="archivePlan" />
       <Stack.Screen name="login" />
+      <Stack.Screen name="prayer" options={{ animation: 'fade' }} />
       <Stack.Screen name="planDetail" />
+      <Stack.Screen name="prayerRecord" />
     </Stack>
   )
 }
