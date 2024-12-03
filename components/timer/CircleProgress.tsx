@@ -16,21 +16,19 @@ type CircleProgressProps = {
   stroke: ColorFormat
   strokeDashoffset: number
   strokeWidth: number,
-  duration: number
+  repeatCount: number
 }
 
 export default function CircleProgress(props: CircleProgressProps) {
 
   const {
-    elapsedTime,
     path,
     pathLength,
-    rotation,
     size,
     stroke,
     strokeDashoffset,
+    repeatCount,
     strokeWidth,
-    duration
   } = props;
 
   return (
@@ -52,7 +50,11 @@ export default function CircleProgress(props: CircleProgressProps) {
             fill="none"
             strokeWidth={strokeWidth}
             strokeDasharray={pathLength}
-            strokeDashoffset={pathLength - strokeDashoffset}
+            strokeDashoffset={
+              repeatCount > 0
+                ? 0
+                : pathLength - strokeDashoffset
+            }
           />
         </Svg>
       </View>
