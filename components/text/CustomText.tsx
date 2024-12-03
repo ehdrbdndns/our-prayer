@@ -10,6 +10,7 @@ export type CustomTextProps = PropsWithChildren<{
   fontFamily?: string;
   textAlign?: 'left' | 'center' | 'right';
   style?: any;
+  [key: string]: any;
 }>
 
 export default function CustomText({
