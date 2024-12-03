@@ -82,7 +82,7 @@ export default function Prayer() {
   }
   const onCompleteTimer = () => {
     setRepeatCount(repeatCount + 1);
-    return { shouldRepeat: false }
+    return { shouldRepeat: true }
   }
 
   const onPressPlay = () => {
@@ -201,20 +201,19 @@ export default function Prayer() {
           {/* Timer */}
           {
             mode === "default" && (
-              <>
-                <View style={styles.timer}>
-                  <Timer
-                    key={timerKey}
-                    duration={DEFAULT_DURATION}
-                    initialRemainingTime={initialRemainingTime}
-                    isPlaying={isPlaying}
-                    onPressNext={onPressNext}
-                    onPressPlay={onPressPlay}
-                    onPressPrev={onPressPrev}
-                    onComplete={onCompleteTimer}
-                  />
-                </View>
-              </>
+              <View style={styles.timer}>
+                <Timer
+                  key={timerKey}
+                  repeatCount={repeatCount}
+                  duration={DEFAULT_DURATION}
+                  initialRemainingTime={initialRemainingTime}
+                  isPlaying={isPlaying}
+                  onPressNext={onPressNext}
+                  onPressPlay={onPressPlay}
+                  onPressPrev={onPressPrev}
+                  onComplete={onCompleteTimer}
+                />
+              </View>
             )
           }
 
