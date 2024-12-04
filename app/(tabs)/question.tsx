@@ -1,45 +1,24 @@
-import Delete from '@/assets/images/icon/delete.svg';
-import Send from "@/assets/images/icon/send.svg";
+import Chat from '@/assets/images/icon/chat.svg';
+import Edit from '@/assets/images/icon/edit.svg';
 import Star from '@/assets/images/icon/star.svg';
-import PrimaryButton from '@/components/button/PrimaryButton';
+import Trash from '@/assets/images/icon/trash.svg';
+import InputButton from '@/components/InputButton';
 import { BoldText } from "@/components/text/BoldText";
+import CustomText from '@/components/text/CustomText';
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
-import { moderateScale, scaleHeight } from "@/utils/style";
-import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { moderateScale } from "@/utils/style";
+import { useState } from "react";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function QuestionPage() {
 
-  const [questionList, setQuestionList] = useState([]);
-  const [isInputVisible, setIsInputVisible] = useState(false);
-  const textInputRef = useRef<TextInput>(null);
+  const [questionList, setQuestionList] = useState([1, 2, 3]);
 
-  const onPressInputTrigger = () => {
-    setIsInputVisible(true);
+  const onPressDelete = () => {
+    setQuestionList(questionList.filter((_, index) => index !== 0));
   }
-
-  const onPressDeleteInputTrigger = () => {
-    setIsInputVisible(false);
-  }
-
-  const onSubmitEditing = () => {
-    setIsInputVisible(false);
-  }
-
-  const onPressSubmitButton = () => {
-    console.log("hello")
-    setIsInputVisible(false);
-  }
-
-  useEffect(() => {
-    if (isInputVisible && textInputRef.current) {
-      setTimeout(() => {
-        textInputRef?.current?.focus();
-      }, 100)
-    }
-  }, [isInputVisible])
 
   return (
     <SafeAreaView style={styles.container}>
@@ -96,18 +75,54 @@ export default function QuestionPage() {
               </RegularText>
             </View>
           ) : (
-            <ScrollView>
+            <ScrollView contentContainerStyle={styles.scrollView}>
               {
                 questionList.map((question, index) => {
                   return (
-                    <View key={index}>
-                      <RegularText
-                        color="#B3B3B3"
+                    <View style={styles.card}>
+                      {/* date */}
+                      <MediumText
+                        style={{ marginBottom: moderateScale(4) }}
+                        color='#B3B3B3'
                         fontSize={14}
-                        lineHeight={24}
+                        lineHeight={26}
                       >
-                        {question}
+                        2024년 10월 19일
+                      </MediumText>
+
+                      {/* Text */}
+                      <RegularText
+                        style={{ marginBottom: moderateScale(16) }}
+                        fontSize={16}
+                        lineHeight={28}
+                      >
+                        {"안녕하세요, 목사님\n저는 현재 삶의 방향을 찾고 싶어서 기도하고 있습니다. 여러 가지 선택지가 있어..."}
                       </RegularText>
+
+                      <View style={styles.cardIconList}>
+                        {/* Chat */}
+                        <View style={{ flexDirection: 'row', gap: moderateScale(4), alignItems: 'center' }}>
+                          <Chat width={moderateScale(24)} height={moderateScale(24)} />
+                          <CustomText
+                            style={{ fontFamily: 'Inter_600SemiBold' }}
+                            fontSize={16}
+                            lineHeight={28}
+                            color='#959FFF'
+                          >
+                            1
+                          </CustomText>
+                        </View>
+
+                        <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
+                          {/* Edit */}
+                          <Edit width={moderateScale(24)} height={moderateScale(24)} />
+
+                          {/* Trash */}
+                          <TouchableOpacity onPress={onPressDelete}>
+                            <Trash width={moderateScale(24)} height={moderateScale(24)} />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
                     </View>
                   )
                 })
@@ -117,64 +132,7 @@ export default function QuestionPage() {
         }
       </View>
 
-      {/* InputTriggerButton */}
-      <View style={styles.inputTriggerContainer}>
-        <TouchableOpacity
-          onPress={onPressInputTrigger}
-          style={styles.inputTriggerButton}
-        >
-          <RegularText
-            color="#B3B3B3"
-            fontSize={16}
-            lineHeight={24}
-          >
-            질문 내용을 입력해주세요.
-          </RegularText>
-
-          <Send />
-        </TouchableOpacity>
-      </View>
-
-      {/* Input */}
-      {
-        isInputVisible && (
-          <>
-            <View style={styles.backgroundFilter} />
-            <KeyboardAvoidingView
-              style={styles.keyboardAvoidingView}
-              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            >
-              <View style={[styles.inputContainer]}>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <TouchableOpacity
-                    style={styles.deleteTriggerButton}
-                    onPress={onPressDeleteInputTrigger}
-                  >
-                    <Delete
-                      width={moderateScale(24)}
-                      height={moderateScale(24)}
-                      opacity={0.8}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <TextInput
-                  ref={textInputRef}
-                  style={styles.input}
-                  placeholder="질문 내용을 입력해주세요."
-                  placeholderTextColor={'#B3B3B3'}
-                  onSubmitEditing={onSubmitEditing}
-                  multiline
-                />
-                <PrimaryButton onPress={onPressSubmitButton} style={styles.submitButton} >
-                  <MediumText fontSize={14}>
-                    질문하기
-                  </MediumText>
-                </PrimaryButton>
-              </View>
-            </KeyboardAvoidingView>
-          </>
-        )
-      }
+      <InputButton />
     </SafeAreaView >
   )
 }
@@ -203,66 +161,26 @@ const styles = StyleSheet.create({
   questionList: {
     paddingHorizontal: moderateScale(24),
     flexGrow: 1,
-  },
-  inputTriggerContainer: {
-    width: '100%',
-    position: 'absolute',
-    bottom: moderateScale(28),
-
-    paddingHorizontal: moderateScale(20),
-  },
-  inputTriggerButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: moderateScale(14),
-    paddingVertical: moderateScale(10),
-
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: moderateScale(12),
+    gap: moderateScale(12)
   },
   emptyQuestion: {
     alignItems: 'center',
-    marginTop: moderateScale(158)
-  },
-  keyboardAvoidingView: {
-    width: '100%',
     position: 'absolute',
-    bottom: 0
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -50 }, { translateY: -50 }]
   },
-  inputContainer: {
-    width: '100%',
-    height: scaleHeight(326),
-
-    paddingTop: moderateScale(10),
-    paddingHorizontal: moderateScale(24),
-    paddingBottom: moderateScale(24),
-
-    backgroundColor: '#2D2D2D',
-
-    borderTopRightRadius: moderateScale(24),
-    borderTopLeftRadius: moderateScale(24),
+  scrollView: {
+    gap: moderateScale(12),
+    paddingBottom: moderateScale(190),
   },
-  input: {
-    fontFamily: 'NotoSansKR_400Regular',
-    fontSize: moderateScale(16),
-
-    height: scaleHeight(200),
-    textAlignVertical: 'top',
-
-    color: "#FFF",
-    marginBottom: scaleHeight(12),
+  card: {
+    borderRadius: moderateScale(10),
+    padding: moderateScale(16),
+    backgroundColor: 'rgba(31, 31, 31, 0.5)'
   },
-  deleteTriggerButton: {
-    width: moderateScale(44),
-    height: moderateScale(44),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  submitButton: {
-    paddingVertical: moderateScale(12),
-  },
-  backgroundFilter: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(30, 30, 30, 0.8)'
+  cardIconList: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   }
 })
