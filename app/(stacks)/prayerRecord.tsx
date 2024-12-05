@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(24),
   },
   text: {
-    fontFamily: 'NotoSansKR-Regular',
+    fontFamily: 'NotoSansKR_400Regular',
     fontSize: moderateScale(16),
     lineHeight: moderateScale(28),
     color: "#FFFFFF",

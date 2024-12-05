@@ -17,7 +17,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Index() {
 
   return (
-    <ScrollView style={styles.scrollViewContent}>
+    <ScrollView
+      style={styles.scrollViewContent}
+      showsVerticalScrollIndicator={false}
+    >
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <Header

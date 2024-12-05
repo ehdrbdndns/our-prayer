@@ -17,6 +17,7 @@ export default function RootLayout() {
       }}
       screenLayout={ScreenLayout}
     >
+      <Stack.Screen name="questionGuide" />
       <Stack.Screen name="archivePlan" />
       <Stack.Screen name="login" />
       <Stack.Screen name="prayer" options={{ animation: 'fade' }} />
