@@ -8,6 +8,7 @@ import CustomText from '@/components/text/CustomText';
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import { moderateScale } from "@/utils/style";
+import { router } from 'expo-router';
 import { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +19,14 @@ export default function QuestionPage() {
 
   const onPressDelete = () => {
     setQuestionList(questionList.filter((_, index) => index !== 0));
+  }
+
+  const onPressQuestionGuid = () => {
+    router.push('/questionGuide')
+  }
+
+  const onPressQuestionCard = () => {
+    router.push('/questionDetail')
   }
 
   return (
@@ -42,7 +51,10 @@ export default function QuestionPage() {
       </RegularText>
 
       {/* Link */}
-      <TouchableOpacity style={styles.textButton}>
+      <TouchableOpacity
+        onPress={onPressQuestionGuid}
+        style={styles.textButton}
+      >
         <MediumText
           style={{ textDecorationLine: 'underline' }}
           fontSize={14}
@@ -79,7 +91,11 @@ export default function QuestionPage() {
               {
                 questionList.map((question, index) => {
                   return (
-                    <View style={styles.card}>
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.card}
+                      onPress={onPressQuestionCard}
+                    >
                       {/* date */}
                       <MediumText
                         style={{ marginBottom: moderateScale(4) }}
@@ -123,7 +139,7 @@ export default function QuestionPage() {
                           </TouchableOpacity>
                         </View>
                       </View>
-                    </View>
+                    </TouchableOpacity>
                   )
                 })
               }
@@ -160,7 +176,6 @@ const styles = StyleSheet.create({
   },
   questionList: {
     paddingHorizontal: moderateScale(24),
-    flexGrow: 1,
     gap: moderateScale(12)
   },
   emptyQuestion: {
