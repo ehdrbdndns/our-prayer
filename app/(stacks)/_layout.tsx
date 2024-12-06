@@ -17,6 +17,7 @@ export default function RootLayout() {
       }}
       screenLayout={ScreenLayout}
     >
+      <Stack.Screen name="prayerTime" />
       <Stack.Screen name="editNickname" />
       <Stack.Screen name="questionDetail" />
       <Stack.Screen name="questionGuide" />
