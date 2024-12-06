@@ -17,6 +17,8 @@ export default function RootLayout() {
       }}
       screenLayout={ScreenLayout}
     >
+      <Stack.Screen name="editNickname" />
+      <Stack.Screen name="questionDetail" />
       <Stack.Screen name="questionGuide" />
       <Stack.Screen name="archivePlan" />
       <Stack.Screen name="login" />

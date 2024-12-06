@@ -24,7 +24,6 @@ export default function TabLayout() {
       <Tabs.Screen name="prayer" />
       <Tabs.Screen name="question" />
       <Tabs.Screen name="mypage" />
-      <Tabs.Screen name="questionDetail" />
     </Tabs>
   );
 }
