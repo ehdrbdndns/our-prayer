@@ -6,7 +6,7 @@ import PlanCard from "@/components/PlanCard";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
-import { moderateScale } from "@/utils/style";
+import { moderateScale, normalizeFontSize } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
 
     fontFamily: "NotoSansKR_400Regular",
-    fontSize: moderateScale(16),
+    fontSize: normalizeFontSize(16),
     padding: 0,
     textAlignVertical: "center"
   },

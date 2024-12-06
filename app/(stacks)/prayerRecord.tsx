@@ -3,7 +3,7 @@ import PrimaryButton from "@/components/button/PrimaryButton";
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
-import { moderateScale } from "@/utils/style";
+import { moderateScale, normalizeFontSize } from "@/utils/style";
 import { router } from "expo-router";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -93,8 +93,8 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: 'NotoSansKR_400Regular',
-    fontSize: moderateScale(16),
-    lineHeight: moderateScale(28),
+    fontSize: normalizeFontSize(16),
+    lineHeight: normalizeFontSize(28),
     color: "#FFFFFF",
     height: '80%'
   },

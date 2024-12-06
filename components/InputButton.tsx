@@ -1,6 +1,6 @@
 import Delete from '@/assets/images/icon/delete.svg';
 import Send from "@/assets/images/icon/send.svg";
-import { moderateScale, scaleHeight } from "@/utils/style";
+import { moderateScale, normalizeFontSize, scaleHeight } from "@/utils/style";
 import { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import PrimaryButton from "./button/PrimaryButton";
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   input: {
     fontFamily: 'NotoSansKR_400Regular',
-    fontSize: moderateScale(16),
+    fontSize: normalizeFontSize(16),
 
     height: scaleHeight(200),
     textAlignVertical: 'top',
