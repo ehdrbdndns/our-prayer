@@ -1,8 +1,6 @@
 import { moderateScale } from '@/utils/style';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import CustomButton from './button/CustomButton';
-import { BoldText } from "./text/BoldText";
 import CustomText from "./text/CustomText";
 import { MediumText } from "./text/MediumText";
 
@@ -57,74 +55,42 @@ export default function PrayerRecord() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Title */}
-      <BoldText
-        style={styles.title}
-        color="#FFFFFF"
-        fontSize={16}
-        lineHeight={24}
-        letterSpacingPercent={-1}
-      >
-        나의 기도 기록
-      </BoldText>
-
-      {/* Record */}
-      <View style={styles.record}>
-        {testDatas.map((weekData, weekIndex) => (
-          <View key={weekIndex}>
-            {/* Row */}
-            <View style={styles.row}>
-              <CustomText
-                color="#B3B3B3"
-                fontSize={10}
-                lineHeight={10}
-                letterSpacingPercent={-1}
-              >
-                {weekData.week}
-              </CustomText>
-              <View style={styles.blockList}>
-                {weekData.days.map((day, dayIndex) => (
-                  <View key={dayIndex} style={[styles.block, day.isActive && styles.blockActive]}>
-                    <MediumText
-                      color={day.isActive ? "#FFFFFF" : "#CFCFCF"}
-                      fontSize={10}
-                      lineHeight={12}
-                    >
-                      {dataEnums[day.index]}
-                    </MediumText>
-                  </View>
-                ))}
-              </View>
+    <View style={styles.record}>
+      {testDatas.map((weekData, weekIndex) => (
+        <View key={weekIndex}>
+          {/* Row */}
+          <View style={styles.row}>
+            <CustomText
+              color="#B3B3B3"
+              fontSize={10}
+              lineHeight={10}
+              letterSpacingPercent={-1}
+            >
+              {weekData.week}
+            </CustomText>
+            <View style={styles.blockList}>
+              {weekData.days.map((day, dayIndex) => (
+                <View key={dayIndex} style={[styles.block, day.isActive && styles.blockActive]}>
+                  <MediumText
+                    color={day.isActive ? "#FFFFFF" : "#CFCFCF"}
+                    fontSize={10}
+                    lineHeight={12}
+                  >
+                    {dataEnums[day.index]}
+                  </MediumText>
+                </View>
+              ))}
             </View>
           </View>
-        ))}
-      </View>
-      {/* Button */}
-      <CustomButton style={styles.button}>
-        <BoldText
-          color="#FFFFFF"
-          fontSize={14}
-          lineHeight={22}
-          letterSpacingPercent={-1}
-        >
-          기도 기록 전체보기
-        </BoldText>
-      </CustomButton>
+        </View>
+      ))}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: moderateScale(40),
-  },
-  title: {
-    marginBottom: moderateScale(16)
-  },
   record: {
     gap: moderateScale(8),
-    marginBottom: moderateScale(16)
   },
   row: {
     flexDirection: "row",
@@ -158,12 +124,5 @@ const styles = StyleSheet.create({
 
     // android
     elevation: 4
-  },
-  button: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    paddingVertical: moderateScale(12),
-    paddingHorizontal: moderateScale(24),
   }
 });
