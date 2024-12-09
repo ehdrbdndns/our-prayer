@@ -8,14 +8,16 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Pressable, StyleSheet, View } from "react-native";
 import { MediumText } from "./text/MediumText";
 
+type TabBarKeys = 'index' | 'calendar' | 'plan' | 'question' | 'mypage';
+
 const ImageSourceDict: {
-  [key: string]: { image: (props: { color: string }) => JSX.Element; text: string };
+  [key in TabBarKeys]: { image: (props: { color: string }) => JSX.Element; text: string };
 } = {
   index: {
     image: ({ color }) => <Home width={moderateScale(24)} height={moderateScale(24)} color={color} />,
     text: '홈',
   },
-  prayer: {
+  calendar: {
     image: ({ color }) => <Prayer width={moderateScale(35)} height={moderateScale(38)} color={color} />,
     text: '',
   },
@@ -43,7 +45,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
 
         const isFocused = state.index === index;
 
-        const imageSource = ImageSourceDict[name];
+        const imageSource = ImageSourceDict[name as TabBarKeys];
 
         const onPress = () => {
           const event = emit({
@@ -72,7 +74,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
             key={key}
           >
             {/* ICON */}
-            <View style={name === "prayer" ? styles.mainTabButtonImage : styles.tabButtonImage}>
+            <View style={name === "calendar" ? styles.mainTabButtonImage : styles.tabButtonImage}>
               <imageSource.image color={isFocused ? '#FFFFFF' : '#B9B9B9'} />
             </View>
             {/* TEXT */}
