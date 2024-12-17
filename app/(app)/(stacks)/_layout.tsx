@@ -2,7 +2,7 @@ import BackgroundWithImage from "@/components/BackgroundWithImage";
 import { Stack } from "expo-router";
 import { PropsWithChildren } from "react";
 
-export default function RootLayout() {
+export default function StackLayout() {
   const ScreenLayout = ({ children }: PropsWithChildren) => (
     <BackgroundWithImage animation='fade'>
       {children}
@@ -22,10 +22,10 @@ export default function RootLayout() {
       <Stack.Screen name="questionDetail" />
       <Stack.Screen name="questionGuide" />
       <Stack.Screen name="archivePlan" />
-      <Stack.Screen name="login" />
       <Stack.Screen name="prayer" options={{ animation: 'fade' }} />
       <Stack.Screen name="planDetail" />
       <Stack.Screen name="prayerRecord" />
+      {/* <Stack.Screen name="login" /> */}
     </Stack>
   )
 }
