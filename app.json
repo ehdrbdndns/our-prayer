@@ -33,9 +33,12 @@
       [
         "expo-asset",
         {
-          "assets": ["./assets/images/background.png"]
+          "assets": [
+            "./assets/images/background.png"
+          ]
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
