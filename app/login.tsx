@@ -3,26 +3,28 @@ import BackgroundWithImage from "@/components/BackgroundWithImage";
 import CustomButton from "@/components/button/CustomButton";
 import PrimaryButton from "@/components/button/PrimaryButton";
 import { MediumText } from "@/components/text/MediumText";
+import { useSession } from "@/ctx";
 import { moderateScale } from "@/utils/style";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Index() {
+export default function login() {
+  const { signIn } = useSession();
 
   const onPressStart = () => {
-    // TODO: save the user's login status
+    signIn();
 
     // move to the home page
-    router.push('/');
+    router.replace('/');
   }
 
   const onPressKakao = () => {
     // TODO: save the user's login status
 
     // move to the home page
-    router.push('/');
+    router.replace('/');
   }
 
   return (
