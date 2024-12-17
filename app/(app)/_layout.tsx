@@ -4,9 +4,9 @@ import { Redirect, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 export default function AppLayout() {
-
   const { session, isLoading } = useSession();
   const [isAppReady, setAppReady] = useState(false);
+
 
   useEffect(() => {
     setAppReady(true);
@@ -16,7 +16,7 @@ export default function AppLayout() {
     return <BackgroundWithImage animation='fade' />;
   }
 
-  if (!session) {
+  if (!isLoading && !session) {
     return <Redirect href="/login" />
   }
 

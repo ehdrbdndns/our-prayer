@@ -59,7 +59,7 @@ export default function Root() {
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
-        <Slot />
+        <Slot initialRouteName='(app)' />
       </SessionProvider>
     </QueryClientProvider>
   );
