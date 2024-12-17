@@ -124,14 +124,14 @@ export default function CalendarPage() {
         />
         <PrayerState
           // style={styles.prayerState}
-          title={"연속 기도일 수"}
+          title={"오늘 기도 시간"}
           icon={<OneStar width={moderateScale(24)} height={moderateScale(24)} />}
           data={14}
           unit={"분"}
         />
         <PrayerState
           // style={styles.prayerState}
-          title={"연속 기도일 수"}
+          title={"전체 기도 시간"}
           icon={<Stars width={moderateScale(24)} height={moderateScale(24)} />}
           data={1}
           unit={"백 시간"}
