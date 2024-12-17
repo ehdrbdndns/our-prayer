@@ -15,7 +15,6 @@ export default function login() {
 
   const onPressStart = async () => {
     // TODO: 회원가입과 동시에 iniital 화면 보여줌 (figma. ourpray-splash 화면)
-
     await signUp();
 
     router.replace('/');

@@ -10,12 +10,50 @@ import PrayerState from "@/components/PrayerState";
 import ShareCard from "@/components/ShareCard";
 import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
+import { useSession } from "@/ctx";
+import api from "@/utils/axios";
 import { moderateScale } from "@/utils/style";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
+import * as SecureStore from 'expo-secure-store';
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+interface BibleType {
+  title: string;
+  content: string;
+}
+
 export default function Index() {
+
+  const { session } = useSession();
+
+  const { data: bibleData } = useQuery<BibleType>({
+    queryKey: ["bible"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      try {
+        const res = await api.get<BibleType>("/bible", {
+          headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "RefreshToken": refreshToken
+          }
+        });
+        return res.data;
+      } catch (e) {
+        console.error(e);
+        // return default data
+        return {
+          title: "마가복음 11:24",
+          content: "그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"
+        }
+      }
+    },
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+  })
 
   return (
     <ScrollView
@@ -46,7 +84,7 @@ export default function Index() {
         {/* Content */}
         <View style={styles.content}>
           <BoldText style={styles.intro} fontSize={24} lineHeight={36} letterSpacingPercent={-1}>
-            {"안녕하세요, 동규우운님,\n오늘의 기도를 시작해보세요."}
+            {`안녕하세요, ${session}님,\n오늘의 기도를 시작해보세요.`}
           </BoldText>
         </View>
 
@@ -75,10 +113,15 @@ export default function Index() {
 
         {/* 오늘의 말씀 */}
         <View style={styles.content}>
-          <TodayVerse
-            subTitle="마가복음 11:24"
-            content="그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"
-          />
+          {
+            bibleData ? (
+              <TodayVerse
+                subTitle={bibleData.title}
+                content={bibleData.content}
+              />
+            ) : null
+          }
+
         </View>
 
         {/* 기도 일자 데이터 */}
