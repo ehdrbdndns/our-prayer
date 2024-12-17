@@ -11,12 +11,13 @@ import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function login() {
-  const { signIn } = useSession();
+  const { signUp } = useSession();
 
-  const onPressStart = () => {
-    signIn();
+  const onPressStart = async () => {
+    // TODO: 회원가입과 동시에 iniital 화면 보여줌 (figma. ourpray-splash 화면)
 
-    // move to the home page
+    await signUp();
+
     router.replace('/');
   }
 
