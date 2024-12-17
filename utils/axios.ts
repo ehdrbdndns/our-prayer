@@ -15,6 +15,7 @@ const handleTokenUpdate = async (accessToken: string, refreshToken: string, orig
   return axios(originalRequest); // api 재요청 함수
 };
 
+// 추후 개선 필요, 토큰 삭제시 로컬 이용자는 계정이 삭제되는 것과 같기에 다른 방법을 찾아야 함
 const handleTokenDeletion = async () => {
   await SecureStore.deleteItemAsync('accessToken');
   await SecureStore.deleteItemAsync('refreshToken');
@@ -25,7 +26,8 @@ const onSuccess = (response: AxiosResponse<any, any>) => response;
 const onError = async (error: any) => {
   try {
     const originalRequest = error.config;
-
+    console.log(error);
+    console.log(originalRequest);
     if (error.response.status === 401) {
       const { expiredType, accessToken, refreshToken } = error.response.data;
 
@@ -34,11 +36,11 @@ const onError = async (error: any) => {
           return await handleTokenUpdate(accessToken, refreshToken, originalRequest);
         case "refresh":
         case "wrong":
-          await handleTokenDeletion();
+          // await handleTokenDeletion();
           return new Error('예기치 못한 오류가 발생했습니다. 다시 로그인해주세요.');
         default:
           console.error(`Unexpected expiredType: ${expiredType}`);
-          await handleTokenDeletion();
+          // await handleTokenDeletion();
           return new Error('예기치 못한 오류가 발생했습니다. 다시 로그인해주세요.');
       }
     }
