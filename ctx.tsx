@@ -1,13 +1,20 @@
+import * as SecureStore from 'expo-secure-store';
 import { createContext, useContext, type PropsWithChildren } from 'react';
 import { useStorageState } from './useStorageState';
+import api from './utils/axios';
+interface SessionType {
+  name: string,
+  accessToken: string,
+  refreshToken: string
+}
 
 const AuthContext = createContext<{
-  signIn: () => void;
+  signUp: () => Promise<void>;
   signOut: () => void;
   session?: string | null;
   isLoading: boolean;
 }>({
-  signIn: () => null,
+  signUp: () => Promise.resolve(),
   signOut: () => null,
   session: null,
   isLoading: false,
@@ -25,9 +32,18 @@ export function SessionProvider({ children }: PropsWithChildren) {
   return (
     <AuthContext.Provider
       value={{
-        signIn: async () => {
-          // Perform sign-in logic here
-          setSession('xxx');
+        signUp: async () => {
+          const res = await api.post<SessionType>('/user/auth', { userType: 'local' });
+
+          if (res.status !== 200) {
+            throw new Error('계정 생성에 실패했습니다.');
+          }
+
+          const { accessToken, refreshToken, name } = res.data;
+
+          await SecureStore.setItemAsync('accessToken', accessToken);
+          await SecureStore.setItemAsync('refreshToken', refreshToken);
+          setSession(name);
         },
         signOut: () => {
           setSession(null);
