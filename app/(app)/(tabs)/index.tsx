@@ -12,48 +12,115 @@ import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
 import { useSession } from "@/ctx";
 import api from "@/utils/axios";
+import { BibleType, HistoryType } from "@/utils/dataType";
 import { moderateScale } from "@/utils/style";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-interface BibleType {
-  title: string;
-  content: string;
-}
 
 export default function Index() {
 
   const { session } = useSession();
 
-  const { data: bibleData } = useQuery<BibleType>({
-    queryKey: ["bible"],
-    queryFn: async () => {
+  const [tokens, setTokens] = useState<{ accessToken: string | null, refreshToken: string | null }>({ accessToken: null, refreshToken: null });
+
+  useEffect(() => {
+    const fetchTokens = async () => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
+      setTokens({ accessToken, refreshToken });
+    };
 
-      try {
-        const res = await api.get<BibleType>("/bible", {
-          headers: {
-            "Authorization": `Bearer ${accessToken}`,
-            "RefreshToken": refreshToken
-          }
-        });
-        return res.data;
-      } catch (e) {
-        console.error(e);
-        // return default data
-        return {
-          title: "마가복음 11:24",
-          content: "그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"
+    fetchTokens();
+  }, []);
+
+  const { data: bible, isSuccess: isBibleSuccess } = useQuery<BibleType>({
+    queryKey: ["bible", tokens.accessToken, tokens.refreshToken],
+    queryFn: async () => {
+      const res = await api.get<BibleType>("/bible", {
+        headers: {
+          "Authorization": `Bearer ${tokens.accessToken}`,
+          "RefreshToken": tokens.refreshToken
         }
-      }
+      });
+
+      return res.data;
+    },
+    placeholderData: {
+      title: "마가복음 11:24",
+      content: "그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"
     },
     staleTime: 12 * 60 * 60 * 1000, // 12시간
     gcTime: 12 * 60 * 60 * 1000, // 12시간
-  })
+    enabled: !!tokens.accessToken && !!tokens.refreshToken, // Tokens are required to enable the query
+  });
+
+  const { data: history, isSuccess: isHistorySuccess } = useQuery<HistoryType[]>({
+    queryKey: ["history", tokens.accessToken, tokens.refreshToken],
+    queryFn: async () => {
+      const res = await api.get<HistoryType[]>("/history", {
+        headers: {
+          "Authorization": `Bearer ${tokens.accessToken}`,
+          "RefreshToken": tokens.refreshToken
+        }
+      });
+
+      return res.data;
+    },
+    placeholderData: [],
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+    enabled: !!tokens.accessToken && !!tokens.refreshToken, // Tokens are required to enable the query
+  });
+
+  // 연속 기도 일수 계산
+  const calculateContinuousPrayerDays = (history: HistoryType[]): number => {
+    if (history.length === 0) {
+      return 0;
+    }
+
+
+    // 날짜별로 기록을 그룹화
+    const dateSet = new Set<string>();
+    history.forEach(entry => {
+      const date = new Date(entry.created_date * 1000).toISOString().split('T')[0];
+      dateSet.add(date);
+    });
+
+    const dates = Array.from(dateSet).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+    let continuousDays = 0;
+    let today = new Date().toISOString().split('T')[0];
+    let yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0];
+
+    // 연속 기도 일수 계산
+    for (let i = dates.length - 1; i >= 0; i--) {
+      if (dates[i] === today || dates[i] === yesterday) {
+        continuousDays++;
+        yesterday = new Date(new Date(dates[i]).setDate(new Date(dates[i]).getDate() - 1)).toISOString().split('T')[0];
+      } else {
+        break;
+      }
+    }
+
+    return continuousDays;
+  };
+
+  // 오늘의 기도 시간 계산
+  const calculateTodayPrayerTime = (history: HistoryType[]): number => {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000; // 오늘 00:00:00의 Unix 타임스탬프 (초 단위)
+
+    return history
+      .filter(row => row.created_date >= todayStart)
+      .reduce((total, { duration }) => total + duration, 0) / 60; // 초 단위를 분 단위로 변환
+  };
+
+  const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
+  const todayPrayerTime = calculateTodayPrayerTime(history || []);
 
   return (
     <ScrollView
@@ -96,7 +163,7 @@ export default function Index() {
               style={styles.prayerState}
               title={"연속 기도일 수"}
               icon={<Fire width={moderateScale(24)} height={moderateScale(24)} />}
-              data={134}
+              data={continuousPrayerDays}
               unit={"일"}
             />
 
@@ -105,7 +172,7 @@ export default function Index() {
               style={styles.prayerState}
               title={"오늘의 기도 시간"}
               icon={<Star width={moderateScale(24)} height={moderateScale(24)} />}
-              data={14}
+              data={todayPrayerTime}
               unit={"분"}
             />
           </View>
@@ -114,12 +181,12 @@ export default function Index() {
         {/* 오늘의 말씀 */}
         <View style={styles.content}>
           {
-            bibleData ? (
+            isBibleSuccess ? (
               <TodayVerse
-                subTitle={bibleData.title}
-                content={bibleData.content}
+                subTitle={bible.title}
+                content={bible.content}
               />
-            ) : null
+            ) : null // TODO : Add skeleton loader
           }
 
         </View>
