@@ -2,7 +2,8 @@ import { PlanType } from "@/utils/dataType";
 import { moderateScale } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from 'expo-linear-gradient';
-import { FlatList, StyleSheet, View } from "react-native";
+import { router } from "expo-router";
+import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import CustomButton from "./button/CustomButton";
 import { BoldText } from "./text/BoldText";
 import { RegularText } from "./text/RegularText";
@@ -12,6 +13,21 @@ interface MyPrayerPlanProps {
 }
 
 export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
+
+  const onPressBtn = () => {
+    router.push("/plan")
+  }
+
+  const onPressPlan = (params: {
+    id: string;
+    title: string;
+    desc: string;
+    banner: string;
+  }) => {
+    const { id, title, desc, banner } = params;
+    router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}`);
+  }
+
   return (
     <View style={styles.container}>
       {/* Title */}
@@ -40,37 +56,48 @@ export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.cardList}
         renderItem={({ item }: { item: PlanType }) => (
-          <ImageBackground
-            style={styles.card}
-            source={item.s_thumbnail}
-          >
-            <LinearGradient
-              colors={["rgba(0, 0, 0, 0)", "#161B29"]}
-              style={styles.cardFilter}
-            />
-            <BoldText
-              fontSize={12}
-              lineHeight={20}
+          <TouchableOpacity
+            onPress={() => onPressPlan({
+              id: item.plan_id,
+              title: item.title,
+              desc: item.description,
+              banner: item.thumbnail,
+            })}>
+            <ImageBackground
+              style={styles.card}
+              source={item.s_thumbnail}
             >
-              {item.title}
-            </BoldText>
-
-            <View>
-              <RegularText
-                fontSize={10}
-                lineHeight={17}
-                numberOfLines={1}
+              <LinearGradient
+                colors={["rgba(0, 0, 0, 0)", "#161B29"]}
+                style={styles.cardFilter}
+              />
+              <BoldText
+                fontSize={12}
+                lineHeight={20}
               >
-                {item.description}
-              </RegularText>
-            </View>
-          </ImageBackground>
+                {item.title}
+              </BoldText>
+
+              <View>
+                <RegularText
+                  fontSize={10}
+                  lineHeight={17}
+                  numberOfLines={1}
+                >
+                  {item.description}
+                </RegularText>
+              </View>
+            </ImageBackground>
+          </TouchableOpacity>
         )}
         horizontal
       />
       {/* Button */}
       <View style={{ paddingRight: moderateScale(24) }}>
-        <CustomButton style={styles.button}>
+        <CustomButton
+          onPress={onPressBtn}
+          style={styles.button}
+        >
           <BoldText
             color="#FFFFFF"
             fontSize={14}
