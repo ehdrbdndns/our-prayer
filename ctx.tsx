@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { createContext, useContext, type PropsWithChildren } from 'react';
-import { useStorageState } from './useStorageState';
+import { useStorageState } from './storage/useStorageState';
 import api from './utils/axios';
 interface SessionType {
   name: string,
