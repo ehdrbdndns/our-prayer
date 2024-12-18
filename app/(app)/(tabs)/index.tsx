@@ -84,7 +84,6 @@ export default function Index() {
       return 0;
     }
 
-
     // 날짜별로 기록을 그룹화
     const dateSet = new Set<string>();
     history.forEach(entry => {
