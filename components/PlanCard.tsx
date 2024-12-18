@@ -1,52 +1,75 @@
 import Heart from "@/assets/images/icon/heart.svg";
+import { PlanType } from "@/utils/dataType";
 import { moderateScale } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { BoldText } from "./text/BoldText";
 import { RegularText } from "./text/RegularText";
 
 const DefaultCardImage = require("@/assets/images/card/default-background.png");
 
-export default function PlanCard() {
+export default function PlanCard({ plan }: { plan: PlanType }) {
 
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(plan.is_liked);
 
   const onPressHeart = () => {
     setIsLiked(!isLiked);
   }
 
+  const onPressPlan = (params: {
+    id: string;
+    title: string;
+    desc: string;
+    banner: string;
+  }) => {
+    const { id, title, desc, banner } = params;
+    router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}`);
+  }
+
+
   return (
-    <ImageBackground
-      style={styles.card}
-      source={DefaultCardImage}
+    <TouchableOpacity
+      onPress={() => onPressPlan({
+        id: plan.plan_id,
+        title: plan.title,
+        desc: plan.description,
+        banner: plan.thumbnail
+      })}
     >
-      <LinearGradient
-        colors={["rgba(0, 0, 0, 0)", "#161B29"]}
-        style={styles.cardFilter}
-      />
-      <BoldText
-        fontSize={16}
-        lineHeight={24}
+      <ImageBackground
+        style={styles.card}
+        source={plan.s_thumbnail}
       >
-        50분 기도
-      </BoldText>
+        <LinearGradient
+          colors={["rgba(0, 0, 0, 0)", "#161B29"]}
+          style={styles.cardFilter}
+        />
+        <BoldText
+          fontSize={16}
+          lineHeight={24}
+        >
+          {plan.title}
+        </BoldText>
 
-      <RegularText
-        fontSize={14}
-        lineHeight={22}
-      >
-        처음 시작하는 기도
-      </RegularText>
+        <RegularText
+          numberOfLines={1}
+          fontSize={14}
+          lineHeight={22}
+        >
+          {plan.description}
+        </RegularText>
 
-      <Heart
-        style={styles.heart}
-        fill={isLiked ? "#FF7D71" : "transparent"}
-        stroke={isLiked ? "#FF7D71" : "white"}
-        onPress={onPressHeart}
-      />
-    </ImageBackground>
+        <Heart
+          style={styles.heart}
+          fill={isLiked ? "#FF7D71" : "transparent"}
+          stroke={isLiked ? "#FF7D71" : "white"}
+          onPress={onPressHeart}
+        />
+      </ImageBackground>
+    </TouchableOpacity>
   )
 }
 
