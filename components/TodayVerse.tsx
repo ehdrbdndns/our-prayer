@@ -2,6 +2,7 @@ import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import { moderateScale } from "@/utils/style";
+import { router } from "expo-router";
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import CustomButton from "./button/CustomButton";
@@ -9,10 +10,14 @@ import CustomButton from "./button/CustomButton";
 interface TodayVerseProps {
   subTitle: string;
   content: string;
-  onPress?: () => void;
 }
 
-export default function TodayVerse({ subTitle, content, onPress }: TodayVerseProps) {
+export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
+
+  const onPress = () => {
+    router.push("/plan")
+  }
+
   return (
     <View style={styles.container}>
       {/* Title */}
