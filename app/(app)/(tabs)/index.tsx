@@ -153,7 +153,7 @@ export default function Index() {
         {/* Content */}
         <View style={styles.content}>
           <BoldText style={styles.intro} fontSize={24} lineHeight={36} letterSpacingPercent={-1}>
-            {`안녕하세요, ${session}님,\n오늘의 기도를 시작해보세요.`}
+            {`안녕하세요, ${session}님\n오늘의 기도를 시작해보세요.`}
           </BoldText>
         </View>
 
