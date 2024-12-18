@@ -15,7 +15,7 @@ import api from "@/utils/axios";
 import { BibleType, HistoryType, PlanType } from "@/utils/dataType";
 import { moderateScale } from "@/utils/style";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -132,6 +132,10 @@ export default function Index() {
       .reduce((total, { duration }) => total + duration, 0) / 60; // 초 단위를 분 단위로 변환
   };
 
+  const onHistoryPress = () => {
+    router.push("/calendar");
+  }
+
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
   const todayPrayerTime = calculateTodayPrayerTime(history || []);
 
@@ -220,14 +224,17 @@ export default function Index() {
           <PrayerRecord history={history || []} />
 
           {/* Button */}
-          <CustomButton style={{
-            flexDirection: "row",
-            justifyContent: "flex-start",
-            backgroundColor: "rgba(255, 255, 255, 0.05)",
-            paddingVertical: moderateScale(12),
-            paddingHorizontal: moderateScale(24),
-            marginTop: moderateScale(16),
-          }}>
+          <CustomButton
+            onPress={onHistoryPress}
+            style={{
+              flexDirection: "row",
+              justifyContent: "flex-start",
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+              paddingVertical: moderateScale(12),
+              paddingHorizontal: moderateScale(24),
+              marginTop: moderateScale(16),
+            }}
+          >
             <BoldText
               color="#FFFFFF"
               fontSize={14}
