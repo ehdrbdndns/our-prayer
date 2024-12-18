@@ -4,7 +4,7 @@ import Star from "@/assets/images/icon/star.svg";
 import Logo from "@/assets/images/text-s-logo.svg";
 import CustomButton from "@/components/button/CustomButton";
 import Header from "@/components/Header";
-import PrayerPlan from "@/components/PrayerPlan";
+import MyPrayerPlan from "@/components/MyPrayerPlan";
 import PrayerRecord from "@/components/PrayerRecord";
 import PrayerState from "@/components/PrayerState";
 import ShareCard from "@/components/ShareCard";
@@ -12,12 +12,11 @@ import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
 import { useSession } from "@/ctx";
 import api from "@/utils/axios";
-import { BibleType, HistoryType } from "@/utils/dataType";
+import { BibleType, HistoryType, PlanType } from "@/utils/dataType";
 import { moderateScale } from "@/utils/style";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
-import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -25,26 +24,17 @@ export default function Index() {
 
   const { session } = useSession();
 
-  const [tokens, setTokens] = useState<{ accessToken: string | null, refreshToken: string | null }>({ accessToken: null, refreshToken: null });
-
-  useEffect(() => {
-    const fetchTokens = async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-      setTokens({ accessToken, refreshToken });
-    };
-
-    fetchTokens();
-  }, []);
-
   // fetch Bible data
   const { data: bible, isSuccess: isBibleSuccess } = useQuery<BibleType>({
-    queryKey: ["bible", tokens.accessToken, tokens.refreshToken],
+    queryKey: ["bible"],
     queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
       const res = await api.get<BibleType>("/bible", {
         headers: {
-          "Authorization": `Bearer ${tokens.accessToken}`,
-          "RefreshToken": tokens.refreshToken
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
         }
       });
 
@@ -56,17 +46,19 @@ export default function Index() {
     },
     staleTime: 12 * 60 * 60 * 1000, // 12시간
     gcTime: 12 * 60 * 60 * 1000, // 12시간
-    enabled: !!tokens.accessToken && !!tokens.refreshToken, // Tokens are required to enable the query
   });
 
   // fetch History data for 3 weeks
   const { data: history, isSuccess: isHistorySuccess } = useQuery<HistoryType[]>({
-    queryKey: ["history", tokens.accessToken, tokens.refreshToken],
+    queryKey: ["history"],
     queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
       const res = await api.get<HistoryType[]>("/history?historyRange=21", {
         headers: {
-          "Authorization": `Bearer ${tokens.accessToken}`,
-          "RefreshToken": tokens.refreshToken
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
         }
       });
 
@@ -75,7 +67,27 @@ export default function Index() {
     placeholderData: [],
     staleTime: 12 * 60 * 60 * 1000, // 12시간
     gcTime: 12 * 60 * 60 * 1000, // 12시간
-    enabled: !!tokens.accessToken && !!tokens.refreshToken, // Tokens are required to enable the query
+  });
+
+  // fetch liked plan data
+  const { data: plan, isSuccess: isPlanSuccess } = useQuery<PlanType[]>({
+    queryKey: ["prayerPlan"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<PlanType[]>("/plan/user", {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+
+      return res.data;
+    },
+    placeholderData: [],
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
   });
 
   // 연속 기도 일수 계산
@@ -229,7 +241,7 @@ export default function Index() {
 
         {/* 기도 플랜 */}
         <View style={[styles.content, { paddingRight: 0 }]}>
-          <PrayerPlan />
+          <MyPrayerPlan plans={plan || []} />
         </View>
 
         {/* 공유 카드 */}

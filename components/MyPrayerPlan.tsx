@@ -1,3 +1,4 @@
+import { PlanType } from "@/utils/dataType";
 import { moderateScale } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -6,9 +7,11 @@ import CustomButton from "./button/CustomButton";
 import { BoldText } from "./text/BoldText";
 import { RegularText } from "./text/RegularText";
 
-const DefaultCardImage = require("@/assets/images/card/default-background.png");
+interface MyPrayerPlanProps {
+  plans: PlanType[];
+}
 
-export default function MyPrayerPlan() {
+export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
   return (
     <View style={styles.container}>
       {/* Title */}
@@ -33,13 +36,13 @@ export default function MyPrayerPlan() {
 
       {/* CardList */}
       <FlatList
-        data={[1, 2, 3, 4]}
+        data={plans}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.cardList}
-        renderItem={() => (
+        renderItem={({ item }: { item: PlanType }) => (
           <ImageBackground
             style={styles.card}
-            source={DefaultCardImage}
+            source={item.s_thumbnail}
           >
             <LinearGradient
               colors={["rgba(0, 0, 0, 0)", "#161B29"]}
@@ -49,15 +52,18 @@ export default function MyPrayerPlan() {
               fontSize={12}
               lineHeight={20}
             >
-              50분 기도
+              {item.title}
             </BoldText>
 
-            <RegularText
-              fontSize={10}
-              lineHeight={17}
-            >
-              처음 시작하는 기도
-            </RegularText>
+            <View>
+              <RegularText
+                fontSize={10}
+                lineHeight={17}
+                numberOfLines={1}
+              >
+                {item.description}
+              </RegularText>
+            </View>
           </ImageBackground>
         )}
         horizontal
