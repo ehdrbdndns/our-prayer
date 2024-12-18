@@ -1,14 +1,33 @@
+import { PlanType } from "@/utils/dataType";
 import { moderateScale } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from 'expo-linear-gradient';
-import { FlatList, StyleSheet, View } from "react-native";
+import { router } from "expo-router";
+import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import CustomButton from "./button/CustomButton";
 import { BoldText } from "./text/BoldText";
 import { RegularText } from "./text/RegularText";
 
-const DefaultCardImage = require("@/assets/images/card/default-background.png");
+interface MyPrayerPlanProps {
+  plans: PlanType[];
+}
 
-export default function PrayerPlan() {
+export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
+
+  const onPressBtn = () => {
+    router.push("/plan")
+  }
+
+  const onPressPlan = (params: {
+    id: string;
+    title: string;
+    desc: string;
+    banner: string;
+  }) => {
+    const { id, title, desc, banner } = params;
+    router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}`);
+  }
+
   return (
     <View style={styles.container}>
       {/* Title */}
@@ -33,38 +52,52 @@ export default function PrayerPlan() {
 
       {/* CardList */}
       <FlatList
-        data={[1, 2, 3, 4]}
+        data={plans}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.cardList}
-        renderItem={() => (
-          <ImageBackground
-            style={styles.card}
-            source={DefaultCardImage}
-          >
-            <LinearGradient
-              colors={["rgba(0, 0, 0, 0)", "#161B29"]}
-              style={styles.cardFilter}
-            />
-            <BoldText
-              fontSize={12}
-              lineHeight={20}
+        renderItem={({ item }: { item: PlanType }) => (
+          <TouchableOpacity
+            onPress={() => onPressPlan({
+              id: item.plan_id,
+              title: item.title,
+              desc: item.description,
+              banner: item.thumbnail,
+            })}>
+            <ImageBackground
+              style={styles.card}
+              source={item.s_thumbnail}
             >
-              50분 기도
-            </BoldText>
+              <LinearGradient
+                colors={["rgba(0, 0, 0, 0)", "#161B29"]}
+                style={styles.cardFilter}
+              />
+              <BoldText
+                fontSize={12}
+                lineHeight={20}
+              >
+                {item.title}
+              </BoldText>
 
-            <RegularText
-              fontSize={10}
-              lineHeight={17}
-            >
-              처음 시작하는 기도
-            </RegularText>
-          </ImageBackground>
+              <View>
+                <RegularText
+                  fontSize={10}
+                  lineHeight={17}
+                  numberOfLines={1}
+                >
+                  {item.description}
+                </RegularText>
+              </View>
+            </ImageBackground>
+          </TouchableOpacity>
         )}
         horizontal
       />
       {/* Button */}
       <View style={{ paddingRight: moderateScale(24) }}>
-        <CustomButton style={styles.button}>
+        <CustomButton
+          onPress={onPressBtn}
+          style={styles.button}
+        >
           <BoldText
             color="#FFFFFF"
             fontSize={14}

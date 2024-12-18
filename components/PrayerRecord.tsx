@@ -1,62 +1,76 @@
+import { HistoryType } from '@/utils/dataType';
 import { moderateScale } from '@/utils/style';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import CustomText from "./text/CustomText";
 import { MediumText } from "./text/MediumText";
+interface PrayerRecordProps {
+  history: HistoryType[];
+}
+interface RecordType {
+  week: string;
+  days: {
+    index: number;
+    isActive: boolean;
+  }[];
+}
 
-export default function PrayerRecord() {
-  const testDatas = [
-    {
-      week: '1 Week',
-      days: [
-        { index: 1, isActive: true },
-        { index: 2, isActive: false },
-        { index: 3, isActive: false },
-        { index: 4, isActive: true },
-        { index: 5, isActive: false },
-        { index: 6, isActive: false },
-        { index: 7, isActive: false }
-      ]
-    },
-    {
-      week: '2 Week',
-      days: [
-        { index: 1, isActive: true },
-        { index: 2, isActive: false },
-        { index: 3, isActive: true },
-        { index: 4, isActive: true },
-        { index: 5, isActive: false },
-        { index: 6, isActive: false },
-        { index: 7, isActive: false }
-      ]
-    },
-    {
-      week: '3 Week',
-      days: [
-        { index: 1, isActive: true },
-        { index: 2, isActive: false },
-        { index: 3, isActive: false },
-        { index: 4, isActive: false },
-        { index: 5, isActive: false },
-        { index: 6, isActive: true },
-        { index: 7, isActive: false }
-      ]
+const DataEnums: { [key: number]: string } = {
+  1: "월",
+  2: "화",
+  3: "수",
+  4: "목",
+  5: "금",
+  6: "토",
+  7: "일"
+};
+
+export default function PrayerRecord({ history }: PrayerRecordProps) {
+  const generateRecord = (history: HistoryType[]): RecordType[] => {
+    const records: RecordType[] = [];
+    const today = new Date();
+    today.setHours(today.getHours() + 9);
+
+    const getMonday = (date: Date) => {
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+      return new Date(date.setDate(diff));
+    };
+
+    const startOfCurrentWeek = getMonday(today);
+
+    for (let week = 1; week <= 3; week++) {
+      const startOfWeek = new Date(startOfCurrentWeek);
+      startOfWeek.setDate(startOfCurrentWeek.getDate() - (3 - week) * 7);
+
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6)
+
+      const days = [];
+      for (let day = 0; day < 7; day++) {
+        const date = new Date(startOfWeek);
+        date.setHours(date.getHours() + 9);
+        date.setDate(startOfWeek.getDate() + day);
+        const dateString = date.toISOString().split('T')[0];
+
+        const isActive = history.find(
+          (entry) => new Date(entry.created_date * 1000).toISOString().split('T')[0] === dateString
+        ) !== undefined;
+
+        days.push({ index: day + 1, isActive });
+      }
+
+      records.push({ week: `${week} Week`, days });
     }
-  ];
 
-  const dataEnums: { [key: number]: string } = {
-    1: "월",
-    2: "화",
-    3: "수",
-    4: "목",
-    5: "금",
-    6: "토",
-    7: "일"
+    return records;
   };
+
+  const records = generateRecord(history);
 
   return (
     <View style={styles.record}>
-      {testDatas.map((weekData, weekIndex) => (
+      {records.map((weekData, weekIndex) => (
         <View key={weekIndex}>
           {/* Row */}
           <View style={styles.row}>
@@ -76,7 +90,7 @@ export default function PrayerRecord() {
                     fontSize={10}
                     lineHeight={12}
                   >
-                    {dataEnums[day.index]}
+                    {DataEnums[day.index]}
                   </MediumText>
                 </View>
               ))}

@@ -4,18 +4,140 @@ import Star from "@/assets/images/icon/star.svg";
 import Logo from "@/assets/images/text-s-logo.svg";
 import CustomButton from "@/components/button/CustomButton";
 import Header from "@/components/Header";
-import PrayerPlan from "@/components/PrayerPlan";
+import MyPrayerPlan from "@/components/MyPrayerPlan";
 import PrayerRecord from "@/components/PrayerRecord";
 import PrayerState from "@/components/PrayerState";
 import ShareCard from "@/components/ShareCard";
 import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
+import { useSession } from "@/ctx";
+import api from "@/utils/axios";
+import { BibleType, HistoryType, PlanType } from "@/utils/dataType";
 import { moderateScale } from "@/utils/style";
-import { Link } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import { Link, router } from "expo-router";
+import * as SecureStore from 'expo-secure-store';
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
+
+  const { session } = useSession();
+
+  // fetch Bible data
+  const { data: bible, isSuccess: isBibleSuccess } = useQuery<BibleType>({
+    queryKey: ["bible"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<BibleType>("/bible", {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+
+      return res.data;
+    },
+    placeholderData: {
+      title: "마가복음 11:24",
+      content: "그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"
+    },
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+  });
+
+  // fetch History data for 3 weeks
+  const { data: history, isSuccess: isHistorySuccess } = useQuery<HistoryType[]>({
+    queryKey: ["history"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<HistoryType[]>("/history?historyRange=21", {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+
+      return res.data;
+    },
+    placeholderData: [],
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+  });
+
+  // fetch liked plan data
+  const { data: plan, isSuccess: isPlanSuccess } = useQuery<PlanType[]>({
+    queryKey: ["prayerPlan"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<PlanType[]>("/plan/user", {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+
+      return res.data;
+    },
+    placeholderData: [],
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+  });
+
+  // 연속 기도 일수 계산
+  const calculateContinuousPrayerDays = (history: HistoryType[]): number => {
+    if (history.length === 0) {
+      return 0;
+    }
+
+    // 날짜별로 기록을 그룹화
+    const dateSet = new Set<string>();
+    history.forEach(entry => {
+      const date = new Date(entry.created_date * 1000).toISOString().split('T')[0];
+      dateSet.add(date);
+    });
+
+    const dates = Array.from(dateSet).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+    let continuousDays = 0;
+    let today = new Date().toISOString().split('T')[0];
+    let yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0];
+
+    // 연속 기도 일수 계산
+    for (let i = dates.length - 1; i >= 0; i--) {
+      if (dates[i] === today || dates[i] === yesterday) {
+        continuousDays++;
+        yesterday = new Date(new Date(dates[i]).setDate(new Date(dates[i]).getDate() - 1)).toISOString().split('T')[0];
+      } else {
+        break;
+      }
+    }
+
+    return continuousDays;
+  };
+
+  // 오늘의 기도 시간 계산
+  const calculateTodayPrayerTime = (history: HistoryType[]): number => {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000; // 오늘 00:00:00의 Unix 타임스탬프 (초 단위)
+
+    return history
+      .filter(row => row.created_date >= todayStart)
+      .reduce((total, { duration }) => total + duration, 0) / 60; // 초 단위를 분 단위로 변환
+  };
+
+  const onHistoryPress = () => {
+    router.push("/calendar");
+  }
+
+  const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
+  const todayPrayerTime = calculateTodayPrayerTime(history || []);
 
   return (
     <ScrollView
@@ -46,7 +168,7 @@ export default function Index() {
         {/* Content */}
         <View style={styles.content}>
           <BoldText style={styles.intro} fontSize={24} lineHeight={36} letterSpacingPercent={-1}>
-            {"안녕하세요, 동규우운님,\n오늘의 기도를 시작해보세요."}
+            {`안녕하세요, ${session}님\n오늘의 기도를 시작해보세요.`}
           </BoldText>
         </View>
 
@@ -58,7 +180,7 @@ export default function Index() {
               style={styles.prayerState}
               title={"연속 기도일 수"}
               icon={<Fire width={moderateScale(24)} height={moderateScale(24)} />}
-              data={134}
+              data={continuousPrayerDays}
               unit={"일"}
             />
 
@@ -67,7 +189,7 @@ export default function Index() {
               style={styles.prayerState}
               title={"오늘의 기도 시간"}
               icon={<Star width={moderateScale(24)} height={moderateScale(24)} />}
-              data={14}
+              data={todayPrayerTime}
               unit={"분"}
             />
           </View>
@@ -75,10 +197,15 @@ export default function Index() {
 
         {/* 오늘의 말씀 */}
         <View style={styles.content}>
-          <TodayVerse
-            subTitle="마가복음 11:24"
-            content="그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"
-          />
+          {
+            isBibleSuccess ? (
+              <TodayVerse
+                subTitle={bible.title}
+                content={bible.content}
+              />
+            ) : null // TODO : Add skeleton loader
+          }
+
         </View>
 
         {/* 기도 일자 데이터 */}
@@ -94,17 +221,20 @@ export default function Index() {
             나의 기도 기록
           </BoldText>
 
-          <PrayerRecord />
+          <PrayerRecord history={history || []} />
 
           {/* Button */}
-          <CustomButton style={{
-            flexDirection: "row",
-            justifyContent: "flex-start",
-            backgroundColor: "rgba(255, 255, 255, 0.05)",
-            paddingVertical: moderateScale(12),
-            paddingHorizontal: moderateScale(24),
-            marginTop: moderateScale(16),
-          }}>
+          <CustomButton
+            onPress={onHistoryPress}
+            style={{
+              flexDirection: "row",
+              justifyContent: "flex-start",
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+              paddingVertical: moderateScale(12),
+              paddingHorizontal: moderateScale(24),
+              marginTop: moderateScale(16),
+            }}
+          >
             <BoldText
               color="#FFFFFF"
               fontSize={14}
@@ -118,7 +248,7 @@ export default function Index() {
 
         {/* 기도 플랜 */}
         <View style={[styles.content, { paddingRight: 0 }]}>
-          <PrayerPlan />
+          <MyPrayerPlan plans={plan || []} />
         </View>
 
         {/* 공유 카드 */}
