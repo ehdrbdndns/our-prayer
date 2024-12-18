@@ -8,7 +8,7 @@ import { RegularText } from "./text/RegularText";
 
 const DefaultCardImage = require("@/assets/images/card/default-background.png");
 
-export default function PrayerPlan() {
+export default function MyPrayerPlan() {
   return (
     <View style={styles.container}>
       {/* Title */}
