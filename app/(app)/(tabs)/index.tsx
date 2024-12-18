@@ -37,6 +37,7 @@ export default function Index() {
     fetchTokens();
   }, []);
 
+  // fetch Bible data
   const { data: bible, isSuccess: isBibleSuccess } = useQuery<BibleType>({
     queryKey: ["bible", tokens.accessToken, tokens.refreshToken],
     queryFn: async () => {
@@ -58,10 +59,11 @@ export default function Index() {
     enabled: !!tokens.accessToken && !!tokens.refreshToken, // Tokens are required to enable the query
   });
 
+  // fetch History data for 3 weeks
   const { data: history, isSuccess: isHistorySuccess } = useQuery<HistoryType[]>({
     queryKey: ["history", tokens.accessToken, tokens.refreshToken],
     queryFn: async () => {
-      const res = await api.get<HistoryType[]>("/history", {
+      const res = await api.get<HistoryType[]>("/history?historyRange=21", {
         headers: {
           "Authorization": `Bearer ${tokens.accessToken}`,
           "RefreshToken": tokens.refreshToken
@@ -204,7 +206,7 @@ export default function Index() {
             나의 기도 기록
           </BoldText>
 
-          <PrayerRecord />
+          <PrayerRecord history={history || []} />
 
           {/* Button */}
           <CustomButton style={{
