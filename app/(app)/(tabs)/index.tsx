@@ -71,7 +71,7 @@ export default function Index() {
 
   // fetch liked plan data
   const { data: plan, isSuccess: isPlanSuccess } = useQuery<PlanType[]>({
-    queryKey: ["prayerPlan"],
+    queryKey: ["userPlan"],
     queryFn: async () => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
