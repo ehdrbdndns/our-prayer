@@ -18,8 +18,6 @@ import { useRef, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const DefaultCardImage = require("@/assets/images/card/default-background.png");
-
 interface FetchedPlanType {
   currentPlan: { plan_id: string } | null,
   plans: PlanType[];
