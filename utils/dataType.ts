@@ -17,6 +17,7 @@ export interface PlanType {
   author_name: string;
   author_description: string;
   author_profile: string;
+  author_deeplink: string;
   is_active: boolean;
   thumbnail: string;
   s_thumbnail: string;
@@ -32,4 +33,21 @@ export interface PlanType {
 export interface PlanResponseType {
   currentPlan: { plan_id: string } | null,
   plans: PlanType[];
+}
+
+export interface PlanDetailResponseType {
+  plan: PlanType;
+  lectures: LectureType[];
+}
+
+export interface LectureType {
+  lecture_id: string;
+  plan_id: string;
+  title: string;
+  description: string;
+  time: string;
+  bgm: string;
+  is_active: boolean;
+  updated_date: number;
+  created_date: number;
 }

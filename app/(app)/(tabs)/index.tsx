@@ -12,7 +12,8 @@ import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
 import { useSession } from "@/ctx";
 import api from "@/utils/axios";
-import { BibleType, HistoryType, PlanResponseType } from "@/utils/dataType";
+import { BibleType, HistoryType } from "@/utils/dataType";
+import { usePlanListQuery } from "@/utils/queries";
 import { moderateScale } from "@/utils/style";
 import { useQuery } from "@tanstack/react-query";
 import { Link, router } from "expo-router";
@@ -70,38 +71,7 @@ export default function Index() {
   });
 
   // fetch Plan data
-  const { data: plan, isSuccess: isPlanSuccess } = useQuery<PlanResponseType>({
-    queryKey: ["plan"],
-    queryFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api.get<PlanResponseType>("/plan", {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        }
-      });
-
-      return res.data;
-    },
-    select: (data) => {
-      const { plans } = data;
-      const normalizedPlans = plans.map((plan) => {
-        return {
-          ...plan,
-          is_liked: Boolean(Number(plan.is_liked))
-        }
-      })
-      return { ...data, plans: normalizedPlans };
-    },
-    placeholderData: {
-      currentPlan: null,
-      plans: []
-    },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
-  });
+  const { data: plan, isSuccess: isPlanSuccess } = usePlanListQuery();
 
   // 연속 기도 일수 계산
   const calculateContinuousPrayerDays = (history: HistoryType[]): number => {
