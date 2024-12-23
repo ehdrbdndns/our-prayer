@@ -7,7 +7,7 @@ import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import api from "@/utils/axios";
-import { PlanType } from "@/utils/dataType";
+import { PlanResponseType, PlanType } from "@/utils/dataType";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import { useQuery } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
@@ -18,11 +18,6 @@ import { useRef, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-interface FetchedPlanType {
-  currentPlan: { plan_id: string } | null,
-  plans: PlanType[];
-}
-
 export default function PlanPage() {
 
   const textInputRef = useRef<TextInput>(null);
@@ -31,13 +26,13 @@ export default function PlanPage() {
   const insets = useSafeAreaInsets();
 
   // fetch Plan data
-  const { data: plan, isSuccess: isPlanSuccess } = useQuery<FetchedPlanType>({
+  const { data: plan, isSuccess: isPlanSuccess } = useQuery<PlanResponseType>({
     queryKey: ["plan"],
     queryFn: async () => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
 
-      const res = await api.get<FetchedPlanType>("/plan", {
+      const res = await api.get<PlanResponseType>("/plan", {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "RefreshToken": refreshToken
@@ -45,6 +40,16 @@ export default function PlanPage() {
       });
 
       return res.data;
+    },
+    select: (data) => {
+      const { plans } = data;
+      const normalizedPlans = plans.map((plan) => {
+        return {
+          ...plan,
+          is_liked: Boolean(Number(plan.is_liked))
+        }
+      })
+      return { ...data, plans: normalizedPlans };
     },
     placeholderData: {
       currentPlan: null,

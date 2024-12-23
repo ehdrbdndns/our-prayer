@@ -24,5 +24,11 @@ export interface PlanType {
   created_date: number;
 
   is_liked: boolean; // 사용자가 좋아요를 눌렀는지 여부
+  plan_like_id: string; // 좋아요 ID
   audit_updated_date: number; // 플랜 강의의 오디오 파일이 업데이트 된 시간
+}
+
+export interface PlanResponseType {
+  currentPlan: { plan_id: string } | null,
+  plans: PlanType[];
 }
