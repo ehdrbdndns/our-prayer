@@ -12,7 +12,7 @@ import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
 import { useSession } from "@/ctx";
 import api from "@/utils/axios";
-import { BibleType, HistoryType, PlanType } from "@/utils/dataType";
+import { BibleType, HistoryType, PlanResponseType } from "@/utils/dataType";
 import { moderateScale } from "@/utils/style";
 import { useQuery } from "@tanstack/react-query";
 import { Link, router } from "expo-router";
@@ -69,14 +69,14 @@ export default function Index() {
     gcTime: 12 * 60 * 60 * 1000, // 12시간
   });
 
-  // fetch liked plan data
-  const { data: plan, isSuccess: isPlanSuccess } = useQuery<PlanType[]>({
-    queryKey: ["prayerPlan"],
+  // fetch Plan data
+  const { data: plan, isSuccess: isPlanSuccess } = useQuery<PlanResponseType>({
+    queryKey: ["plan"],
     queryFn: async () => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
 
-      const res = await api.get<PlanType[]>("/plan/user", {
+      const res = await api.get<PlanResponseType>("/plan", {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "RefreshToken": refreshToken
@@ -85,7 +85,20 @@ export default function Index() {
 
       return res.data;
     },
-    placeholderData: [],
+    select: (data) => {
+      const { plans } = data;
+      const normalizedPlans = plans.map((plan) => {
+        return {
+          ...plan,
+          is_liked: Boolean(Number(plan.is_liked))
+        }
+      })
+      return { ...data, plans: normalizedPlans };
+    },
+    placeholderData: {
+      currentPlan: null,
+      plans: []
+    },
     staleTime: 12 * 60 * 60 * 1000, // 12시간
     gcTime: 12 * 60 * 60 * 1000, // 12시간
   });
@@ -248,7 +261,11 @@ export default function Index() {
 
         {/* 기도 플랜 */}
         <View style={[styles.content, { paddingRight: 0 }]}>
-          <MyPrayerPlan plans={plan || []} />
+          {
+            isPlanSuccess
+              ? <MyPrayerPlan plans={plan?.plans || []} />
+              : ''
+          }
         </View>
 
         {/* 공유 카드 */}

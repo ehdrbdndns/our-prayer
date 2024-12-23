@@ -6,21 +6,71 @@ import PlanCard from "@/components/PlanCard";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
+import api from "@/utils/axios";
+import { PlanResponseType, PlanType } from "@/utils/dataType";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
+import { useQuery } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import * as SecureStore from 'expo-secure-store';
+import React, { useRef, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const DefaultCardImage = require("@/assets/images/card/default-background.png");
+const Tabs = [
+  { label: "전체보기", value: "" },
+  { label: "시간별 기도", value: "time" },
+  { label: "주제별 기도", value: "topic" },
+  { label: "자유 기도", value: "free" },
+];
 
 export default function PlanPage() {
+
+  const insets = useSafeAreaInsets();
+
   const textInputRef = useRef<TextInput>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
-  const insets = useSafeAreaInsets();
+  const [planType, setPlanType] = useState('');
+
+  // fetch Plan data
+  const { data: plan, isSuccess: isPlanSuccess } = useQuery<PlanResponseType>({
+    queryKey: ["plan"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<PlanResponseType>("/plan", {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+
+      return res.data;
+    },
+    select: (data) => {
+      const { plans } = data;
+      const normalizedPlans = plans.map((plan) => {
+        return {
+          ...plan,
+          is_liked: Boolean(Number(plan.is_liked))
+        }
+      })
+      return { ...data, plans: normalizedPlans };
+    },
+    placeholderData: {
+      currentPlan: null,
+      plans: []
+    },
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+  });
+
+  const currentPlan = plan?.currentPlan
+    ? plan.plans.filter((row) => row.plan_id === plan.currentPlan?.plan_id)[0]
+    : null;
 
   const handleSearchPress = () => {
     if (textInputRef.current) {
@@ -53,10 +103,22 @@ export default function PlanPage() {
     router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}`);
   }
 
+  const onPressTab = (type: string) => {
+    setPlanType(type);
+  }
+
+  const filteredPlans = plan ? plan.plans.filter((item) => {
+    if (isSearchActive) {
+      return item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+    return planType === '' || item.type === planType;
+  }) : [];
+
   return (
     <FlatList
-      data={[1, 2, 3, 4, 5]}
+      data={filteredPlans}
       showsHorizontalScrollIndicator={false}
+      showsVerticalScrollIndicator={false}
       ListHeaderComponent={(
         <View style={{ paddingTop: insets.top }}>
           {/* Header */}
@@ -94,57 +156,64 @@ export default function PlanPage() {
           />
 
           {/* 현재 진행중인 기도 */}
-          <View style={[styles.container, isSearchActive && styles.hidden]}>
-            {/* Title */}
-            <BoldText
-              style={styles.title}
-              fontSize={16}
-              lineHeight={24}
-            >
-              현재 진행 중인 기도
-            </BoldText>
-
-            {/* Card */}
-            <TouchableOpacity
-              onPress={() => onPressPlan({
-                id: "1",
-                title: "30분 기도",
-                desc: "기도는 신과의 깊은 교감을 나누는 시간입니다. 이 30분 기도는 우리의 마음과 영혼을 하나님께 드리는 소중한 순간입니다. 바쁜 일상 속에서 잠시 멈추고, 하나님과의 관계를 더욱 깊게 하는 기회를 제공하고자 합니다.",
-                banner: "default"
-              })}
-            >
-              <View style={styles.opacityBackground}>
-                {/* Image */}
-                <ImageBackground
-                  style={styles.image}
-                  source={DefaultCardImage}
+          {
+            currentPlan && (
+              <View style={[styles.container, isSearchActive && styles.hidden]}>
+                {/* Title */}
+                <BoldText
+                  style={styles.title}
+                  fontSize={16}
+                  lineHeight={24}
                 >
-                  <LinearGradient
-                    colors={["rgba(0, 0, 0, 0)", "#161B29"]}
-                    style={styles.imageFilter}
-                  />
-                </ImageBackground>
+                  현재 진행 중인 기도
+                </BoldText>
 
-                <View>
-                  {/* SubTitle */}
-                  <BoldText
-                    fontSize={16}
-                    lineHeight={24}
-                  >
-                    50분 기도
-                  </BoldText>
+                {/* Card */}
+                <TouchableOpacity
+                  onPress={() => onPressPlan({
+                    id: currentPlan.plan_id,
+                    title: currentPlan.title,
+                    desc: currentPlan.description,
+                    banner: currentPlan.thumbnail
+                  })}
+                >
+                  <View style={styles.opacityBackground}>
+                    {/* Image */}
+                    <ImageBackground
+                      style={styles.image}
+                      source={currentPlan.s_thumbnail}
+                    >
+                      <LinearGradient
+                        colors={["rgba(0, 0, 0, 0)", "#161B29"]}
+                        style={styles.imageFilter}
+                      />
+                    </ImageBackground>
 
-                  {/* Content */}
-                  <RegularText
-                    fontSize={14}
-                    lineHeight={22}
-                  >
-                    처음 시작하는 기도
-                  </RegularText>
-                </View>
+                    <View style={{
+                      width: moderateScale(228)
+                    }}>
+                      {/* SubTitle */}
+                      <BoldText
+                        fontSize={16}
+                        lineHeight={24}
+                      >
+                        {currentPlan.title}
+                      </BoldText>
+
+                      {/* Content */}
+                      <RegularText
+                        numberOfLines={1}
+                        fontSize={14}
+                        lineHeight={22}
+                      >
+                        {currentPlan.description}
+                      </RegularText>
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
-          </View>
+            )
+          }
 
           {/* 기도 플랜 찾기 */}
           <View style={isSearchActive && styles.hidden}>
@@ -163,38 +232,19 @@ export default function PlanPage() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.tabList}
             >
-              <TouchableOpacity style={styles.activeTab}>
-                <MediumText
-                  fontSize={14}
-                  lineHeight={22}
-                >
-                  전체보기
-                </MediumText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.tab}>
-                <MediumText
-                  fontSize={14}
-                  lineHeight={22}
-                >
-                  시간별 기도
-                </MediumText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.tab}>
-                <MediumText
-                  fontSize={14}
-                  lineHeight={22}
-                >
-                  주제별 기도
-                </MediumText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.tab}>
-                <MediumText
-                  fontSize={14}
-                  lineHeight={22}
-                >
-                  자유 기도
-                </MediumText>
-              </TouchableOpacity>
+              {
+                Tabs.map(tab => (
+                  <TouchableOpacity
+                    key={tab.value}
+                    onPress={() => onPressTab(tab.value)}
+                    style={planType === tab.value ? styles.activeTab : styles.tab}
+                  >
+                    <MediumText fontSize={14} lineHeight={22}>
+                      {tab.label}
+                    </MediumText>
+                  </TouchableOpacity>
+                ))
+              }
             </ScrollView>
 
             {/* Card List */}
@@ -210,7 +260,8 @@ export default function PlanPage() {
           </View>
         </View>
       )}
-      renderItem={() => <PlanCard />}
+      keyExtractor={(item) => item.plan_id}
+      renderItem={({ item }: { item: PlanType }) => <PlanCard plan={item} />}
       numColumns={2}
       columnWrapperStyle={styles.columnWrapper}
     />
@@ -269,6 +320,8 @@ const styles = StyleSheet.create({
     opacity: 0.6
   },
   opacityBackground: {
+    width: '100%',
+    overflow: "hidden",
     borderRadius: moderateScale(10),
     padding: moderateScale(8),
     backgroundColor: "rgba(255, 255, 255, 0.05)",

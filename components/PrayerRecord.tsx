@@ -29,12 +29,15 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
   const generateRecord = (history: HistoryType[]): RecordType[] => {
     const records: RecordType[] = [];
     const today = new Date();
-    today.setHours(today.getHours() + 9);
 
     const getMonday = (date: Date) => {
       const day = date.getDay();
       const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
-      return new Date(date.setDate(diff));
+      const monday = new Date(date.setDate(diff));
+
+      monday.setHours(0, 0, 0, 0);
+      monday.setMinutes(monday.getMinutes() + (-1 * monday.getTimezoneOffset()))
+      return monday;
     };
 
     const startOfCurrentWeek = getMonday(today);
