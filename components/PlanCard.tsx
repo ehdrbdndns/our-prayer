@@ -24,12 +24,19 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
   const onPressPlan = (params: {
     id: string;
     title: string;
-    desc: string;
     banner: string;
     isLiked: boolean;
   }) => {
-    const { id, title, desc, banner, isLiked } = params;
-    router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}&isLiked=${isLiked}`);
+    const { id, title, banner, isLiked } = params;
+    router.push({
+      pathname: `/planDetail/[plan_id]`,
+      params: {
+        plan_id: id,
+        title,
+        banner,
+        isLiked: String(isLiked),
+      },
+    });
   }
 
 
@@ -38,7 +45,6 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
       onPress={() => onPressPlan({
         id: plan.plan_id,
         title: plan.title,
-        desc: plan.description,
         banner: plan.thumbnail,
         isLiked: isLiked
       })}

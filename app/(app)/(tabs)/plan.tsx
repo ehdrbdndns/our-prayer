@@ -67,7 +67,16 @@ export default function PlanPage() {
     isLiked: boolean;
   }) => {
     const { id, title, banner, isLiked } = params;
-    router.push(`/planDetail?id=${id}&title=${title}&banner=${banner}&isLiked=${isLiked}`);
+
+    router.push({
+      pathname: `/planDetail/[plan_id]`,
+      params: {
+        plan_id: id,
+        title,
+        banner,
+        isLiked: String(isLiked),
+      },
+    });
   }
 
   const onPressTab = (type: string) => {
