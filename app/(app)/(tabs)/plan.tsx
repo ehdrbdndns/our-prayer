@@ -96,11 +96,11 @@ export default function PlanPage() {
   const onPressPlan = (params: {
     id: string;
     title: string;
-    desc: string;
     banner: string;
+    isLiked: boolean;
   }) => {
-    const { id, title, desc, banner } = params;
-    router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}`);
+    const { id, title, banner, isLiked } = params;
+    router.push(`/planDetail?id=${id}&title=${title}&banner=${banner}&isLiked=${isLiked}`);
   }
 
   const onPressTab = (type: string) => {
@@ -173,8 +173,8 @@ export default function PlanPage() {
                   onPress={() => onPressPlan({
                     id: currentPlan.plan_id,
                     title: currentPlan.title,
-                    desc: currentPlan.description,
-                    banner: currentPlan.thumbnail
+                    banner: currentPlan.thumbnail,
+                    isLiked: currentPlan.is_liked
                   })}
                 >
                   <View style={styles.opacityBackground}>

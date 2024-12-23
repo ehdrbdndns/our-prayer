@@ -85,9 +85,10 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
     title: string;
     desc: string;
     banner: string;
+    isLiked: boolean;
   }) => {
-    const { id, title, desc, banner } = params;
-    router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}`);
+    const { id, title, desc, banner, isLiked } = params;
+    router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}&isLiked=${isLiked}`);
   }
 
 
@@ -97,7 +98,8 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
         id: plan.plan_id,
         title: plan.title,
         desc: plan.description,
-        banner: plan.thumbnail
+        banner: plan.thumbnail,
+        isLiked: isLiked
       })}
     >
       <ImageBackground

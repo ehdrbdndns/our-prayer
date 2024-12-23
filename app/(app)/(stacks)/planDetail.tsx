@@ -3,37 +3,50 @@ import Heart from "@/assets/images/icon/heart.svg";
 import LeftArrow from "@/assets/images/icon/leftArrow.svg";
 import Play from '@/assets/images/icon/play.svg';
 import RightShortArrow from '@/assets/images/icon/rightShortArrow.svg';
-import UnCheckedCircle from '@/assets/images/icon/unCheckedCircle.svg';
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
+import { useLikeMutation } from '@/utils/mutation';
+import { usePlanQuery } from '@/utils/queries';
 import { moderateScale } from "@/utils/style";
 import { ImageBackground } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import * as WebBrowser from 'expo-web-browser';
 import { Image, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const DefaultBanner = require('@/assets/images/plan/default-banner.png');
-const DefaultAuthor = require('@/assets/images/plan/default-author.png');
-
 export default function PlanDetailPage() {
   const insets = useSafeAreaInsets();
-  const { id, title, desc, banner } = useLocalSearchParams<{
+  const {
+    id,
+    title,
+    banner,
+    isLiked: isLikedFromParam,
+  } = useLocalSearchParams<{
     id: string;
     title: string;
-    desc: string;
     banner: string;
+    isLiked: string;
   }>();
-  const [isLiked, setIsLiked] = useState(false);
+
+  const { data, isSuccess: isPlanSuccess } = usePlanQuery({ plan_id: id });
+
+  const plan = data?.plan;
+  const lectures = data?.lectures || [];
+
+  const { isLiked, mutateLike } = useLikeMutation({
+    plan_id: id,
+    is_liked: plan?.is_liked || Boolean(Number(isLikedFromParam)),
+    plan_like_id: plan?.plan_like_id || '',
+  });
 
   const onPressHeart = () => {
-    setIsLiked(!isLiked);
+    mutateLike();
   }
 
   const onPressLeftArrow = () => {
-    router.back();
+    router.push('/plan');
   }
 
   const onPressLecture = () => {
@@ -41,10 +54,14 @@ export default function PlanDetailPage() {
     router.push("/prayer");
   }
 
+  const onPressAuthor = async (uri: string) => {
+    await WebBrowser.openBrowserAsync(uri);
+  }
+
   return (
     // Background
     <ImageBackground
-      source={banner === 'default' ? DefaultBanner : { uri: banner }}
+      source={{ uri: banner }}
       style={{ flex: 1 }}
       blurRadius={30}
     >
@@ -74,7 +91,7 @@ export default function PlanDetailPage() {
           <Image
             resizeMode="cover"
             style={styles.bannerImage}
-            source={banner === 'default' ? DefaultBanner : { uri: banner }}
+            source={{ uri: banner }}
           />
         </View>
 
@@ -102,21 +119,22 @@ export default function PlanDetailPage() {
               fontSize={14}
               lineHeight={22}
             >
-              {desc}
+              {plan?.description}
             </RegularText>
           </View>
 
           {/* Desc Author */}
-          <View style={[styles.card, styles.author]}>
-            {/* Profile */}
-            <View style={styles.profile}>
-              <Image
-                style={styles.profileImage}
-                source={DefaultAuthor}
-              />
-
-              <View style={styles.profileName}>
-                <Pressable>
+          <TouchableOpacity
+            onPress={() => onPressAuthor(plan?.author_deeplink || '')}
+          >
+            <View style={[styles.card, styles.author]}>
+              {/* Profile */}
+              <View style={styles.profile}>
+                <Image
+                  style={styles.profileImage}
+                  source={{ uri: plan?.author_profile }}
+                />
+                <View style={styles.profileName}>
                   <RegularText
                     fontSize={12}
                     lineHeight={18}
@@ -128,31 +146,31 @@ export default function PlanDetailPage() {
                     fontSize={16}
                     lineHeight={22}
                   >
-                    Jesus Medical Center
+                    {plan?.author_name}
                   </RegularText>
+                </View>
+                <Pressable>
+                  <RightShortArrow />
                 </Pressable>
               </View>
-              <Pressable>
-                <RightShortArrow />
-              </Pressable>
-            </View>
-            {/* Content */}
-            <RegularText
-              style={styles.profileContent}
-              fontSize={12}
-              lineHeight={22}
-            >
-              {`이 기도 플랜 계획을 제공해주신 'Jesus Medical Center'에 감사드립니다. 더 많은 정보를 보시려면, 이 링크를 클릭해주세요: {유튜브 링크}`}
-            </RegularText>
+              {/* Content */}
+              <RegularText
+                style={styles.profileContent}
+                fontSize={12}
+                lineHeight={22}
+              >
+                {plan?.author_description}
+              </RegularText>
 
-            <RegularText
-              fontSize={12}
-              lineHeight={22}
-              color="#B3B3B3"
-            >
-              출판자 소개
-            </RegularText>
-          </View>
+              <RegularText
+                fontSize={12}
+                lineHeight={22}
+                color="#B3B3B3"
+              >
+                출판자 소개
+              </RegularText>
+            </View>
+          </TouchableOpacity>
 
           {/* LectureList */}
           <View>
@@ -172,72 +190,49 @@ export default function PlanDetailPage() {
               lineHeight={15}
               color="#B3B3B3"
             >
-              {`전체 회차 수: {}회차`}
+              {`전체 회차 수: ${lectures.length}회차`}
             </RegularText>
 
             {/* List */}
             <View>
-              <TouchableOpacity
-                onPress={onPressLecture}
-                style={[styles.card, styles.lecture]}
-              >
-                {/* CheckBox */}
-                <CheckedCircle
-                  width={moderateScale(22)}
-                  height={moderateScale(22)}
-                />
-
-                {/* Content */}
-                <View style={styles.lectureContent}>
-                  <BoldText
-                    fontSize={16}
-                    lineHeight={24}
+              {
+                lectures.map((row) => (
+                  <TouchableOpacity
+                    key={row.lecture_id}
+                    onPress={onPressLecture}
+                    style={[styles.card, styles.lecture]}
                   >
-                    1. 기도란 무엇인가?
-                  </BoldText>
-                  <RegularText
-                    fontSize={14}
-                    lineHeight={22}
-                  >
-                    처음 시작하는 기도
-                  </RegularText>
-                </View>
+                    {/* CheckBox */}
+                    <CheckedCircle
+                      width={moderateScale(22)}
+                      height={moderateScale(22)}
+                    />
 
-                {/* Button */}
-                <Play
-                  width={moderateScale(38)}
-                  height={moderateScale(38)}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.card, styles.lecture]}>
-                {/* CheckBox */}
-                <UnCheckedCircle
-                  width={moderateScale(22)}
-                  height={moderateScale(22)}
-                />
+                    {/* Content */}
+                    <View style={styles.lectureContent}>
+                      <BoldText
+                        fontSize={16}
+                        lineHeight={24}
+                      >
+                        {row.title}
+                      </BoldText>
+                      <RegularText
+                        fontSize={14}
+                        lineHeight={22}
+                        numberOfLines={1}
+                      >
+                        {row.description}
+                      </RegularText>
+                    </View>
 
-                {/* Content */}
-                <View style={styles.lectureContent}>
-                  <BoldText
-                    fontSize={16}
-                    lineHeight={24}
-                  >
-                    2. 하나님이 원하시는 기도
-                  </BoldText>
-                  <RegularText
-                    fontSize={14}
-                    lineHeight={22}
-                  >
-                    처음 시작하는 기도
-                  </RegularText>
-                </View>
-
-                {/* Button */}
-                <Play
-                  width={moderateScale(38)}
-                  height={moderateScale(38)}
-                />
-              </TouchableOpacity>
+                    {/* Button */}
+                    <Play
+                      width={moderateScale(38)}
+                      height={moderateScale(38)}
+                    />
+                  </TouchableOpacity>
+                ))
+              }
             </View>
           </View>
         </View>
