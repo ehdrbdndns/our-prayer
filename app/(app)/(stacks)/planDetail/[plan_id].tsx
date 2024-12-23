@@ -20,9 +20,7 @@ export default function PlanDetailPage() {
   const insets = useSafeAreaInsets();
 
   const {
-    plan_id,
-    title,
-    banner,
+    plan_id, title, banner,
     isLiked: isLikedFromParam,
   } = useLocalSearchParams<{
     plan_id: string;
@@ -50,9 +48,14 @@ export default function PlanDetailPage() {
     router.push('/plan');
   }
 
-  const onPressLecture = () => {
+  const onPressLecture = ({ lecture_id }: { lecture_id: string }) => {
     // Todo - add params
-    router.push("/prayer");
+    router.push({
+      pathname: '/lecture/[lecture_id]',
+      params: {
+        lecture_id: lecture_id
+      }
+    })
   }
 
   const onPressAuthor = async (uri: string) => {
@@ -200,7 +203,7 @@ export default function PlanDetailPage() {
                 lectures.map((row) => (
                   <TouchableOpacity
                     key={row.lecture_id}
-                    onPress={onPressLecture}
+                    onPress={() => onPressLecture({ lecture_id: row.lecture_id })}
                     style={[styles.card, styles.lecture]}
                   >
                     {/* CheckBox */}
