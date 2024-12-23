@@ -52,7 +52,7 @@ export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
 
       {/* CardList */}
       <FlatList
-        data={plans}
+        data={plans.filter((plan) => plan.is_liked)}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.cardList}
         renderItem={({ item }: { item: PlanType }) => (

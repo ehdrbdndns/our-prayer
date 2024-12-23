@@ -18,12 +18,21 @@ import { useRef, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const Tabs = [
+  { label: "전체보기", value: "" },
+  { label: "시간별 기도", value: "time" },
+  { label: "주제별 기도", value: "topic" },
+  { label: "자유 기도", value: "free" },
+];
+
 export default function PlanPage() {
+
+  const insets = useSafeAreaInsets();
 
   const textInputRef = useRef<TextInput>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
-  const insets = useSafeAreaInsets();
+  const [planType, setPlanType] = useState('');
 
   // fetch Plan data
   const { data: plan, isSuccess: isPlanSuccess } = useQuery<PlanResponseType>({
@@ -94,9 +103,15 @@ export default function PlanPage() {
     router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}`);
   }
 
+  const onPressTab = (type: string) => {
+    setPlanType(type);
+  }
+
+  const filteredPlans = plan ? plan.plans.filter((item) => planType === '' || item.type === planType) : [];
+
   return (
     <FlatList
-      data={plan ? plan.plans : []}
+      data={filteredPlans}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
       ListHeaderComponent={(
@@ -212,38 +227,19 @@ export default function PlanPage() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.tabList}
             >
-              <TouchableOpacity style={styles.activeTab}>
-                <MediumText
-                  fontSize={14}
-                  lineHeight={22}
-                >
-                  전체보기
-                </MediumText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.tab}>
-                <MediumText
-                  fontSize={14}
-                  lineHeight={22}
-                >
-                  시간별 기도
-                </MediumText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.tab}>
-                <MediumText
-                  fontSize={14}
-                  lineHeight={22}
-                >
-                  주제별 기도
-                </MediumText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.tab}>
-                <MediumText
-                  fontSize={14}
-                  lineHeight={22}
-                >
-                  자유 기도
-                </MediumText>
-              </TouchableOpacity>
+              {
+                Tabs.map(tab => (
+                  <TouchableOpacity
+                    key={tab.value}
+                    onPress={() => onPressTab(tab.value)}
+                    style={planType === tab.value ? styles.activeTab : styles.tab}
+                  >
+                    <MediumText fontSize={14} lineHeight={22}>
+                      {tab.label}
+                    </MediumText>
+                  </TouchableOpacity>
+                ))
+              }
             </ScrollView>
 
             {/* Card List */}

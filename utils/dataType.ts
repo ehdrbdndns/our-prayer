@@ -22,6 +22,7 @@ export interface PlanType {
   s_thumbnail: string;
   updated_date: number;
   created_date: number;
+  type: 'free' | 'time' | 'topic';
 
   is_liked: boolean; // 사용자가 좋아요를 눌렀는지 여부
   plan_like_id: string; // 좋아요 ID
