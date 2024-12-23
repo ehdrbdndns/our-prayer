@@ -14,7 +14,7 @@ import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -107,7 +107,12 @@ export default function PlanPage() {
     setPlanType(type);
   }
 
-  const filteredPlans = plan ? plan.plans.filter((item) => planType === '' || item.type === planType) : [];
+  const filteredPlans = plan ? plan.plans.filter((item) => {
+    if (isSearchActive) {
+      return item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+    return planType === '' || item.type === planType;
+  }) : [];
 
   return (
     <FlatList
@@ -255,6 +260,7 @@ export default function PlanPage() {
           </View>
         </View>
       )}
+      keyExtractor={(item) => item.plan_id}
       renderItem={({ item }: { item: PlanType }) => <PlanCard plan={item} />}
       numColumns={2}
       columnWrapperStyle={styles.columnWrapper}

@@ -64,6 +64,8 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
         ? updatePlanLikeStatus(previousPlans, plan.plan_id, false)
         : updatePlanLikeStatus(previousPlans, plan.plan_id, true, data.plan_like_id);
 
+      queryClient.invalidateQueries({ queryKey: ["plan"] });
+
       queryClient.setQueryData(["plan"], { currentPlan, plans: updatedPlans });
     },
     onError: (error, newUser, context) => {
@@ -75,7 +77,7 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
 
   const onPressHeart = () => {
     mutateLike();
-    // setIsLiked(!isLiked);
+    setIsLiked(!isLiked);
   }
 
   const onPressPlan = (params: {
