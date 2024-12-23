@@ -6,14 +6,12 @@ import PlanCard from "@/components/PlanCard";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
-import api from "@/utils/axios";
-import { PlanResponseType, PlanType } from "@/utils/dataType";
+import { PlanType } from "@/utils/dataType";
+import { usePlanListQuery } from "@/utils/queries";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
-import { useQuery } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
 import React, { useRef, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -35,38 +33,7 @@ export default function PlanPage() {
   const [planType, setPlanType] = useState('');
 
   // fetch Plan data
-  const { data: plan, isSuccess: isPlanSuccess } = useQuery<PlanResponseType>({
-    queryKey: ["plan"],
-    queryFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api.get<PlanResponseType>("/plan", {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        }
-      });
-
-      return res.data;
-    },
-    select: (data) => {
-      const { plans } = data;
-      const normalizedPlans = plans.map((plan) => {
-        return {
-          ...plan,
-          is_liked: Boolean(Number(plan.is_liked))
-        }
-      })
-      return { ...data, plans: normalizedPlans };
-    },
-    placeholderData: {
-      currentPlan: null,
-      plans: []
-    },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
-  });
+  const { data: plan, isSuccess: isPlanSuccess } = usePlanListQuery();
 
   const currentPlan = plan?.currentPlan
     ? plan.plans.filter((row) => row.plan_id === plan.currentPlan?.plan_id)[0]
