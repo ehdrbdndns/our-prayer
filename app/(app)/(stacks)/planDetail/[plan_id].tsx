@@ -18,25 +18,26 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PlanDetailPage() {
   const insets = useSafeAreaInsets();
+
   const {
-    id,
+    plan_id,
     title,
     banner,
     isLiked: isLikedFromParam,
   } = useLocalSearchParams<{
-    id: string;
+    plan_id: string;
     title: string;
     banner: string;
     isLiked: string;
   }>();
 
-  const { data, isSuccess: isPlanSuccess } = usePlanQuery({ plan_id: id });
+  const { data, isSuccess: isPlanSuccess } = usePlanQuery({ plan_id });
 
   const plan = data?.plan;
   const lectures = data?.lectures || [];
 
   const { isLiked, mutateLike } = useLikeMutation({
-    plan_id: id,
+    plan_id,
     is_liked: plan?.is_liked || Boolean(Number(isLikedFromParam)),
     plan_like_id: plan?.plan_like_id || '',
   });
