@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 // Intro duration in seconds
 const DEFAULT_DURATION = 60;
 
-export default function Prayer() {
+export default function Lecture() {
   const insets = useSafeAreaInsets();
 
   const [showIntro, setShowIntro] = useState(false);

@@ -23,10 +23,8 @@ export default function StackLayout() {
       <Stack.Screen name="questionDetail" />
       <Stack.Screen name="questionGuide" />
       <Stack.Screen name="archivePlan" />
-      <Stack.Screen name="prayer" options={{ animation: 'fade' }} />
-      {/* <Stack.Screen name="planDetail" /> */}
+      <Stack.Screen name="lecture/[lecture_id]" options={{ animation: 'fade' }} />
       <Stack.Screen name="prayerRecord" />
-      {/* <Stack.Screen name="login" /> */}
     </Stack>
   )
 }
