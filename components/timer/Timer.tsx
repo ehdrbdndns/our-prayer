@@ -47,7 +47,7 @@ export default function Timer(props: TimerProps) {
     onComplete,
   });
 
-  const formatRemainingTime = (remainingTime: number) => {
+  const showRemainingTime = (remainingTime: number) => {
     const time = repeatCount > 0
       ? (Math.floor(duration * (repeatCount - 1) + countdown.elapsedTime))
       : remainingTime;
@@ -78,7 +78,7 @@ export default function Timer(props: TimerProps) {
         lineHeight={48}
         color="white"
       >
-        {formatRemainingTime(countdown.remainingTime)}
+        {showRemainingTime(countdown.remainingTime)}
       </CustomText>
 
       {/* Plan Title */}
