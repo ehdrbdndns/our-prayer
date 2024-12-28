@@ -4,13 +4,20 @@ import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PrayerRecord() {
 
   const insets = useSafeAreaInsets();
+
+  const {
+    lecture_id, duration
+  } = useLocalSearchParams<{
+    lecture_id: string,
+    duration: string
+  }>();
 
   const onPressSave = () => {
     // Todo save data

@@ -3,7 +3,6 @@ import Next from "@/assets/images/icon/next.svg";
 import Pause from "@/assets/images/icon/pause.svg";
 import Prev from "@/assets/images/icon/prev.svg";
 import { moderateScale } from "@/utils/style";
-import { router } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useCountdown } from "react-native-countdown-circle-timer";
 import PrimaryButton from "../button/PrimaryButton";
@@ -14,6 +13,8 @@ import { RegularText } from "../text/RegularText";
 import CircleProgress from "./CircleProgress";
 
 type TimerProps = {
+  planTitle: string;
+  lectureTitle: string;
   duration: number;
   initialRemainingTime: number;
   isPlaying: boolean;
@@ -22,10 +23,13 @@ type TimerProps = {
   onPressPrev: (remainingTime: number) => void;
   onPressPlay: () => void;
   onComplete: () => void;
+  onPressCompleteBtn: (elapsedTime: number) => void;
 }
 
 export default function Timer(props: TimerProps) {
   const {
+    planTitle,
+    lectureTitle,
     duration,
     initialRemainingTime,
     isPlaying,
@@ -33,7 +37,8 @@ export default function Timer(props: TimerProps) {
     onPressNext,
     onPressPrev,
     onPressPlay,
-    onComplete
+    onComplete,
+    onPressCompleteBtn
   } = props as TimerProps;
 
   let countdown = useCountdown({
@@ -59,10 +64,6 @@ export default function Timer(props: TimerProps) {
     return `${repeatCount > 0 ? '+' : ''}${minutes}:${formattedSeconds}`;
   };
 
-  const onPressComplete = () => {
-    router.push('/prayerRecord');
-  }
-
   return (
     <View style={styles.timer}>
       {/* Circle Progress */}
@@ -86,7 +87,7 @@ export default function Timer(props: TimerProps) {
         fontSize={14}
         color="rgba(255, 255, 255, 0.8)"
       >
-        30분 기도
+        {planTitle}
       </BoldText>
 
       {/* Lecture Title */}
@@ -95,7 +96,7 @@ export default function Timer(props: TimerProps) {
         lineHeight={26}
         color="rgba(255, 255, 255, 0.8)"
       >
-        2. 하나님이 원하시는 기도
+        {lectureTitle}
       </RegularText>
 
       {/* Controller */}
@@ -103,7 +104,10 @@ export default function Timer(props: TimerProps) {
         repeatCount > 0
           ? (
             <View style={[styles.controller, { width: moderateScale(320) }]}>
-              <PrimaryButton onPress={onPressComplete} style={styles.completeButton}>
+              <PrimaryButton
+                onPress={() => onPressCompleteBtn(countdown.elapsedTime)}
+                style={styles.completeButton}
+              >
                 <MediumText
                   fontSize={14}
                 >
