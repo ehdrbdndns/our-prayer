@@ -6,6 +6,9 @@ import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
+import { useSession } from '@/ctx';
+import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
+import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, scaleHeight } from "@/utils/style";
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -17,6 +20,18 @@ export default function MyPage() {
   const insets = useSafeAreaInsets();
 
   const [enableAlarm, setEnableAlarm] = useState(true);
+  const { session } = useSession();
+
+  const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
+
+  // 연속 기도 일수
+  const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
+
+  // 오늘 기도 시간
+  const todayPrayerTime = calculateTodayPrayerTime(history || []);
+
+  // 전체 기도 시간
+  const totalPrayerTime = calculateTotalPrayerTime(history || []);
 
   const onChangeAlarm = () => {
     setEnableAlarm(!enableAlarm);
@@ -28,6 +43,10 @@ export default function MyPage() {
 
   const onPressPrayerTime = () => {
     router.push('/prayerTime');
+  }
+
+  const onPressHistory = () => {
+    router.push('/calendar');
   }
 
   return (
@@ -50,7 +69,7 @@ export default function MyPage() {
                 fontSize={24}
                 lineHeight={36}
               >
-                동규우운
+                {session}
               </BoldText>
               <Edit
                 width={moderateScale(20)}
@@ -93,7 +112,9 @@ export default function MyPage() {
                 나의 기도 데이터
               </BoldText>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={onPressHistory}
+            >
               <MediumText
                 fontSize={12}
                 color="#B3B3B3"
@@ -125,7 +146,7 @@ export default function MyPage() {
                   fontFamily='Inter_600SemiBold'
                   fontSize={20}
                 >
-                  36
+                  {continuousPrayerDays}
                 </CustomText>
                 <RegularText fontSize={12}>
                   일
@@ -147,7 +168,7 @@ export default function MyPage() {
                   fontFamily='Inter_600SemiBold'
                   fontSize={20}
                 >
-                  14
+                  {todayPrayerTime}
                 </CustomText>
                 <RegularText fontSize={12}>
                   분
@@ -169,10 +190,10 @@ export default function MyPage() {
                   fontFamily='Inter_600SemiBold'
                   fontSize={20}
                 >
-                  2.4
+                  {totalPrayerTime.time}
                 </CustomText>
                 <RegularText fontSize={12}>
-                  시간
+                  {totalPrayerTime.unit}
                 </RegularText>
               </View>
             </View>
@@ -187,7 +208,7 @@ export default function MyPage() {
             borderRadius: moderateScale(10),
           }}
         >
-          <PrayerRecord />
+          <PrayerRecord history={history || []} />
         </View>
 
         {/* 알림 */}
