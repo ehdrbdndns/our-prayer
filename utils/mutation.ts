@@ -3,6 +3,7 @@ import { PlanResponseType, PlanType } from '@/utils/dataType';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
+import { Alert } from 'react-native';
 
 export const useLikeMutation = ({
   plan_like_id, plan_id, is_liked
@@ -75,3 +76,41 @@ export const useLikeMutation = ({
 
   return { isLiked, mutateLike };
 };
+
+export const useHistoryMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      lecture_id, duration, note
+    }: {
+      lecture_id: string, duration: string, note: string
+    }) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<{ message: string }>({
+        method: "POST",
+        url: "/history",
+        data: {
+          lecture_id: lecture_id,
+          duration: duration,
+          note: note
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["history"] });
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+      Alert.alert('오류', '기록 저장에 실패했습니다.');
+    },
+  })
+}
