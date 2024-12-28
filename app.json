@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj"
+      "bundleIdentifier": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
+      "infoPlist": {
+        "UIBackgroundModes": [ "audio" ]
+      }
     },
     "android": {
       "package": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj"
