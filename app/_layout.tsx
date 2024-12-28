@@ -10,6 +10,7 @@ import {
   QueryClient,
   QueryClientProvider
 } from '@tanstack/react-query';
+import { Audio } from 'expo-av';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setStatusBarStyle } from "expo-status-bar";
@@ -39,11 +40,17 @@ export default function Root() {
 
   const [isAppReady, setAppReady] = useState(false);
 
-  // Set the status bar style to light
+  // Set the status bar style to light and set the audio mode
   useEffect(() => {
+    const setAudioMode = async () => {
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+    };
+
+    setAudioMode();
+
     setTimeout(() => {
       setStatusBarStyle('light');
-    }, 0)
+    }, 0);
   }, [])
 
   // Hide the splash screen when the app is ready

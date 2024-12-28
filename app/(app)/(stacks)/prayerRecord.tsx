@@ -3,8 +3,10 @@ import PrimaryButton from "@/components/button/PrimaryButton";
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
+import { useHistoryMutation } from "@/utils/mutation";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -12,13 +14,26 @@ export default function PrayerRecord() {
 
   const insets = useSafeAreaInsets();
 
-  const onPressSave = () => {
+  const {
+    lecture_id, duration
+  } = useLocalSearchParams<{
+    lecture_id: string,
+    duration: string
+  }>();
+
+  const [note, setNote] = useState('');
+
+  const { mutate } = useHistoryMutation()
+
+  const onPressSave = async () => {
     // Todo save data
-    router.push('/(tabs)');
+    mutate({ lecture_id, duration, note });
+    router.push('/calendar');
   }
 
   const onPressCancel = () => {
-    router.push('/(tabs)');
+    mutate({ lecture_id, duration, note: '' });
+    router.push('/calendar');
   }
 
   return (
@@ -46,12 +61,16 @@ export default function PrayerRecord() {
       </BoldText>
 
       <View style={styles.textInput}>
+        {/* TODO 1500자 제한 */}
         <TextInput
-          style={styles.text}
-          placeholder="여기를 탭하여 입력하세요"
-          placeholderTextColor={"#B3B3B3"}
+          value={note}
           multiline={true}
+          maxLength={1500}
+          style={styles.text}
           scrollEnabled={true}
+          onChangeText={(v) => setNote(v)}
+          placeholderTextColor={"#B3B3B3"}
+          placeholder="여기를 탭하여 입력하세요(최대 1500자)"
         />
       </View>
 

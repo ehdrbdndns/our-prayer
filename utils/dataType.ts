@@ -45,9 +45,26 @@ export interface LectureType {
   plan_id: string;
   title: string;
   description: string;
-  time: string;
+  time: number;
   bgm: string;
   is_active: boolean;
   updated_date: number;
   created_date: number;
+}
+
+export interface LectureAudioType {
+  lecture_audio_id: string;
+  lecture_id: string;
+  file_name: string;
+  audio: string;
+  caption: string;
+  start_time: number;
+  is_active: boolean;
+  created_date: number;
+  updated_date: number;
+}
+
+export interface LectureResponseType {
+  lecture: LectureType;
+  lectureAudios: LectureAudioType[];
 }

@@ -17,15 +17,14 @@ export default function StackLayout() {
       }}
       screenLayout={ScreenLayout}
     >
+      <Stack.Screen name="planDetail/[plan_id]" />
       <Stack.Screen name="prayerTime" />
       <Stack.Screen name="editNickname" />
       <Stack.Screen name="questionDetail" />
       <Stack.Screen name="questionGuide" />
       <Stack.Screen name="archivePlan" />
-      <Stack.Screen name="prayer" options={{ animation: 'fade' }} />
-      <Stack.Screen name="planDetail" />
+      <Stack.Screen name="lecture/[lecture_id]" options={{ animation: 'fade' }} />
       <Stack.Screen name="prayerRecord" />
-      {/* <Stack.Screen name="login" /> */}
     </Stack>
   )
 }

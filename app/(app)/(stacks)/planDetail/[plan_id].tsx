@@ -18,25 +18,24 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PlanDetailPage() {
   const insets = useSafeAreaInsets();
+
   const {
-    id,
-    title,
-    banner,
+    plan_id, title, banner,
     isLiked: isLikedFromParam,
   } = useLocalSearchParams<{
-    id: string;
+    plan_id: string;
     title: string;
     banner: string;
     isLiked: string;
   }>();
 
-  const { data, isSuccess: isPlanSuccess } = usePlanQuery({ plan_id: id });
+  const { data, isSuccess: isPlanSuccess } = usePlanQuery({ plan_id });
 
   const plan = data?.plan;
   const lectures = data?.lectures || [];
 
   const { isLiked, mutateLike } = useLikeMutation({
-    plan_id: id,
+    plan_id,
     is_liked: plan?.is_liked || Boolean(Number(isLikedFromParam)),
     plan_like_id: plan?.plan_like_id || '',
   });
@@ -49,9 +48,15 @@ export default function PlanDetailPage() {
     router.push('/plan');
   }
 
-  const onPressLecture = () => {
+  const onPressLecture = ({ lecture_id }: { lecture_id: string }) => {
     // Todo - add params
-    router.push("/prayer");
+    router.push({
+      pathname: '/lecture/[lecture_id]',
+      params: {
+        lecture_id: lecture_id,
+        plan_title: title
+      }
+    })
   }
 
   const onPressAuthor = async (uri: string) => {
@@ -199,7 +204,7 @@ export default function PlanDetailPage() {
                 lectures.map((row) => (
                   <TouchableOpacity
                     key={row.lecture_id}
-                    onPress={onPressLecture}
+                    onPress={() => onPressLecture({ lecture_id: row.lecture_id })}
                     style={[styles.card, styles.lecture]}
                   >
                     {/* CheckBox */}

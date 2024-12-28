@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj"
+      "bundleIdentifier": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
+      "infoPlist": {
+        "UIBackgroundModes": [ "audio" ]
+      }
     },
     "android": {
       "package": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj"
@@ -36,6 +39,12 @@
           "assets": [
             "./assets/images/background.png"
           ]
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
         }
       ],
       "expo-secure-store"

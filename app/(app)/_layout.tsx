@@ -7,7 +7,6 @@ export default function AppLayout() {
   const { session, isLoading } = useSession();
   const [isAppReady, setAppReady] = useState(false);
 
-
   useEffect(() => {
     setAppReady(true);
   }, [isLoading])
