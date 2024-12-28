@@ -3,12 +3,53 @@ import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
 import { BoldText } from '@/components/text/BoldText';
 import { MediumText } from "@/components/text/MediumText";
+import { useSession } from '@/ctx';
+import api from '@/utils/axios';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
+import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
+import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditNickname() {
+
+  const { session, setSession } = useSession();
+  const [name, setName] = useState(session || '');
+
+  const { mutate } = useMutation({
+    mutationFn: async ({ name }: { name: string }) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<{ message: string }>({
+        method: "PUT",
+        url: "/user",
+        data: {
+          name: name
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: () => {
+      // update user session
+      setSession(name);
+      router.back();
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+    },
+  })
+
+  const onPressSave = () => {
+    mutate({ name });
+  }
 
   const onPressBack = () => {
     router.back();
@@ -38,7 +79,9 @@ export default function EditNickname() {
           </View>
         }
         suffix={
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={onPressSave}
+          >
             <MediumText
               fontSize={16}
               color="#959FFF"
@@ -68,8 +111,9 @@ export default function EditNickname() {
               borderBottomColor: 'rgba(255, 255, 255, 0.1)',
               paddingBottom: moderateScale(8),
             }}
-            placeholder='동규우운'
+            placeholder={session || '닉네임을 입력하세요'}
             placeholderTextColor={'#B3B3B3'}
+            onChangeText={(v) => setName(v)}
           />
         </View>
       </View>
@@ -81,14 +125,8 @@ export default function EditNickname() {
           marginBottom: moderateScale(24),
         }}
       >
-        <PrimaryButton
-          style={{
-
-          }}
-        >
-          <MediumText
-            fontSize={14}
-          >
+        <PrimaryButton onPress={onPressSave}>
+          <MediumText fontSize={14}>
             저장하기
           </MediumText>
         </PrimaryButton>
