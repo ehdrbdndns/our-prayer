@@ -41,3 +41,30 @@ export const calculateTodayPrayerTime = (history: HistoryType[]): number => {
     .filter(row => row.created_date >= todayStart)
     .reduce((total, { duration }) => total + duration, 0) / 60; // 초 단위를 분 단위로 변환
 };
+
+// 전체 기도 시간 계산
+export const calculateTotalPrayerTime = (history: HistoryType[]): { time: string, unit: string } => {
+  const totalHours = history.reduce((total, { duration }) => total + duration, 0) / 3600; // 초 단위를 시간 단위로 변환
+
+  if (totalHours < 100) {
+    return {
+      time: totalHours.toFixed(),
+      unit: '시간'
+    };
+  } else if (totalHours < 1000) {
+    return {
+      time: (totalHours / 100).toFixed(1),
+      unit: '백'
+    };
+  } else if (totalHours < 10000) {
+    return {
+      time: (totalHours / 1000).toFixed(2),
+      unit: '천'
+    }
+  } else {
+    return {
+      time: (totalHours / 10000).toFixed(3),
+      unit: '만'
+    }
+  }
+};
