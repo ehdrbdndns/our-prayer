@@ -1,7 +1,7 @@
 import Delete from '@/assets/images/icon/delete.svg';
 import Send from "@/assets/images/icon/send.svg";
 import { moderateScale, normalizeFontSize, scaleHeight } from "@/utils/style";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import PrimaryButton from "./button/PrimaryButton";
 import { MediumText } from "./text/MediumText";
