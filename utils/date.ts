@@ -33,13 +33,16 @@ export const calculateContinuousPrayerDays = (history: HistoryType[]): number =>
 };
 
 // 오늘의 기도 시간 계산
-export const calculateTodayPrayerTime = (history: HistoryType[]): number => {
+export const calculateTodayPrayerTime = (history: HistoryType[]): string => {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000; // 오늘 00:00:00의 Unix 타임스탬프 (초 단위)
 
-  return history
+  const totalMinutes = history
     .filter(row => row.created_date >= todayStart)
     .reduce((total, { duration }) => total + duration, 0) / 60; // 초 단위를 분 단위로 변환
+
+  // 소수점이 있다면 둘째 자리까지 노출, 소수점이 없다면 없는 채로 반환
+  return totalMinutes % 1 === 0 ? totalMinutes.toString() : totalMinutes.toFixed(2);
 };
 
 // 전체 기도 시간 계산
