@@ -68,3 +68,18 @@ export const calculateTotalPrayerTime = (history: HistoryType[]): { time: string
     }
   }
 };
+
+// 가입한 날짜로부터 오늘까지의 일수를 계산하는 함수
+export const calculateDaysSinceSignup = (signupDateUnix: number): number => {
+  // 가입한 날짜를 Date 객체로 변환
+  const signupDate = new Date(signupDateUnix * 1000); // 초 단위를 밀리초 단위로 변환
+  // 현재 날짜를 Date 객체로 가져옴
+  const currentDate = new Date();
+
+  // 두 날짜의 차이를 밀리초 단위로 계산
+  const timeDifference = currentDate.getTime() - signupDate.getTime();
+  // 밀리초 단위를 일수로 변환
+  const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+  return daysDifference + 1;
+};
