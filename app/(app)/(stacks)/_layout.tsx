@@ -17,6 +17,7 @@ export default function StackLayout() {
       }}
       screenLayout={ScreenLayout}
     >
+      <Stack.Screen name="historyDetail/[history_id]" />
       <Stack.Screen name="planDetail/[plan_id]" />
       <Stack.Screen name="prayerTime" />
       <Stack.Screen name="editNickname" />
