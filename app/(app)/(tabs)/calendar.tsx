@@ -161,7 +161,9 @@ export default function CalendarPage() {
   }
 
   return (
-    <ScrollView>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+    >
       <SafeAreaView>
         {/* Header */}
         <Header
