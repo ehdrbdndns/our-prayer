@@ -84,7 +84,7 @@ export default function MyPage() {
   const totalPrayerTime = calculateTotalPrayerTime(history || []);
 
   // 가입한 날로부터 경과한 일수
-  const daysSinceSignup = calculateDaysSinceSignup(user?.created_date || 0)
+  const daysSinceSignup = user?.created_date ? calculateDaysSinceSignup(user.created_date) : 0;
 
   const onChangeAlarm = () => {
     userMutate({ alarm: !enableAlarm });
