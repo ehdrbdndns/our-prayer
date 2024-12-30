@@ -6,7 +6,7 @@ import { MediumText } from "@/components/text/MediumText";
 import { useSession } from '@/ctx';
 import api from '@/utils/axios';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditNickname() {
 
+  const queryClient = useQueryClient();
   const { session, setSession } = useSession();
   const [name, setName] = useState(session || '');
 
@@ -39,6 +40,7 @@ export default function EditNickname() {
     },
     onSuccess: () => {
       // update user session
+      queryClient.invalidateQueries({ queryKey: ['user'] });
       setSession(name);
       router.back();
     },
