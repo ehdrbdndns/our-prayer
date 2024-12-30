@@ -6,11 +6,17 @@ import Header from "@/components/Header";
 import PrayerState from '@/components/PrayerState';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
+import api from '@/utils/axios';
+import { HistoryType } from '@/utils/dataType';
+import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotalPrayerTime, formatPrayerTime } from '@/utils/date';
+import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
+import { useMutation } from '@tanstack/react-query';
 import { router } from "expo-router";
+import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Calendar, LocaleConfig } from 'react-native-calendars';
+import { Calendar, DateData, LocaleConfig } from 'react-native-calendars';
 import { SafeAreaView } from "react-native-safe-area-context";
 
 LocaleConfig.locales['kr'] = {
@@ -24,16 +30,134 @@ LocaleConfig.defaultLocale = 'kr';
 
 const Today = new Date().toISOString().split('T')[0];
 
+const EmptyNote = () => (
+  <View style={styles.emptyQuestion}>
+    <Stars opacity={0.8} />
+    <RegularText
+      color="#B3B3B3"
+      fontSize={14}
+      lineHeight={24}
+    >
+      기도 기록이 없습니다.
+    </RegularText>
+  </View>
+)
+
+const HistoryNote = ({
+  note, created_date, duration, onPressNote
+}: {
+  note: string;
+  created_date: number;
+  duration: number;
+  onPressNote: () => void;
+}) => (
+  <TouchableOpacity
+    onPress={onPressNote}
+  >
+    <View style={styles.note}>
+      <RegularText
+        style={{ marginBottom: moderateScale(8) }}
+        fontSize={16}
+        lineHeight={28}
+      >
+        {note}
+      </RegularText>
+      <MediumText
+        color="#B3B3B3"
+        fontSize={14}
+        lineHeight={26}
+      >
+        {formatPrayerTime(created_date, duration)}
+      </MediumText>
+    </View >
+  </TouchableOpacity >
+)
+
 export default function CalendarPage() {
 
   const [selectedDay, setSelectedDay] = useState(Today);
+  const [selectedNoteList, setSelectedNoteList] = useState<JSX.Element[]>([<EmptyNote />]);
+  const { data: history } = useHistoryQuery();
+  const { mutate: retrieveHistoryNote } = useMutation({
+    mutationFn: async (prayer_history_id_list: string[]) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<HistoryType[]>({
+        method: "POST",
+        url: "/history/detail",
+        data: {
+          prayer_history_id_list
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data.filter(row => row.note !== null);
+    },
+    onSuccess: (data) => {
+      if (data.length === 0) {
+        setSelectedNoteList([<EmptyNote />])
+      } else {
+        setSelectedNoteList(
+          data.map((row) => <HistoryNote
+            note={row.note}
+            created_date={row.created_date}
+            duration={row.duration}
+            onPressNote={() => {
+              router.push(`/historyDetail/${row.prayer_history_id}`)
+            }}
+          />)
+        )
+      }
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+      setSelectedNoteList([<EmptyNote />]);
+    },
+  })
+
+  const markedDates = {
+    ...history?.reduce((acc, cur) => {
+      const date = new Date(cur.created_date * 1000);
+      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+      if (!acc[formattedDate]) {
+        acc[formattedDate] = {
+          prayer_history_id_list: [cur.prayer_history_id],
+          marked: true,
+          dotColor: '#959FFF',
+        };
+      } else {
+        acc[formattedDate].prayer_history_id_list.push(cur.prayer_history_id);
+      }
+
+      return acc;
+    }, {} as { [key: string]: { prayer_history_id_list: string[], marked: boolean; dotColor: string } })
+  }
+
+  // 연속 기도 일수
+  const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
+
+  // 오늘 기도 시간
+  const todayPrayerTime = calculateTodayPrayerTime(history || []);
+
+  // 전체 기도 시간
+  const totalPrayerTime = calculateTotalPrayerTime(history || []);
+
+  const onPressDay = async (day: DateData) => {
+    setSelectedDay(day.dateString);
+    if (!markedDates[day.dateString]) {
+      setSelectedNoteList([<EmptyNote />]);
+    } else {
+      retrieveHistoryNote(markedDates[day.dateString].prayer_history_id_list);
+    }
+  }
 
   const onPressBack = () => {
     router.back();
-  }
-
-  const onPressNote = () => {
-    router.push("/historyDetail/1");
   }
 
   return (
@@ -65,7 +189,7 @@ export default function CalendarPage() {
         {/* Calendar */}
         <View style={styles.container}>
           <Calendar
-            onDayPress={(day) => setSelectedDay(day.dateString)}
+            onDayPress={onPressDay}
             renderHeader={(date?: XDate) => (
               date ? (
                 <MediumText>
@@ -73,6 +197,7 @@ export default function CalendarPage() {
                 </MediumText>
               ) : null
             )}
+            hideExtraDays={true}
             theme={{
               // Container
               backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -87,24 +212,18 @@ export default function CalendarPage() {
               textDayFontFamily: 'Inter_500Medium',
               textDayFontSize: normalizeFontSize(14),
               dayTextColor: '#FFF',
+              todayTextColor: '#F7EE91',
 
               // Selected Day
-              selectedDayTextColor: '#FFF'
+              selectedDayTextColor: '#FFF',
             }}
             markedDates={{
-              '2024-12-08': {
-                marked: true,
-                dotColor: '#959FFF',
-              },
+              ...markedDates,
               [selectedDay]: {
-                selected: true,
-                disableTouchEvent: true,
-                selectedColor: '#4F5FFF',
-                textColor: '#FFF',
+                ...markedDates[selectedDay],
                 dotColor: '#FFF',
-
-                // Todo: check if this is marked
-                // marked: true,
+                selected: true,
+                selectedColor: '#4F5FFF',
               },
             }}
             style={styles.calendar}
@@ -124,22 +243,22 @@ export default function CalendarPage() {
             // style={styles.prayerState}
             title={"연속 기도일 수"}
             icon={<Fire width={moderateScale(24)} height={moderateScale(24)} />}
-            data={134}
+            data={continuousPrayerDays}
             unit={"일"}
           />
           <PrayerState
             // style={styles.prayerState}
             title={"오늘 기도 시간"}
             icon={<OneStar width={moderateScale(24)} height={moderateScale(24)} />}
-            data={14}
+            data={todayPrayerTime}
             unit={"분"}
           />
           <PrayerState
             // style={styles.prayerState}
             title={"전체 기도 시간"}
             icon={<Stars width={moderateScale(24)} height={moderateScale(24)} />}
-            data={1}
-            unit={"백 시간"}
+            data={totalPrayerTime.time}
+            unit={totalPrayerTime.unit}
           />
         </View>
 
@@ -151,42 +270,7 @@ export default function CalendarPage() {
           >
             {`${selectedDay.split('-')[0]}년 ${selectedDay.split('-')[1]}월 ${selectedDay.split('-')[2]}일`}
           </MediumText>
-
-          {/* 
-          Empty Question
-          <View style={styles.emptyQuestion}>
-            <Stars opacity={0.8} />
-            <RegularText
-              color="#B3B3B3"
-              fontSize={14}
-              lineHeight={24}
-            >
-              기도 기록이 없습니다.
-            </RegularText>
-          </View> 
-          */}
-
-          <TouchableOpacity
-            onPress={onPressNote}
-          >
-            <View style={styles.note}>
-              <RegularText
-                style={{ marginBottom: moderateScale(8) }}
-                fontSize={16}
-                lineHeight={28}
-              >
-                기도하는 시간이 제게 큰 힘이 됩니다.
-                앞으로도 이 시간을 소중히 여기며, 주님과의 관계를 계속 깊게 해나가고 싶어요. 감사해요, 주님.  아멘. 🌿
-              </RegularText>
-              <MediumText
-                color="#B3B3B3"
-                fontSize={14}
-                lineHeight={26}
-              >
-                오후 12시 30분에 30분 기도했습니다
-              </MediumText>
-            </View>
-          </TouchableOpacity>
+          {selectedNoteList.map((note) => note)}
         </View>
       </SafeAreaView>
     </ScrollView>
