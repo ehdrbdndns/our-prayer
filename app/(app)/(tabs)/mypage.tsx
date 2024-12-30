@@ -13,15 +13,16 @@ import { calculateContinuousPrayerDays, calculateDaysSinceSignup, calculateToday
 import { useUserMutation } from '@/utils/mutation';
 import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, scaleHeight } from "@/utils/style";
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MyPage() {
 
+  const queryClient = useQueryClient();
   const { session, signOut } = useSession();
   const insets = useSafeAreaInsets();
   const [enableAlarm, setEnableAlarm] = useState(false);
@@ -48,6 +49,30 @@ export default function MyPage() {
     gcTime: 12 * 60 * 60 * 1000, // 12시간
   });
   const { mutate: userMutate } = useUserMutation();
+  const { mutate: deleteUserMutate } = useMutation({
+    mutationFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<{ message: string }>({
+        method: "DELETE",
+        url: "/user",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      signOut();
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+    },
+  })
 
   // 연속 기도 일수
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
@@ -76,6 +101,19 @@ export default function MyPage() {
 
   const onPressHistory = () => {
     router.push('/calendar');
+  }
+
+  const onPressDeleteAccount = () => {
+    Alert.alert(
+      '계정을 삭제하시겠습니까?', // title
+      '삭제된 계정은 되돌릴 수 없습니다.', // message
+      [                     // buttons
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제하기', onPress: () => deleteUserMutate()
+        }
+      ]
+    )
   }
 
   return (
@@ -323,7 +361,7 @@ export default function MyPage() {
         </TouchableOpacity>
 
         {/* 회원 탈퇴 */}
-        <TouchableOpacity style={styles.textButton}>
+        <TouchableOpacity onPress={onPressDeleteAccount} style={styles.textButton}>
           <MediumText
             fontSize={12}
             color="#B3B3B3"
@@ -331,7 +369,6 @@ export default function MyPage() {
             회원 탈퇴
           </MediumText>
         </TouchableOpacity>
-
       </ScrollView >
     </View>
   )
