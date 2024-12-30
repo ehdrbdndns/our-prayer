@@ -7,22 +7,47 @@ import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
 import { useSession } from '@/ctx';
-import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
+import api from '@/utils/axios';
+import { UserType } from '@/utils/dataType';
+import { calculateContinuousPrayerDays, calculateDaysSinceSignup, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
+import { useUserMutation } from '@/utils/mutation';
 import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, scaleHeight } from "@/utils/style";
+import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MyPage() {
 
+  const { session, signOut } = useSession();
   const insets = useSafeAreaInsets();
-
-  const [enableAlarm, setEnableAlarm] = useState(true);
-  const { session } = useSession();
+  const [enableAlarm, setEnableAlarm] = useState(false);
 
   const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
+  const { data: user, isSuccess: isUserSuccess } = useQuery<UserType>({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<UserType>(`/user`, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+
+      setEnableAlarm(Boolean(res.data.alarm));
+
+      return res.data;
+    },
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+  });
+  const { mutate: userMutate } = useUserMutation();
 
   // 연속 기도 일수
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
@@ -33,7 +58,11 @@ export default function MyPage() {
   // 전체 기도 시간
   const totalPrayerTime = calculateTotalPrayerTime(history || []);
 
+  // 가입한 날로부터 경과한 일수
+  const daysSinceSignup = calculateDaysSinceSignup(user?.created_date || 0)
+
   const onChangeAlarm = () => {
+    userMutate({ alarm: !enableAlarm });
     setEnableAlarm(!enableAlarm);
   }
 
@@ -84,7 +113,7 @@ export default function MyPage() {
             lineHeight={16}
             color='#B3B3B3'
           >
-            Our Pray와 함께한지 34일이 되었어요
+            Our Pray와 함께한지 {daysSinceSignup}일이 되었어요
           </BoldText>
         </View>
 
