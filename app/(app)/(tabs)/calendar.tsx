@@ -9,7 +9,7 @@ import { RegularText } from '@/components/text/RegularText';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import { router } from "expo-router";
 import { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -32,133 +32,164 @@ export default function CalendarPage() {
     router.back();
   }
 
+  const onPressNote = () => {
+    router.push("/historyDetail/1");
+  }
+
   return (
-    <SafeAreaView>
-      {/* Header */}
-      <Header
-        style={styles.header}
-        prefix={
-          <View style={styles.headerPrefix}>
-            <TouchableOpacity
-              onPress={onPressBack}
-            >
-              <LeftArrow
-                width={moderateScale(24)}
-                height={moderateScale(24)}
-              />
-            </TouchableOpacity>
-            <MediumText
-              color="#FFF"
-              fontSize={16}
-            >
-              나의 기도 기록
-            </MediumText>
-          </View>
-        }
-      />
-
-      {/* Calendar */}
-      <View style={styles.container}>
-        <Calendar
-          onDayPress={(day) => setSelectedDay(day.dateString)}
-          renderHeader={(date?: XDate) => (
-            date ? (
-              <MediumText>
-                {date.toString('yyyy년 MM월')}
+    <ScrollView>
+      <SafeAreaView>
+        {/* Header */}
+        <Header
+          style={styles.header}
+          prefix={
+            <View style={styles.headerPrefix}>
+              <TouchableOpacity
+                onPress={onPressBack}
+              >
+                <LeftArrow
+                  width={moderateScale(24)}
+                  height={moderateScale(24)}
+                />
+              </TouchableOpacity>
+              <MediumText
+                color="#FFF"
+                fontSize={16}
+              >
+                나의 기도 기록
               </MediumText>
-            ) : null
-          )}
-          theme={{
-            // Container
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            calendarBackground: 'transparent',
+            </View>
+          }
+        />
 
-            // Header
-            textDayHeaderFontFamily: "NotoSansKR_500Medium",
-            textDayHeaderFontSize: normalizeFontSize(10),
-            arrowColor: '#B5BEC6',
+        {/* Calendar */}
+        <View style={styles.container}>
+          <Calendar
+            onDayPress={(day) => setSelectedDay(day.dateString)}
+            renderHeader={(date?: XDate) => (
+              date ? (
+                <MediumText>
+                  {date.toString('yyyy년 MM월')}
+                </MediumText>
+              ) : null
+            )}
+            theme={{
+              // Container
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              calendarBackground: 'transparent',
 
-            // Day
-            textDayFontFamily: 'Inter_500Medium',
-            textDayFontSize: normalizeFontSize(14),
-            dayTextColor: '#FFF',
+              // Header
+              textDayHeaderFontFamily: "NotoSansKR_500Medium",
+              textDayHeaderFontSize: normalizeFontSize(10),
+              arrowColor: '#B5BEC6',
 
-            // Selected Day
-            selectedDayTextColor: '#FFF'
+              // Day
+              textDayFontFamily: 'Inter_500Medium',
+              textDayFontSize: normalizeFontSize(14),
+              dayTextColor: '#FFF',
+
+              // Selected Day
+              selectedDayTextColor: '#FFF'
+            }}
+            markedDates={{
+              '2024-12-08': {
+                marked: true,
+                dotColor: '#959FFF',
+              },
+              [selectedDay]: {
+                selected: true,
+                disableTouchEvent: true,
+                selectedColor: '#4F5FFF',
+                textColor: '#FFF',
+                dotColor: '#FFF',
+
+                // Todo: check if this is marked
+                // marked: true,
+              },
+            }}
+            style={styles.calendar}
+          />
+        </View>
+
+        {/* Prayer Data */}
+        <View
+          style={{
+            flexDirection: 'row',
+            paddingHorizontal: moderateScale(24),
+            gap: moderateScale(10),
+            marginBottom: moderateScale(24)
           }}
-          markedDates={{
-            '2024-12-08': {
-              marked: true,
-              dotColor: '#959FFF',
-            },
-            [selectedDay]: {
-              selected: true,
-              disableTouchEvent: true,
-              selectedColor: '#4F5FFF',
-              textColor: '#FFF',
-              dotColor: '#FFF',
-
-              // Todo: check if this is marked
-              // marked: true,
-            },
-          }}
-          style={styles.calendar}
-        />
-      </View>
-
-      {/* Prayer Data */}
-      <View
-        style={{
-          flexDirection: 'row',
-          paddingHorizontal: moderateScale(24),
-          gap: moderateScale(10),
-          marginBottom: moderateScale(24)
-        }}
-      >
-        <PrayerState
-          // style={styles.prayerState}
-          title={"연속 기도일 수"}
-          icon={<Fire width={moderateScale(24)} height={moderateScale(24)} />}
-          data={134}
-          unit={"일"}
-        />
-        <PrayerState
-          // style={styles.prayerState}
-          title={"오늘 기도 시간"}
-          icon={<OneStar width={moderateScale(24)} height={moderateScale(24)} />}
-          data={14}
-          unit={"분"}
-        />
-        <PrayerState
-          // style={styles.prayerState}
-          title={"전체 기도 시간"}
-          icon={<Stars width={moderateScale(24)} height={moderateScale(24)} />}
-          data={1}
-          unit={"백 시간"}
-        />
-      </View>
-
-      {/* User Memo */}
-      <View style={{ paddingHorizontal: moderateScale(24), flexGrow: 1 }}>
-        <MediumText
-          fontSize={14}
-          lineHeight={24}
         >
-          {`${selectedDay.split('-')[0]}년 ${selectedDay.split('-')[1]}월 ${selectedDay.split('-')[2]}일`}
-        </MediumText>
+          <PrayerState
+            // style={styles.prayerState}
+            title={"연속 기도일 수"}
+            icon={<Fire width={moderateScale(24)} height={moderateScale(24)} />}
+            data={134}
+            unit={"일"}
+          />
+          <PrayerState
+            // style={styles.prayerState}
+            title={"오늘 기도 시간"}
+            icon={<OneStar width={moderateScale(24)} height={moderateScale(24)} />}
+            data={14}
+            unit={"분"}
+          />
+          <PrayerState
+            // style={styles.prayerState}
+            title={"전체 기도 시간"}
+            icon={<Stars width={moderateScale(24)} height={moderateScale(24)} />}
+            data={1}
+            unit={"백 시간"}
+          />
+        </View>
 
-        <View style={styles.emptyQuestion}>
-          <Stars opacity={0.8} />
-          <RegularText
-            color="#B3B3B3"
+        {/* User Memo */}
+        <View style={{ paddingHorizontal: moderateScale(24), flexGrow: 1 }}>
+          <MediumText
             fontSize={14}
             lineHeight={24}
           >
-            기도 기록이 없습니다.
-          </RegularText>
+            {`${selectedDay.split('-')[0]}년 ${selectedDay.split('-')[1]}월 ${selectedDay.split('-')[2]}일`}
+          </MediumText>
+
+          {/* 
+          Empty Question
+          <View style={styles.emptyQuestion}>
+            <Stars opacity={0.8} />
+            <RegularText
+              color="#B3B3B3"
+              fontSize={14}
+              lineHeight={24}
+            >
+              기도 기록이 없습니다.
+            </RegularText>
+          </View> 
+          */}
+
+          <TouchableOpacity
+            onPress={onPressNote}
+          >
+            <View style={styles.note}>
+              <RegularText
+                style={{ marginBottom: moderateScale(8) }}
+                fontSize={16}
+                lineHeight={28}
+              >
+                기도하는 시간이 제게 큰 힘이 됩니다.
+                앞으로도 이 시간을 소중히 여기며, 주님과의 관계를 계속 깊게 해나가고 싶어요. 감사해요, 주님.  아멘. 🌿
+              </RegularText>
+              <MediumText
+                color="#B3B3B3"
+                fontSize={14}
+                lineHeight={26}
+              >
+                오후 12시 30분에 30분 기도했습니다
+              </MediumText>
+            </View>
+          </TouchableOpacity>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScrollView>
   )
 }
 
@@ -189,4 +220,11 @@ const styles = StyleSheet.create({
     left: '50%',
     transform: [{ translateX: -50 }, { translateY: 50 }]
   },
+  note: {
+    marginTop: moderateScale(12),
+    paddingVertical: moderateScale(18),
+    paddingHorizontal: moderateScale(16),
+    borderRadius: moderateScale(10),
+    backgroundColor: 'rgba(31, 31, 31, 0.5)'
+  }
 })
