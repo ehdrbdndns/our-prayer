@@ -4,11 +4,10 @@ import Header from "@/components/Header";
 import { BoldText } from '@/components/text/BoldText';
 import { MediumText } from "@/components/text/MediumText";
 import { useSession } from '@/ctx';
-import api from '@/utils/axios';
+import { useUserMutation } from '@/utils/mutation';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,38 +18,11 @@ export default function EditNickname() {
   const { session, setSession } = useSession();
   const [name, setName] = useState(session || '');
 
-  const { mutate } = useMutation({
-    mutationFn: async ({ name }: { name: string }) => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api<{ message: string }>({
-        method: "PUT",
-        url: "/user",
-        data: {
-          name: name
-        },
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        },
-      });
-
-      return res.data;
-    },
-    onSuccess: () => {
-      // update user session
-      queryClient.invalidateQueries({ queryKey: ['user'] });
-      setSession(name);
-      router.back();
-    },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
-    },
-  })
-
+  const { mutate } = useUserMutation();
   const onPressSave = () => {
     mutate({ name });
+    setSession(name);
+    router.back();
   }
 
   const onPressBack = () => {

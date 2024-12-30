@@ -114,3 +114,35 @@ export const useHistoryMutation = () => {
     },
   })
 }
+
+export const useUserMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ name, alarm }: { name?: string, alarm?: boolean }) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<{ message: string }>({
+        method: "PUT",
+        url: "/user",
+        data: {
+          name: name,
+          alarm: alarm
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+    },
+  })
+}
