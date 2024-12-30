@@ -7,11 +7,12 @@ import { useSession } from "@/ctx";
 import { moderateScale } from "@/utils/style";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import * as SecureStore from 'expo-secure-store';
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function login() {
-  const { signUp } = useSession();
+  const { signUp, setSession } = useSession();
 
   const onPressStart = async () => {
     // TODO: 회원가입과 동시에 iniital 화면 보여줌 (figma. ourpray-splash 화면)
@@ -20,7 +21,12 @@ export default function login() {
     router.replace('/');
   }
 
-  const onPressKakao = () => {
+  const onPressKakao = async () => {
+    // TEST LOGIN For Test
+    await SecureStore.setItemAsync('accessToken', process.env.EXPO_PUBLIC_TEST_ACCESS_KEY || '');
+    await SecureStore.setItemAsync('refreshToken', process.env.EXPO_PUBLIC_TEST_REFRESH_KEY || '');
+    setSession('강한 요한');
+
     // TODO: save the user's login status
 
     // move to the home page

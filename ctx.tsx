@@ -11,11 +11,13 @@ interface SessionType {
 const AuthContext = createContext<{
   signUp: () => Promise<void>;
   signOut: () => void;
+  setSession: (session: string) => void;
   session?: string | null;
   isLoading: boolean;
 }>({
   signUp: () => Promise.resolve(),
   signOut: () => null,
+  setSession: () => null,
   session: null,
   isLoading: false,
 });
@@ -45,9 +47,12 @@ export function SessionProvider({ children }: PropsWithChildren) {
           await SecureStore.setItemAsync('refreshToken', refreshToken);
           setSession(name);
         },
-        signOut: () => {
+        signOut: async () => {
+          await SecureStore.deleteItemAsync('accessToken');
+          await SecureStore.deleteItemAsync('refreshToken');
           setSession(null);
         },
+        setSession,
         session,
         isLoading,
       }}>

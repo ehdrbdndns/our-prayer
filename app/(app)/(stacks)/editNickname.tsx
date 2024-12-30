@@ -3,12 +3,27 @@ import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
 import { BoldText } from '@/components/text/BoldText';
 import { MediumText } from "@/components/text/MediumText";
+import { useSession } from '@/ctx';
+import { useUserMutation } from '@/utils/mutation';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
+import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditNickname() {
+
+  const queryClient = useQueryClient();
+  const { session, setSession } = useSession();
+  const [name, setName] = useState(session || '');
+
+  const { mutate } = useUserMutation();
+  const onPressSave = () => {
+    mutate({ name });
+    setSession(name);
+    router.back();
+  }
 
   const onPressBack = () => {
     router.back();
@@ -38,7 +53,9 @@ export default function EditNickname() {
           </View>
         }
         suffix={
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={onPressSave}
+          >
             <MediumText
               fontSize={16}
               color="#959FFF"
@@ -68,8 +85,9 @@ export default function EditNickname() {
               borderBottomColor: 'rgba(255, 255, 255, 0.1)',
               paddingBottom: moderateScale(8),
             }}
-            placeholder='동규우운'
+            placeholder={session || '닉네임을 입력하세요'}
             placeholderTextColor={'#B3B3B3'}
+            onChangeText={(v) => setName(v)}
           />
         </View>
       </View>
@@ -81,14 +99,8 @@ export default function EditNickname() {
           marginBottom: moderateScale(24),
         }}
       >
-        <PrimaryButton
-          style={{
-
-          }}
-        >
-          <MediumText
-            fontSize={14}
-          >
+        <PrimaryButton onPress={onPressSave}>
+          <MediumText fontSize={14}>
             저장하기
           </MediumText>
         </PrimaryButton>

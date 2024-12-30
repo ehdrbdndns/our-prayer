@@ -1,3 +1,9 @@
+export interface UserType {
+  name: string;
+  alarm: boolean;
+  created_date: number; // Unix timestamp
+}
+
 export interface BibleType {
   title: string;
   content: string;

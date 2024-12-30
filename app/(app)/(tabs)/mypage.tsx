@@ -6,19 +6,88 @@ import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
+import { useSession } from '@/ctx';
+import api from '@/utils/axios';
+import { UserType } from '@/utils/dataType';
+import { calculateContinuousPrayerDays, calculateDaysSinceSignup, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
+import { useUserMutation } from '@/utils/mutation';
+import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, scaleHeight } from "@/utils/style";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MyPage() {
 
+  const queryClient = useQueryClient();
+  const { session, signOut } = useSession();
   const insets = useSafeAreaInsets();
+  const [enableAlarm, setEnableAlarm] = useState(false);
 
-  const [enableAlarm, setEnableAlarm] = useState(true);
+  const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
+  const { data: user, isSuccess: isUserSuccess } = useQuery<UserType>({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<UserType>(`/user`, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+
+      setEnableAlarm(Boolean(res.data.alarm));
+
+      return res.data;
+    },
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+  });
+  const { mutate: userMutate } = useUserMutation();
+  const { mutate: deleteUserMutate } = useMutation({
+    mutationFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<{ message: string }>({
+        method: "DELETE",
+        url: "/user",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      signOut();
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+    },
+  })
+
+  // 연속 기도 일수
+  const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
+
+  // 오늘 기도 시간
+  const todayPrayerTime = calculateTodayPrayerTime(history || []);
+
+  // 전체 기도 시간
+  const totalPrayerTime = calculateTotalPrayerTime(history || []);
+
+  // 가입한 날로부터 경과한 일수
+  const daysSinceSignup = calculateDaysSinceSignup(user?.created_date || 0)
 
   const onChangeAlarm = () => {
+    userMutate({ alarm: !enableAlarm });
     setEnableAlarm(!enableAlarm);
   }
 
@@ -28,6 +97,23 @@ export default function MyPage() {
 
   const onPressPrayerTime = () => {
     router.push('/prayerTime');
+  }
+
+  const onPressHistory = () => {
+    router.push('/calendar');
+  }
+
+  const onPressDeleteAccount = () => {
+    Alert.alert(
+      '계정을 삭제하시겠습니까?', // title
+      '삭제된 계정은 되돌릴 수 없습니다.', // message
+      [                     // buttons
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제하기', onPress: () => deleteUserMutate()
+        }
+      ]
+    )
   }
 
   return (
@@ -50,7 +136,7 @@ export default function MyPage() {
                 fontSize={24}
                 lineHeight={36}
               >
-                동규우운
+                {session}
               </BoldText>
               <Edit
                 width={moderateScale(20)}
@@ -65,7 +151,7 @@ export default function MyPage() {
             lineHeight={16}
             color='#B3B3B3'
           >
-            Our Pray와 함께한지 34일이 되었어요
+            Our Pray와 함께한지 {daysSinceSignup}일이 되었어요
           </BoldText>
         </View>
 
@@ -93,7 +179,9 @@ export default function MyPage() {
                 나의 기도 데이터
               </BoldText>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={onPressHistory}
+            >
               <MediumText
                 fontSize={12}
                 color="#B3B3B3"
@@ -125,7 +213,7 @@ export default function MyPage() {
                   fontFamily='Inter_600SemiBold'
                   fontSize={20}
                 >
-                  36
+                  {continuousPrayerDays}
                 </CustomText>
                 <RegularText fontSize={12}>
                   일
@@ -147,7 +235,7 @@ export default function MyPage() {
                   fontFamily='Inter_600SemiBold'
                   fontSize={20}
                 >
-                  14
+                  {todayPrayerTime}
                 </CustomText>
                 <RegularText fontSize={12}>
                   분
@@ -169,10 +257,10 @@ export default function MyPage() {
                   fontFamily='Inter_600SemiBold'
                   fontSize={20}
                 >
-                  2.4
+                  {totalPrayerTime.time}
                 </CustomText>
                 <RegularText fontSize={12}>
-                  시간
+                  {totalPrayerTime.unit}
                 </RegularText>
               </View>
             </View>
@@ -187,7 +275,7 @@ export default function MyPage() {
             borderRadius: moderateScale(10),
           }}
         >
-          <PrayerRecord />
+          <PrayerRecord history={history || []} />
         </View>
 
         {/* 알림 */}
@@ -273,7 +361,7 @@ export default function MyPage() {
         </TouchableOpacity>
 
         {/* 회원 탈퇴 */}
-        <TouchableOpacity style={styles.textButton}>
+        <TouchableOpacity onPress={onPressDeleteAccount} style={styles.textButton}>
           <MediumText
             fontSize={12}
             color="#B3B3B3"
@@ -281,7 +369,6 @@ export default function MyPage() {
             회원 탈퇴
           </MediumText>
         </TouchableOpacity>
-
       </ScrollView >
     </View>
   )
