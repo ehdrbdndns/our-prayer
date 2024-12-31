@@ -12,9 +12,9 @@ import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotal
 import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import { useMutation } from '@tanstack/react-query';
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from 'react-native-calendars';
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -89,6 +89,7 @@ const HistoryNote = ({
 export default function CalendarPage() {
 
   const [selectedDay, setSelectedDay] = useState(Today);
+  const selectedDayRef = useRef(selectedDay)
   const [selectedNoteList, setSelectedNoteList] = useState<JSX.Element[]>([<EmptyNote key="empty" />]);
   const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
   const { mutate: retrieveHistoryNote } = useMutation({
@@ -167,8 +168,17 @@ export default function CalendarPage() {
     }
   }, [isHistorySuccess])
 
+  useFocusEffect(
+    useCallback(() => {
+      if (!!markedDates[selectedDayRef.current]) {
+        retrieveHistoryNote(markedDates[selectedDayRef.current].prayer_history_id_list);
+      }
+    }, [])
+  )
+
   const onPressDay = async (day: DateData) => {
     setSelectedDay(day.dateString);
+    selectedDayRef.current = day.dateString;
     if (!markedDates[day.dateString]) {
       setSelectedNoteList([<EmptyNote key={'empty'} />]);
     } else {
