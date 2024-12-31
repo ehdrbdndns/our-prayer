@@ -87,7 +87,9 @@ export default function QuestionPage() {
               </RegularText>
             </View>
           ) : (
-            <ScrollView contentContainerStyle={styles.scrollView}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollView}>
               {
                 questionList.map((question, index) => {
                   return (
@@ -175,19 +177,20 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(40),
   },
   questionList: {
+    flex: 1,
     paddingHorizontal: moderateScale(24),
     gap: moderateScale(12)
   },
   emptyQuestion: {
     alignItems: 'center',
     position: 'absolute',
-    top: '50%',
+    top: '25%',
     left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }]
+    transform: [{ translateX: -50 }, { translateY: 0 }]
   },
   scrollView: {
     gap: moderateScale(12),
-    paddingBottom: moderateScale(190),
+    paddingBottom: moderateScale(400),
   },
   card: {
     borderRadius: moderateScale(10),
