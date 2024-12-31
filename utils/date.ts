@@ -102,5 +102,7 @@ export const formatPrayerTime = (created_date: number, duration: number): string
   const formattedMinutes = String(minutes).padStart(2, '0');
   const prayerDurationMinutes = Math.floor(duration / 60); // 초 단위를 분 단위로 변환
 
-  return `${period} ${formattedHours}시 ${formattedMinutes}분에 ${prayerDurationMinutes}분 기도했습니다`;
+  const prayerDurationString = prayerDurationMinutes === 0 ? '1분 미만으로' : `${prayerDurationMinutes}분`;
+
+  return `${period} ${formattedHours}시 ${formattedMinutes}분에 ${prayerDurationString} 기도했습니다`;
 };

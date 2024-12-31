@@ -55,13 +55,26 @@ const HistoryNote = ({
     onPress={onPressNote}
   >
     <View style={styles.note}>
-      <RegularText
-        style={{ marginBottom: moderateScale(8) }}
-        fontSize={16}
-        lineHeight={28}
-      >
-        {note}
-      </RegularText>
+      {
+        note === null ? (
+          <RegularText
+            style={{ marginBottom: moderateScale(8) }}
+            color="#B3B3B3"
+            fontSize={14}
+            lineHeight={26}
+          >
+            기도 메모를 남겨주세요.
+          </RegularText>
+        ) : (
+          <RegularText
+            style={{ marginBottom: moderateScale(8) }}
+            fontSize={16}
+            lineHeight={28}
+          >
+            {note}
+          </RegularText>
+        )
+      }
       <MediumText
         color="#B3B3B3"
         fontSize={14}
@@ -95,7 +108,7 @@ export default function CalendarPage() {
         },
       });
 
-      return res.data.filter(row => row.note !== null);
+      return res.data;
     },
     onSuccess: (data) => {
       if (data.length === 0) {
