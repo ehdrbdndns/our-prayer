@@ -184,13 +184,13 @@ const styles = StyleSheet.create({
   emptyQuestion: {
     alignItems: 'center',
     position: 'absolute',
-    top: '25%',
+    top: '50%',
     left: '50%',
-    transform: [{ translateX: -50 }, { translateY: 0 }]
+    transform: [{ translateX: -50 }, { translateY: -50 }]
   },
   scrollView: {
     gap: moderateScale(12),
-    paddingBottom: moderateScale(400),
+    paddingBottom: moderateScale(100),
   },
   card: {
     borderRadius: moderateScale(10),
