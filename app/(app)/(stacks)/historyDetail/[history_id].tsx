@@ -3,15 +3,153 @@ import CustomButton from '@/components/button/CustomButton';
 import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
 import { MediumText } from '@/components/text/MediumText';
+import api from '@/utils/axios';
+import { HistoryType } from '@/utils/dataType';
+import { formatDateToKorean, formatPrayerTime } from '@/utils/date';
 import { moderateScale } from "@/utils/style";
-import { router } from "expo-router";
-import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { router, useLocalSearchParams } from "expo-router";
+import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HistoryDetailPage() {
 
+  const queryClient = useQueryClient();
+  const { history_id } = useLocalSearchParams<{ history_id: string }>();
+  const { data: historyDetail, isSuccess: isHistorySuccess } = useQuery<HistoryType>({
+    queryKey: ["history", history_id],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<HistoryType>(
+        `/history/detail?prayer_history_id=${history_id}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "RefreshToken": refreshToken
+          }
+        });
+
+      return res.data;
+    },
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+  });
+  const { mutate: updateHistoryMutate } = useMutation({
+    mutationFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<HistoryType[]>({
+        method: "PUT",
+        url: "/history",
+        data: {
+          prayer_history_id: history_id,
+          note: note
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: async () => {
+      // invalid history detail cache
+      await queryClient.invalidateQueries({ queryKey: ["history", history_id] });
+      router.back();
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+    },
+  })
+  const { mutate: deleteHistoryMutate } = useMutation({
+    mutationFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<HistoryType[]>({
+        method: "DELETE",
+        url: "/history",
+        data: {
+          prayer_history_id: history_id,
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: async () => {
+      // invalid history detail cache
+      await queryClient.invalidateQueries({ queryKey: ["history", history_id] });
+      router.back();
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+    },
+  })
+
+  const [note, setNote] = useState('');
+
+  useEffect(() => {
+    if (isHistorySuccess) {
+      setNote(historyDetail?.note || '');
+    }
+  }, [isHistorySuccess])
+
   const onPressBack = () => {
     router.back();
+  }
+
+  const onChangeNote = (text: string) => {
+    setNote(text);
+  }
+
+  const onPressSave = () => {
+    Alert.alert(
+      '기도 기록을 저장하시겠습니까?',
+      '',
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '저장하기',
+          onPress: () => {
+            updateHistoryMutate();
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  }
+
+  const onPressDelete = () => {
+    Alert.alert(
+      '기도 기록 내용을 삭제하시겠습니까?',
+      '기도 시간은 삭제되지 않습니다.',
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '삭제하기',
+          onPress: () => {
+            deleteHistoryMutate();
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   }
 
   return (
@@ -57,10 +195,14 @@ export default function HistoryDetailPage() {
           lineHeight={24}
           color="#B3B3B3"
         >
-          {"2024년 10월 19일, \n오후 12시 30분에 30분 기도 기록을 편집합니다."}
+          {formatDateToKorean(historyDetail?.created_date || 0)},{"\n"}
+          {formatPrayerTime(historyDetail?.created_date || 0, historyDetail?.duration || 0)}
         </MediumText>
         <TextInput
+          value={note}
           multiline
+          placeholder='기도 기록을 작성해주세요'
+          placeholderTextColor={'#B3B3B3'}
           style={{
             fontFamily: 'NotoSansKR_400Regular',
             fontSize: moderateScale(16),
@@ -69,15 +211,7 @@ export default function HistoryDetailPage() {
             color: '#FFF',
             flex: 1
           }}
-          value={`기도하는 시간이 제게 큰 힘이 됩니다. 매일 이렇게 주님 앞에 나아갈 수 있다는 것에 감사함을 느낍니다. 
-기도를 통해 제 마음의 부담이 덜어지고, 삶의 방향을 찾는 데 큰 도움을 받고 있습니다.
-앞으로도 이 기도 시간을 소중히 여기고, 하나님과의 교제를 지속적으로 이어가고 싶습니다. 하나님과의 관계를 더욱 깊게 만들어 가며, 제 삶의 모든 부분에서 하나님의 뜻을 따르기를 소망합니다. 매일매일 기도를 통해 얻는 힘과 지혜로, 하나님이 제게 주신 사명을 다할 수 있도록 이끌어 주시기를 기도합니다.
-
-감사해요, 하나님. 저의 기도를 들어주시고, 언제나 함께하시는 하나님께 영광을 돌립니다. 아멘. 🌿기도하는 시간이 제게 큰 힘이 됩니다. 매일 이렇게 주님 앞에 나아갈 수 있다는 것에 감사함을 느낍니다. 
-기도를 통해 제 마음의 부담이 덜어지고, 삶의 방향을 찾는 데 큰 도움을 받고 있습니다.
-앞으로도 이 기도 시간을 소중히 여기고, 하나님과의 교제를 지속적으로 이어가고 싶습니다. 하나님과의 관계를 더욱 깊게 만들어 가며, 제 삶의 모든 부분에서 하나님의 뜻을 따르기를 소망합니다. 매일매일 기도를 통해 얻는 힘과 지혜로, 하나님이 제게 주신 사명을 다할 수 있도록 이끌어 주시기를 기도합니다.
-
-감사해요, 하나님. 저의 기도를 들어주시고, 언제나 함께하시는 하나님께 영광을 돌립니다. 아멘. 🌿`}
+          onChange={e => onChangeNote(e.nativeEvent.text)}
         />
       </View>
       <KeyboardAvoidingView
@@ -87,14 +221,14 @@ export default function HistoryDetailPage() {
         }}
       >
         <View style={[styles.buttonList]}>
-          <CustomButton onPress={() => { }} style={[styles.button, styles.secondaryButton]}>
+          <CustomButton onPress={onPressDelete} style={[styles.button, styles.secondaryButton]}>
             <MediumText
               fontSize={14}
             >
               삭제하기
             </MediumText>
           </CustomButton>
-          <PrimaryButton style={styles.button} onPress={() => { }}>
+          <PrimaryButton style={styles.button} onPress={onPressSave}>
             <MediumText fontSize={14}>
               저장하기
             </MediumText>
