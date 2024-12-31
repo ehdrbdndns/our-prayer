@@ -4,11 +4,14 @@ import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
 import { MediumText } from '@/components/text/MediumText';
 import { moderateScale } from "@/utils/style";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HistoryDetailPage() {
+
+  const { history_id } = useLocalSearchParams<{ history_id: string }>();
+  console.log(history_id);
 
   const onPressBack = () => {
     router.back();

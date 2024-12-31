@@ -14,7 +14,7 @@ import { moderateScale, normalizeFontSize } from "@/utils/style";
 import { useMutation } from '@tanstack/react-query';
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from 'react-native-calendars';
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -31,7 +31,7 @@ LocaleConfig.defaultLocale = 'kr';
 const Today = new Date().toISOString().split('T')[0];
 
 const EmptyNote = () => (
-  <View style={styles.emptyQuestion}>
+  <View key="emptyNote" style={styles.emptyQuestion}>
     <Stars opacity={0.8} />
     <RegularText
       color="#B3B3B3"
@@ -89,8 +89,8 @@ const HistoryNote = ({
 export default function CalendarPage() {
 
   const [selectedDay, setSelectedDay] = useState(Today);
-  const [selectedNoteList, setSelectedNoteList] = useState<JSX.Element[]>([<EmptyNote />]);
-  const { data: history } = useHistoryQuery();
+  const [selectedNoteList, setSelectedNoteList] = useState<JSX.Element[]>([<EmptyNote key="empty" />]);
+  const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
   const { mutate: retrieveHistoryNote } = useMutation({
     mutationFn: async (prayer_history_id_list: string[]) => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
@@ -112,10 +112,11 @@ export default function CalendarPage() {
     },
     onSuccess: (data) => {
       if (data.length === 0) {
-        setSelectedNoteList([<EmptyNote />])
+        setSelectedNoteList([<EmptyNote key="empty" />])
       } else {
         setSelectedNoteList(
           data.map((row) => <HistoryNote
+            key={row.prayer_history_id}
             note={row.note}
             created_date={row.created_date}
             duration={row.duration}
@@ -128,7 +129,7 @@ export default function CalendarPage() {
     },
     onError: (error, newUser, context) => {
       console.error('onError', error, newUser, context);
-      setSelectedNoteList([<EmptyNote />]);
+      setSelectedNoteList([<EmptyNote key={'empty'} />]);
     },
   })
 
@@ -160,10 +161,16 @@ export default function CalendarPage() {
   // 전체 기도 시간
   const totalPrayerTime = calculateTotalPrayerTime(history || []);
 
+  useEffect(() => {
+    if (!!markedDates[Today]) {
+      retrieveHistoryNote(markedDates[Today].prayer_history_id_list);
+    }
+  }, [isHistorySuccess])
+
   const onPressDay = async (day: DateData) => {
     setSelectedDay(day.dateString);
     if (!markedDates[day.dateString]) {
-      setSelectedNoteList([<EmptyNote />]);
+      setSelectedNoteList([<EmptyNote key={'empty'} />]);
     } else {
       retrieveHistoryNote(markedDates[day.dateString].prayer_history_id_list);
     }
