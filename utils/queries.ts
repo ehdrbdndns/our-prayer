@@ -1,5 +1,5 @@
 import api from '@/utils/axios';
-import { HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType } from '@/utils/dataType';
+import { HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionType } from '@/utils/dataType';
 import { useQuery } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 
@@ -113,5 +113,26 @@ export const useHistoryQuery = (historyRange?: number) => {
     placeholderData: [],
     staleTime: 12 * 60 * 60 * 1000, // 12시간
     gcTime: 12 * 60 * 60 * 1000, // 12시간
+  });
+}
+
+export const useQuestionQuery = (question_id: string) => {
+  return useQuery<QuestionType>({
+    queryKey: ["question", question_id],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<QuestionType>(`/question?question_id=${question_id}`, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+      return res.data;
+    },
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+    enabled: !!question_id
   });
 }

@@ -120,6 +120,15 @@ export default function QuestionPage() {
     });
   }
 
+  const onPressEdit = (question_id: string) => {
+    router.push({
+      pathname: `/editQuestion/[question_id]`,
+      params: {
+        question_id,
+      }
+    });
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Title */}
@@ -225,7 +234,9 @@ export default function QuestionPage() {
 
                         <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
                           {/* Edit */}
-                          <Edit width={moderateScale(24)} height={moderateScale(24)} />
+                          <TouchableOpacity onPress={() => onPressEdit(question.question_id)}>
+                            <Edit width={moderateScale(24)} height={moderateScale(24)} />
+                          </TouchableOpacity>
 
                           {/* Trash */}
                           <TouchableOpacity onPress={() => onPressDelete(question.question_id)}>

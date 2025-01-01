@@ -7,17 +7,50 @@ import InputButton from '@/components/InputButton';
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
+import { formatDateToKorean } from '@/utils/date';
+import { useDeleteQuestionMutation } from '@/utils/mutation';
+import { useQuestionQuery } from '@/utils/queries';
 import { moderateScale } from '@/utils/style';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { router, useLocalSearchParams } from 'expo-router';
+import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const DefaultAuthor = require('@/assets/images/plan/default-author.png');
 
 export default function QuestionDetail() {
 
+  const { question_id } = useLocalSearchParams<{ question_id: string }>();
+
+  const { data: question } = useQuestionQuery(question_id);
+  const { mutate: deleteQuestion } = useDeleteQuestionMutation();
+
   const datas = [1, 2, 3, 4];
+
+  const onPressDelete = () => {
+    Alert.alert('삭제', '삭제된 질문 내용은 되돌릴 수 없습니다.', [
+      {
+        text: '취소',
+        style: 'cancel'
+      },
+      {
+        text: '삭제',
+        onPress: () => {
+          deleteQuestion(question_id);
+          router.back();
+        }
+      }
+    ])
+  }
+
+  const onPressEdit = () => {
+    router.push({
+      pathname: `/editQuestion/[question_id]`,
+      params: {
+        question_id,
+      }
+    });
+  }
 
   const onPressBack = () => {
     router.back();
@@ -50,20 +83,22 @@ export default function QuestionDetail() {
 
       {/* Content */}
       <View style={styles.container}>
+        {/* 날짜 */}
         <MediumText
           fontSize={14}
           lineHeight={26}
           color='#B3B3B3'
           style={{ marginBottom: moderateScale(4) }}
         >
-          2024년 10월 19일
+          {formatDateToKorean(question?.created_date || 0)}
         </MediumText>
+        {/* 질문 내용 */}
         <RegularText
           fontSize={16}
           lineHeight={28}
           style={{ marginBottom: moderateScale(16) }}
         >
-          {"안녕하세요, 목사님\n제가 현재 삶의 방향을 찾고 싶어서 기도하고 있습니다. 여러 가지 선택지가 있어 혼란스러운 마음이 드는데, 어떻게 주님의 뜻을 분별할 수 있을까요? 제가 내리는 결정이 하나님께서 원하시는 길인지 알 수 있도록 기도하는 방법이나 조언이 필요합니다. 목사님의 지혜를 나눠주시면 감사하겠습니다."}
+          {question?.content}
         </RegularText>
         <View style={styles.cardIconList}>
           {/* Chat */}
@@ -75,16 +110,18 @@ export default function QuestionDetail() {
               lineHeight={28}
               color='#959FFF'
             >
-              1
+              {question?.reply_count}
             </CustomText>
           </View>
 
           <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
             {/* Edit */}
-            <Edit width={moderateScale(24)} height={moderateScale(24)} />
+            <TouchableOpacity onPress={onPressEdit}>
+              <Edit width={moderateScale(24)} height={moderateScale(24)} />
+            </TouchableOpacity>
 
             {/* Trash */}
-            <TouchableOpacity>
+            <TouchableOpacity onPress={onPressDelete}>
               <Trash width={moderateScale(24)} height={moderateScale(24)} />
             </TouchableOpacity>
           </View>
