@@ -1,5 +1,5 @@
 import api from '@/utils/axios';
-import { PlanResponseType, PlanType } from '@/utils/dataType';
+import { PlanResponseType, PlanType, QuestionType } from '@/utils/dataType';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
@@ -143,6 +143,50 @@ export const useUserMutation = () => {
     },
     onError: (error, newUser, context) => {
       console.error('onError', error, newUser, context);
+    },
+  })
+}
+
+export const useDeleteQuestionMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (question_id: string) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<{ message: string }>({
+        method: "DELETE",
+        url: "/question",
+        data: {
+          question_id
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+      return res.data;
+    },
+    onMutate: async (question_id: string) => {
+      await queryClient.cancelQueries({ queryKey: ["question"] });
+
+      const previousValue = queryClient.getQueryData<QuestionType[]>(["question"]);
+      if (previousValue) {
+        queryClient.setQueryData<QuestionType[]>(["question"], previousValue.filter((question) => question.question_id !== question_id));
+      }
+
+      return { previousValue };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["question"] });
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+
+      if (context) {
+        queryClient.setQueryData<QuestionType[]>(["question"], context.previousValue);
+      }
     },
   })
 }

@@ -10,6 +10,7 @@ import { RegularText } from "@/components/text/RegularText";
 import api from '@/utils/axios';
 import { QuestionType } from '@/utils/dataType';
 import { formatDateToKorean } from '@/utils/date';
+import { useDeleteQuestionMutation } from '@/utils/mutation';
 import { moderateScale } from "@/utils/style";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -87,45 +88,7 @@ export default function QuestionPage() {
     },
   })
 
-  const { mutate: deleteQuestion } = useMutation({
-    mutationFn: async (question_id: string) => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api<{ message: string }>({
-        method: "DELETE",
-        url: "/question",
-        data: {
-          question_id
-        },
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        },
-      });
-      return res.data;
-    },
-    onMutate: async (question_id: string) => {
-      await queryClient.cancelQueries({ queryKey: ["question"] });
-
-      const previousValue = queryClient.getQueryData<QuestionType[]>(["question"]);
-      if (previousValue) {
-        queryClient.setQueryData<QuestionType[]>(["question"], previousValue.filter((question) => question.question_id !== question_id));
-      }
-
-      return { previousValue };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["question"] });
-    },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
-
-      if (context) {
-        queryClient.setQueryData<QuestionType[]>(["question"], context.previousValue);
-      }
-    },
-  })
+  const { mutate: deleteQuestion } = useDeleteQuestionMutation();
 
   const onPressDelete = (question_id: string) => {
     Alert.alert('삭제', '삭제된 질문 내용은 되돌릴 수 없습니다.', [
@@ -241,6 +204,7 @@ export default function QuestionPage() {
                         style={{ marginBottom: moderateScale(16) }}
                         fontSize={16}
                         lineHeight={28}
+                        numberOfLines={5}
                       >
                         {question.content}
                       </RegularText>
