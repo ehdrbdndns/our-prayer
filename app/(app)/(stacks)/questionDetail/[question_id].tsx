@@ -148,7 +148,7 @@ export default function QuestionDetail() {
         ))}
       </ScrollView>
 
-      <InputButton />
+      <InputButton onSubmit={() => { }} />
     </SafeAreaView>
   )
 }
