@@ -7,24 +7,28 @@ import PrimaryButton from "./button/PrimaryButton";
 import { MediumText } from "./text/MediumText";
 import { RegularText } from './text/RegularText';
 
-export default function InputButton() {
-  const [isInputVisible, setIsInputVisible] = useState(false);
-  const textInputRef = useRef<TextInput>(null);
+type inputButtonProps = {
+  onSubmit: (content: string) => void;
+}
 
-  const onPressInputTrigger = () => {
+export default function InputButton({ onSubmit }: inputButtonProps) {
+
+  const textInputRef = useRef<TextInput>(null);
+  const [text, setText] = useState('');
+  const [isInputVisible, setIsInputVisible] = useState(false);
+
+  const onPressOpenInput = () => {
     setIsInputVisible(true);
   }
 
-  const onPressDeleteInputTrigger = () => {
-    setIsInputVisible(false);
-  }
-
-  const onSubmitEditing = () => {
+  const onPressCloseInputTrigger = () => {
     setIsInputVisible(false);
   }
 
   const onPressSubmitButton = () => {
+    onSubmit(text);
     setIsInputVisible(false);
+    setText('');
   }
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export default function InputButton() {
       {/* InputTriggerButton */}
       <View style={styles.inputTriggerContainer}>
         <TouchableOpacity
-          onPress={onPressInputTrigger}
+          onPress={onPressOpenInput}
           style={styles.inputTriggerButton}
         >
           <RegularText
@@ -67,7 +71,7 @@ export default function InputButton() {
               <View style={{ alignItems: 'flex-end' }}>
                 <TouchableOpacity
                   style={styles.deleteTriggerButton}
-                  onPress={onPressDeleteInputTrigger}
+                  onPress={onPressCloseInputTrigger}
                 >
                   <Delete
                     width={moderateScale(24)}
@@ -77,11 +81,12 @@ export default function InputButton() {
                 </TouchableOpacity>
               </View>
               <TextInput
+                value={text}
                 ref={textInputRef}
                 style={styles.input}
+                onChangeText={(v) => setText(v)}
                 placeholder="질문 내용을 입력해주세요."
                 placeholderTextColor={'#B3B3B3'}
-                onSubmitEditing={onSubmitEditing}
                 multiline
               />
               <PrimaryButton onPress={onPressSubmitButton} style={styles.submitButton} >
