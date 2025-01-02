@@ -168,6 +168,7 @@ export default function QuestionPage() {
       {/* Question List */}
       <View style={styles.questionList}>
         <BoldText
+          style={{ paddingHorizontal: moderateScale(24), }}
           fontSize={16}
           lineHeight={24}
         >
@@ -188,6 +189,7 @@ export default function QuestionPage() {
             </View>
           ) : (
             <ScrollView
+              style={{ paddingHorizontal: moderateScale(24) }}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.scrollView}>
               {
@@ -281,7 +283,6 @@ const styles = StyleSheet.create({
   },
   questionList: {
     flex: 1,
-    paddingHorizontal: moderateScale(24),
     gap: moderateScale(12)
   },
   emptyQuestion: {
@@ -289,7 +290,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }]
+    transform: [{ translateX: '-50%' }, { translateY: '-50%' }]
   },
   scrollView: {
     gap: moderateScale(12),
