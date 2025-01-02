@@ -41,8 +41,8 @@ export const calculateTodayPrayerTime = (history: HistoryType[]): string => {
     .filter(row => row.created_date >= todayStart)
     .reduce((total, { duration }) => total + duration, 0) / 60; // 초 단위를 분 단위로 변환
 
-  // 소수점이 있다면 둘째 자리까지 노출, 소수점이 없다면 없는 채로 반환
-  return totalMinutes % 1 === 0 ? totalMinutes.toString() : totalMinutes.toFixed(2);
+  // 소수점 이하를 제거하고 정수로 반환
+  return Math.floor(totalMinutes).toString();
 };
 
 // 전체 기도 시간 계산

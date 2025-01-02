@@ -76,11 +76,11 @@ export default function QuestionPage() {
 
       return { previousValue };
     },
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["question"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["question"] });
     },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
+    onError: (error, newQuestion, context) => {
+      console.error('onError', error, newQuestion, context);
 
       if (context) {
         queryClient.setQueryData<QuestionType[]>(["question"], context.previousValue);

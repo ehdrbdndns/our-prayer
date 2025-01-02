@@ -86,3 +86,14 @@ export interface QuestionType {
   created_date: number;
   updated_date: number;
 }
+
+export interface QuestionReplyType {
+  question_reply_id: string;
+  user_id: string;
+  question_id: string;
+  content: string;
+  is_active: boolean;
+  is_replier: boolean;
+  created_date: number;
+  updated_date: number;
+}

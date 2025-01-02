@@ -1,18 +1,24 @@
 import Chat from '@/assets/images/icon/chat.svg';
 import Edit from '@/assets/images/icon/edit.svg';
 import Left from '@/assets/images/icon/leftArrow.svg';
+import Star from '@/assets/images/icon/star.svg';
 import Trash from '@/assets/images/icon/trash.svg';
 import Header from "@/components/Header";
 import InputButton from '@/components/InputButton';
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
+import { useSession } from '@/ctx';
+import api from '@/utils/axios';
+import { QuestionReplyType } from '@/utils/dataType';
 import { formatDateToKorean } from '@/utils/date';
 import { useDeleteQuestionMutation } from '@/utils/mutation';
 import { useQuestionQuery } from '@/utils/queries';
 import { moderateScale } from '@/utils/style';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -20,12 +26,84 @@ const DefaultAuthor = require('@/assets/images/plan/default-author.png');
 
 export default function QuestionDetail() {
 
+  const queryClient = useQueryClient();
+
+  const { session } = useSession();
   const { question_id } = useLocalSearchParams<{ question_id: string }>();
 
   const { data: question } = useQuestionQuery(question_id);
+  const { data: replys } = useQuery<QuestionReplyType[]>({
+    queryKey: ["reply", question_id],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<QuestionReplyType[]>(`/question/reply?question_id=${question_id}`, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+      return res.data;
+    },
+    placeholderData: [],
+    staleTime: 60 * 1000, // 1분
+    gcTime: 60 * 1000, // 1분
+    enabled: !!question_id
+  });
+
   const { mutate: deleteQuestion } = useDeleteQuestionMutation();
 
-  const datas = [1, 2, 3, 4];
+  const { mutate: insertReply } = useMutation({
+    mutationFn: async (content: string) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.post<{ message: string }>(`/question/reply`, {
+        question_id,
+        content,
+      }, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+      return res.data;
+    },
+    onMutate: async (content: string) => {
+      await queryClient.cancelQueries({ queryKey: ["reply", question_id] });
+
+      const previousValue = queryClient.getQueryData<QuestionReplyType[]>(["reply", question_id]);
+      if (previousValue) {
+        queryClient.setQueryData<QuestionReplyType[]>(["reply", question_id], [
+          ...previousValue,
+          {
+            question_reply_id: '',
+            user_id: session || '',
+            question_id,
+            content,
+            is_active: true,
+            is_replier: true,
+            created_date: Date.now() * 1000,
+            updated_date: Date.now() * 1000
+          }
+        ]);
+      }
+
+      return { previousValue };
+    },
+    onSuccess: async () => {
+      queryClient.refetchQueries({ queryKey: ["reply", question_id] });
+      queryClient.refetchQueries({ queryKey: ["question"] });
+    },
+    onError: (error, newReply, context) => {
+      console.error('onError', error, newReply, context);
+
+      if (context) {
+        queryClient.setQueryData<QuestionReplyType[]>(["reply", question_id], context.previousValue);
+      }
+    },
+  });
 
   const onPressDelete = () => {
     Alert.alert('삭제', '삭제된 질문 내용은 되돌릴 수 없습니다.', [
@@ -128,65 +206,99 @@ export default function QuestionDetail() {
         </View>
       </View>
 
-      {/* Reply List */}
-      <ScrollView
-        style={{ paddingHorizontal: moderateScale(24) }}
-        contentContainerStyle={{ gap: moderateScale(12) }}
-      >
-        {datas.map((_, index) => (
-          <View style={styles.card} key={index}>
-            {/* Team */}
-            <View style={{
-              flexDirection: 'row',
-              gap: moderateScale(10),
-              alignItems: 'center',
-              marginBottom: moderateScale(10)
-            }}>
-              <Image
-                style={{
-                  width: moderateScale(28),
-                  height: moderateScale(28)
-                }}
-                source={DefaultAuthor}
-              />
-              <MediumText
-                fontSize={14}
-                color='#B3B3B3'
-              >
-                홍길동
-              </MediumText>
-            </View>
-
-            {/* Content */}
+      <View style={{ flex: 1, position: 'relative' }}>
+        {(replys ?? []).length === 0 ? (
+          <View style={styles.emptyQuestion}>
+            <Star opacity={0.8} />
             <RegularText
-              style={{ marginBottom: moderateScale(10) }}
-              fontSize={16}
-              lineHeight={28}
+              color="#B3B3B3"
+              fontSize={14}
+              lineHeight={24}
             >
-              {"사랑하는 성도님, 고민을 나누어 주셔서 감사합니다. 방향을 잃은 기분은 많은 이들이 겪는 일입니다. 먼저, 하나님께서는 우리 각자를 사랑하시고, 우리가 그분께 나아가기를 원하십니다. "}
+              아직 답변 내역이 없습니다!
             </RegularText>
-
-            {/* date */}
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end'
-              }}
-            >
-              <MediumText
-                fontSize={12}
-                lineHeight={26}
-                color='#B3B3B3'
-              >
-                2024년 10월 19일
-              </MediumText>
-            </View>
           </View>
-        ))}
-      </ScrollView>
+        ) : (
+          <ScrollView
+            style={{ paddingHorizontal: moderateScale(24) }}
+            contentContainerStyle={{ gap: moderateScale(12), paddingBottom: moderateScale(100) }}
+          >
+            {(replys ?? []).map((reply) => (
+              <View style={styles.card} key={reply.question_reply_id}>
+                {/* Team */}
+                {
+                  reply.user_id === 'admin' ? (
+                    <View style={{
+                      flexDirection: 'row',
+                      gap: moderateScale(10),
+                      alignItems: 'center',
+                      marginBottom: moderateScale(10)
+                    }}>
+                      <Image
+                        style={{
+                          width: moderateScale(28),
+                          height: moderateScale(28)
+                        }}
+                        source={DefaultAuthor}
+                      />
+                      <MediumText
+                        fontSize={14}
+                        color='#B3B3B3'
+                      >
+                        {'목사님'}
+                      </MediumText>
+                    </View>
+                  ) : (
+                    <View style={{
+                      flexDirection: 'row',
+                      gap: moderateScale(10),
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      marginBottom: moderateScale(10)
+                    }}>
+                      <MediumText
+                        fontSize={14}
+                        color='#B3B3B3'
+                      >
+                        {`나 (${session})`}
+                      </MediumText>
+                    </View>
+                  )
+                }
 
-      <InputButton onSubmit={() => { }} />
-    </SafeAreaView>
+                {/* Content */}
+                <RegularText
+                  style={{
+                    marginBottom: moderateScale(10),
+                    textAlign: reply.user_id === 'admin' ? 'left' : 'right'
+                  }}
+                  fontSize={16}
+                  lineHeight={28}
+                >
+                  {reply.content}
+                </RegularText>
+
+                {/* date */}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                  }}
+                >
+                  <MediumText
+                    fontSize={12}
+                    lineHeight={26}
+                    color='#B3B3B3'
+                  >
+                    {formatDateToKorean(reply.created_date)}
+                  </MediumText>
+                </View>
+              </View>
+            ))}
+          </ScrollView>)}
+      </View>
+      <InputButton placeholder='질문을 추가로 입력해주세요.' onSubmit={insertReply} />
+    </SafeAreaView >
   )
 }
 
@@ -210,5 +322,12 @@ const styles = StyleSheet.create({
     padding: moderateScale(16),
     borderRadius: moderateScale(10),
     backgroundColor: 'rgba(255, 255, 255, 0.05)'
-  }
+  },
+  emptyQuestion: {
+    alignItems: 'center',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: '-50%' }, { translateY: '-100%' }]
+  },
 })

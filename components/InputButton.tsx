@@ -9,9 +9,10 @@ import { RegularText } from './text/RegularText';
 
 type inputButtonProps = {
   onSubmit: (content: string) => void;
+  placeholder?: string;
 }
 
-export default function InputButton({ onSubmit }: inputButtonProps) {
+export default function InputButton({ onSubmit, placeholder }: inputButtonProps) {
 
   const textInputRef = useRef<TextInput>(null);
   const [text, setText] = useState('');
@@ -52,7 +53,9 @@ export default function InputButton({ onSubmit }: inputButtonProps) {
             fontSize={16}
             lineHeight={24}
           >
-            질문 내용을 입력해주세요.
+            {
+              placeholder ? placeholder : "질문 내용을 입력해주세요."
+            }
           </RegularText>
 
           <Send />
