@@ -19,10 +19,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const DefaultAuthor = require('@/assets/images/plan/default-author.png');
+const deviceHeight = Dimensions.get('window').height;
 
 export default function QuestionDetail() {
 
@@ -136,167 +137,166 @@ export default function QuestionDetail() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      {/* Header */}
-      <Header
-        style={styles.header}
-        prefix={
-          <View style={styles.headerPrefix}>
-            <TouchableOpacity
-              onPress={onPressBack}
-            >
-              <Left
-                width={moderateScale(24)}
-                height={moderateScale(24)}
-              />
-            </TouchableOpacity>
-            <MediumText
-              color='#FFF'
-              fontSize={16}
-            >
-              나의 질문
-            </MediumText>
-          </View>
-        }
-      />
+      <ScrollView style={{ flex: 1 }}>
+        {/* Header */}
+        <Header
+          style={styles.header}
+          prefix={
+            <View style={styles.headerPrefix}>
+              <TouchableOpacity
+                onPress={onPressBack}
+              >
+                <Left
+                  width={moderateScale(24)}
+                  height={moderateScale(24)}
+                />
+              </TouchableOpacity>
+              <MediumText
+                color='#FFF'
+                fontSize={16}
+              >
+                나의 질문
+              </MediumText>
+            </View>
+          }
+        />
 
-      {/* Content */}
-      <View style={styles.container}>
-        {/* 날짜 */}
-        <MediumText
-          fontSize={14}
-          lineHeight={26}
-          color='#B3B3B3'
-          style={{ marginBottom: moderateScale(4) }}
-        >
-          {formatDateToKorean(question?.created_date || 0)}
-        </MediumText>
-        {/* 질문 내용 */}
-        <RegularText
-          fontSize={16}
-          lineHeight={28}
-          style={{ marginBottom: moderateScale(16) }}
-        >
-          {question?.content}
-        </RegularText>
-        <View style={styles.cardIconList}>
-          {/* Chat */}
-          <View style={{ flexDirection: 'row', gap: moderateScale(4), alignItems: 'center' }}>
-            <Chat width={moderateScale(24)} height={moderateScale(24)} />
-            <CustomText
-              style={{ fontFamily: 'Inter_600SemiBold' }}
-              fontSize={16}
-              lineHeight={28}
-              color='#959FFF'
-            >
-              {question?.reply_count}
-            </CustomText>
-          </View>
+        {/* Content */}
+        <View style={styles.container}>
+          {/* 날짜 */}
+          <MediumText
+            fontSize={14}
+            lineHeight={26}
+            color='#B3B3B3'
+            style={{ marginBottom: moderateScale(4) }}
+          >
+            {formatDateToKorean(question?.created_date || 0)}
+          </MediumText>
+          {/* 질문 내용 */}
+          <RegularText
+            fontSize={16}
+            lineHeight={28}
+            style={{ marginBottom: moderateScale(16) }}
+          >
+            {question?.content}
+          </RegularText>
+          <View style={styles.cardIconList}>
+            {/* Chat */}
+            <View style={{ flexDirection: 'row', gap: moderateScale(4), alignItems: 'center' }}>
+              <Chat width={moderateScale(24)} height={moderateScale(24)} />
+              <CustomText
+                style={{ fontFamily: 'Inter_600SemiBold' }}
+                fontSize={16}
+                lineHeight={28}
+                color='#959FFF'
+              >
+                {question?.reply_count}
+              </CustomText>
+            </View>
 
-          <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
-            {/* Edit */}
-            <TouchableOpacity onPress={onPressEdit}>
-              <Edit width={moderateScale(24)} height={moderateScale(24)} />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
+              {/* Edit */}
+              <TouchableOpacity onPress={onPressEdit}>
+                <Edit width={moderateScale(24)} height={moderateScale(24)} />
+              </TouchableOpacity>
 
-            {/* Trash */}
-            <TouchableOpacity onPress={onPressDelete}>
-              <Trash width={moderateScale(24)} height={moderateScale(24)} />
-            </TouchableOpacity>
+              {/* Trash */}
+              <TouchableOpacity onPress={onPressDelete}>
+                <Trash width={moderateScale(24)} height={moderateScale(24)} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
 
-      <View style={{ flex: 1, position: 'relative' }}>
-        {(replys ?? []).length === 0 ? (
-          <View style={styles.emptyQuestion}>
-            <Star opacity={0.8} />
-            <RegularText
-              color="#B3B3B3"
-              fontSize={14}
-              lineHeight={24}
-            >
-              아직 답변 내역이 없습니다!
-            </RegularText>
-          </View>
-        ) : (
-          <ScrollView
-            style={{ paddingHorizontal: moderateScale(24) }}
-            contentContainerStyle={{ gap: moderateScale(12), paddingBottom: moderateScale(100) }}
-          >
-            {(replys ?? []).map((reply) => (
-              <View style={styles.card} key={reply.question_reply_id}>
-                {/* Team */}
-                {
-                  reply.user_id === 'admin' ? (
-                    <View style={{
-                      flexDirection: 'row',
-                      gap: moderateScale(10),
-                      alignItems: 'center',
-                      marginBottom: moderateScale(10)
-                    }}>
-                      <Image
-                        style={{
-                          width: moderateScale(28),
-                          height: moderateScale(28)
-                        }}
-                        source={DefaultAuthor}
-                      />
-                      <MediumText
-                        fontSize={14}
-                        color='#B3B3B3'
-                      >
-                        {'목사님'}
-                      </MediumText>
-                    </View>
-                  ) : (
-                    <View style={{
-                      flexDirection: 'row',
-                      gap: moderateScale(10),
-                      alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      marginBottom: moderateScale(10)
-                    }}>
-                      <MediumText
-                        fontSize={14}
-                        color='#B3B3B3'
-                      >
-                        {`나 (${session})`}
-                      </MediumText>
-                    </View>
-                  )
-                }
+        <View style={[styles.replyContainer, { minHeight: deviceHeight / 2 }]}>
+          {(replys ?? []).length === 0 ? (
+            <View style={styles.emptyQuestion}>
+              <Star opacity={0.8} />
+              <RegularText
+                color="#B3B3B3"
+                fontSize={14}
+                lineHeight={24}
+              >
+                아직 답변 내역이 없습니다!
+              </RegularText>
+            </View>
+          ) : (
+            <View style={{ paddingHorizontal: moderateScale(24), gap: moderateScale(12), paddingBottom: moderateScale(100) }}>
+              {(replys ?? []).map((reply) => (
+                <View style={styles.card} key={reply.question_reply_id}>
+                  {/* Team */}
+                  {
+                    reply.user_id === 'admin' ? (
+                      <View style={{
+                        flexDirection: 'row',
+                        gap: moderateScale(10),
+                        alignItems: 'center',
+                        marginBottom: moderateScale(10)
+                      }}>
+                        <Image
+                          style={{
+                            width: moderateScale(28),
+                            height: moderateScale(28)
+                          }}
+                          source={DefaultAuthor}
+                        />
+                        <MediumText
+                          fontSize={14}
+                          color='#B3B3B3'
+                        >
+                          {'목사님'}
+                        </MediumText>
+                      </View>
+                    ) : (
+                      <View style={{
+                        flexDirection: 'row',
+                        gap: moderateScale(10),
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        marginBottom: moderateScale(10)
+                      }}>
+                        <MediumText
+                          fontSize={14}
+                          color='#B3B3B3'
+                        >
+                          {`나 (${session})`}
+                        </MediumText>
+                      </View>
+                    )
+                  }
 
-                {/* Content */}
-                <RegularText
-                  style={{
-                    marginBottom: moderateScale(10),
-                    textAlign: reply.user_id === 'admin' ? 'left' : 'right'
-                  }}
-                  fontSize={16}
-                  lineHeight={28}
-                >
-                  {reply.content}
-                </RegularText>
-
-                {/* date */}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'flex-end',
-                  }}
-                >
-                  <MediumText
-                    fontSize={12}
-                    lineHeight={26}
-                    color='#B3B3B3'
+                  {/* Content */}
+                  <RegularText
+                    style={{
+                      marginBottom: moderateScale(10),
+                      textAlign: reply.user_id === 'admin' ? 'left' : 'right'
+                    }}
+                    fontSize={16}
+                    lineHeight={28}
                   >
-                    {formatDateToKorean(reply.created_date)}
-                  </MediumText>
+                    {reply.content}
+                  </RegularText>
+
+                  {/* date */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
+                    <MediumText
+                      fontSize={12}
+                      lineHeight={26}
+                      color='#B3B3B3'
+                    >
+                      {formatDateToKorean(reply.created_date)}
+                    </MediumText>
+                  </View>
                 </View>
-              </View>
-            ))}
-          </ScrollView>)}
-      </View>
+              ))}
+            </View>)}
+        </View>
+      </ScrollView>
       <InputButton placeholder='질문을 추가로 입력해주세요.' onSubmit={insertReply} />
     </SafeAreaView >
   )
@@ -311,8 +311,13 @@ const styles = StyleSheet.create({
     gap: moderateScale(16)
   },
   container: {
+    flex: 1,
     paddingHorizontal: moderateScale(24),
     marginBottom: moderateScale(40)
+  },
+  replyContainer: {
+    flex: 1,
+    position: 'relative'
   },
   cardIconList: {
     flexDirection: 'row',
