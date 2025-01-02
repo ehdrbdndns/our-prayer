@@ -7,26 +7,126 @@ import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
+import api from '@/utils/axios';
+import { QuestionType } from '@/utils/dataType';
+import { formatDateToKorean } from '@/utils/date';
+import { useDeleteQuestionMutation } from '@/utils/mutation';
 import { moderateScale } from "@/utils/style";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import * as SecureStore from 'expo-secure-store';
+import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function QuestionPage() {
 
-  const [questionList, setQuestionList] = useState([1, 2, 3]);
+  const queryClient = useQueryClient();
 
-  const onPressDelete = () => {
-    setQuestionList(questionList.filter((_, index) => index !== 0));
+  const { data: questionList } = useQuery<QuestionType[]>({
+    queryKey: ["question"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<QuestionType[]>(`/question`, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+      return res.data;
+    },
+    placeholderData: [],
+    staleTime: 12 * 60 * 60 * 1000, // 12시간
+    gcTime: 12 * 60 * 60 * 1000, // 12시간
+  });
+
+  const { mutate: insertQuestion } = useMutation({
+    mutationFn: async (content: string) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.post<{ message: string }>(`/question`, {
+        content,
+      }, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+      return res.data;
+    },
+    onMutate: async (content: string) => {
+      await queryClient.cancelQueries({ queryKey: ["question"] });
+
+      const previousValue = queryClient.getQueryData<QuestionType[]>(["question"]);
+      if (previousValue) {
+        queryClient.setQueryData<QuestionType[]>(["question"], [{
+          question_id: '',
+          user_id: '',
+          content,
+          category: '',
+          is_answered: false,
+          is_active: true,
+          reply_count: 0,
+          created_date: Math.floor(new Date().getTime() / 1000),
+          updated_date: Math.floor(new Date().getTime() / 1000),
+        }, ...previousValue]);
+      }
+
+      return { previousValue };
+    },
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["question"] });
+    },
+    onError: (error, newQuestion, context) => {
+      console.error('onError', error, newQuestion, context);
+
+      if (context) {
+        queryClient.setQueryData<QuestionType[]>(["question"], context.previousValue);
+      }
+    },
+  })
+
+  const { mutate: deleteQuestion } = useDeleteQuestionMutation();
+
+  const onPressDelete = (question_id: string) => {
+    Alert.alert('삭제', '삭제된 질문 내용은 되돌릴 수 없습니다.', [
+      {
+        text: '취소',
+        style: 'cancel'
+      },
+      {
+        text: '삭제',
+        onPress: () => {
+          deleteQuestion(question_id);
+        }
+      }
+    ])
   }
 
   const onPressQuestionGuid = () => {
     router.push('/questionGuide')
   }
 
-  const onPressQuestionCard = () => {
-    router.push('/questionDetail')
+  const onPressQuestionCard = (question_id: string) => {
+    if (!question_id) return;
+
+    router.push({
+      pathname: `/questionDetail/[question_id]`,
+      params: {
+        question_id,
+      }
+    });
+  }
+
+  const onPressEdit = (question_id: string) => {
+    router.push({
+      pathname: `/editQuestion/[question_id]`,
+      params: {
+        question_id,
+      }
+    });
   }
 
   return (
@@ -68,6 +168,7 @@ export default function QuestionPage() {
       {/* Question List */}
       <View style={styles.questionList}>
         <BoldText
+          style={{ paddingHorizontal: moderateScale(24), }}
           fontSize={16}
           lineHeight={24}
         >
@@ -75,7 +176,7 @@ export default function QuestionPage() {
         </BoldText>
 
         {
-          questionList.length === 0 ? (
+          (questionList ?? []).length === 0 ? (
             <View style={styles.emptyQuestion}>
               <Star opacity={0.8} />
               <RegularText
@@ -87,14 +188,17 @@ export default function QuestionPage() {
               </RegularText>
             </View>
           ) : (
-            <ScrollView contentContainerStyle={styles.scrollView}>
+            <ScrollView
+              style={{ paddingHorizontal: moderateScale(24) }}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollView}>
               {
-                questionList.map((question, index) => {
+                (questionList ?? []).map((question) => {
                   return (
                     <TouchableOpacity
-                      key={index}
+                      key={question.question_id}
                       style={styles.card}
-                      onPress={onPressQuestionCard}
+                      onPress={() => onPressQuestionCard(question.question_id)}
                     >
                       {/* date */}
                       <MediumText
@@ -103,7 +207,7 @@ export default function QuestionPage() {
                         fontSize={14}
                         lineHeight={26}
                       >
-                        2024년 10월 19일
+                        {formatDateToKorean(question.created_date)}
                       </MediumText>
 
                       {/* Text */}
@@ -111,8 +215,9 @@ export default function QuestionPage() {
                         style={{ marginBottom: moderateScale(16) }}
                         fontSize={16}
                         lineHeight={28}
+                        numberOfLines={5}
                       >
-                        {"안녕하세요, 목사님\n저는 현재 삶의 방향을 찾고 싶어서 기도하고 있습니다. 여러 가지 선택지가 있어..."}
+                        {question.content}
                       </RegularText>
 
                       <View style={styles.cardIconList}>
@@ -125,16 +230,18 @@ export default function QuestionPage() {
                             lineHeight={28}
                             color='#959FFF'
                           >
-                            1
+                            {question.reply_count}
                           </CustomText>
                         </View>
 
                         <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
                           {/* Edit */}
-                          <Edit width={moderateScale(24)} height={moderateScale(24)} />
+                          <TouchableOpacity onPress={() => onPressEdit(question.question_id)}>
+                            <Edit width={moderateScale(24)} height={moderateScale(24)} />
+                          </TouchableOpacity>
 
                           {/* Trash */}
-                          <TouchableOpacity onPress={onPressDelete}>
+                          <TouchableOpacity onPress={() => onPressDelete(question.question_id)}>
                             <Trash width={moderateScale(24)} height={moderateScale(24)} />
                           </TouchableOpacity>
                         </View>
@@ -148,7 +255,7 @@ export default function QuestionPage() {
         }
       </View>
 
-      <InputButton />
+      <InputButton onSubmit={insertQuestion} />
     </SafeAreaView >
   )
 }
@@ -175,7 +282,7 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(40),
   },
   questionList: {
-    paddingHorizontal: moderateScale(24),
+    flex: 1,
     gap: moderateScale(12)
   },
   emptyQuestion: {
@@ -183,11 +290,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }]
+    transform: [{ translateX: '-50%' }, { translateY: '-50%' }]
   },
   scrollView: {
     gap: moderateScale(12),
-    paddingBottom: moderateScale(190),
+    paddingBottom: moderateScale(100),
   },
   card: {
     borderRadius: moderateScale(10),
