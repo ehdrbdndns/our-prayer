@@ -126,7 +126,6 @@ export default function Lecture() {
     }
 
     if (isLectureSuccess && !!lecture.bgm) {
-      console.log("play bgm");
       loadSound();
     }
 
