@@ -21,11 +21,19 @@ export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
   const onPressPlan = (params: {
     id: string;
     title: string;
-    desc: string;
     banner: string;
+    isLiked: boolean;
   }) => {
-    const { id, title, desc, banner } = params;
-    router.push(`/planDetail?id=${id}&title=${title}&desc=${desc}&banner=${banner}`);
+    const { id, title, banner, isLiked } = params;
+    router.push({
+      pathname: `/planDetail/[plan_id]`,
+      params: {
+        plan_id: id,
+        title,
+        banner,
+        isLiked: String(isLiked),
+      },
+    });
   }
 
   return (
@@ -60,7 +68,7 @@ export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
             onPress={() => onPressPlan({
               id: item.plan_id,
               title: item.title,
-              desc: item.description,
+              isLiked: item.is_liked,
               banner: item.thumbnail,
             })}>
             <ImageBackground
