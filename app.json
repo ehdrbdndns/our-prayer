@@ -66,6 +66,10 @@
     },
     "packagerOpts": {
       "config": "metro.config.js"
+    },
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "backgroundColor": "#242527"
     }
   }
 }
