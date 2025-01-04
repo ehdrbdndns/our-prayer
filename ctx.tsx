@@ -1,7 +1,9 @@
 import * as SecureStore from 'expo-secure-store';
-import { createContext, useContext, type PropsWithChildren } from 'react';
+import { createContext, useContext, useState, type PropsWithChildren } from 'react';
 import { useStorageState } from './storage/useStorageState';
 import api from './utils/axios';
+
+// Session Context
 interface SessionType {
   name: string,
   accessToken: string,
@@ -60,3 +62,31 @@ export function SessionProvider({ children }: PropsWithChildren) {
     </AuthContext.Provider>
   );
 }
+
+// Modal Context
+interface ModalContextType {
+  isModalVisible: boolean;
+  showModal: () => void;
+  hideModal: () => void;
+}
+
+const ModalContext = createContext<ModalContextType>({
+  isModalVisible: false,
+  showModal: () => { },
+  hideModal: () => { },
+});
+
+export const ModalProvider = ({ children }: PropsWithChildren) => {
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const showModal = () => setModalVisible(true);
+  const hideModal = () => setModalVisible(false);
+
+  return (
+    <ModalContext.Provider value={{ isModalVisible, showModal, hideModal }}>
+      {children}
+    </ModalContext.Provider>
+  );
+};
+
+export const useModal = () => useContext(ModalContext);

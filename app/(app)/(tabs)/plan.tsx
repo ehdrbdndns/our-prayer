@@ -1,11 +1,13 @@
 import Archive from "@/assets/images/icon/archive.svg";
 import LeftArrow from "@/assets/images/icon/leftArrow.svg";
 import Search from "@/assets/images/icon/search.svg";
+import DownloadModal from "@/components/DownloadModal";
 import Header from "@/components/Header";
 import PlanCard from "@/components/PlanCard";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
+import { ModalProvider } from "@/ctx";
 import { PlanType } from "@/utils/dataType";
 import { usePlanListQuery } from "@/utils/queries";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
@@ -91,156 +93,159 @@ export default function PlanPage() {
   }) : [];
 
   return (
-    <FlatList
-      data={filteredPlans}
-      showsHorizontalScrollIndicator={false}
-      showsVerticalScrollIndicator={false}
-      ListHeaderComponent={(
-        <View style={{ paddingTop: insets.top }}>
-          {/* Header */}
-          <Header
-            style={styles.header}
-            prefix={
-              <Pressable
-                onPress={onPressLeftArrow}
-                style={[styles.headerPrefix, !isSearchActive && styles.hidden]}
-              >
-                <LeftArrow />
-              </Pressable>
-            }
-            infix={
-              <View style={styles.searchBar}>
-                <Pressable onPress={handleSearchPress}>
-                  <Search />
+    <ModalProvider>
+      <FlatList
+        numColumns={2}
+        data={filteredPlans}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
+        keyExtractor={(item) => item.plan_id}
+        columnWrapperStyle={styles.columnWrapper}
+        ListHeaderComponent={(
+          <View style={{ paddingTop: insets.top }}>
+            {/* Header */}
+            <Header
+              style={styles.header}
+              prefix={
+                <Pressable
+                  onPress={onPressLeftArrow}
+                  style={[styles.headerPrefix, !isSearchActive && styles.hidden]}
+                >
+                  <LeftArrow />
                 </Pressable>
-                <TextInput
-                  ref={textInputRef}
-                  style={styles.searchInput}
-                  onChangeText={setSearchQuery}
-                  onSubmitEditing={handleSearchSubmit}
-                  value={searchQuery}
-                  placeholder="더 많은 기도 플랜을 찾아보세요"
-                  placeholderTextColor={"#B3B3B3"}
-                />
-              </View>
-            }
-            suffix={
-              <Pressable onPress={onPressArchive}>
-                <Archive />
-              </Pressable>
-            }
-          />
-
-          {/* 현재 진행중인 기도 */}
-          {
-            currentPlan && (
-              <View style={[styles.container, isSearchActive && styles.hidden]}>
-                {/* Title */}
-                <BoldText
-                  style={styles.title}
-                  fontSize={16}
-                  lineHeight={24}
-                >
-                  현재 진행 중인 기도
-                </BoldText>
-
-                {/* Card */}
-                <TouchableOpacity
-                  onPress={() => onPressPlan({
-                    id: currentPlan.plan_id,
-                    title: currentPlan.title,
-                    banner: currentPlan.thumbnail,
-                    isLiked: currentPlan.is_liked
-                  })}
-                >
-                  <View style={styles.opacityBackground}>
-                    {/* Image */}
-                    <ImageBackground
-                      style={styles.image}
-                      source={currentPlan.s_thumbnail}
-                    >
-                      <LinearGradient
-                        colors={["rgba(0, 0, 0, 0)", "#161B29"]}
-                        style={styles.imageFilter}
-                      />
-                    </ImageBackground>
-
-                    <View style={{
-                      width: moderateScale(228)
-                    }}>
-                      {/* SubTitle */}
-                      <BoldText
-                        fontSize={16}
-                        lineHeight={24}
-                      >
-                        {currentPlan.title}
-                      </BoldText>
-
-                      {/* Content */}
-                      <RegularText
-                        numberOfLines={1}
-                        fontSize={14}
-                        lineHeight={22}
-                      >
-                        {currentPlan.description}
-                      </RegularText>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            )
-          }
-
-          {/* 기도 플랜 찾기 */}
-          <View style={isSearchActive && styles.hidden}>
-            {/* Title */}
-            <BoldText
-              style={[styles.title, { paddingHorizontal: moderateScale(24) }]}
-              fontSize={16}
-              lineHeight={24}
-            >
-              기도 플랜 찾기
-            </BoldText>
-
-            {/* Tabs (전체보기, 시간별 기도, 주제별 기도, 자유 기도) */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.tabList}
-            >
-              {
-                Tabs.map(tab => (
-                  <TouchableOpacity
-                    key={tab.value}
-                    onPress={() => onPressTab(tab.value)}
-                    style={planType === tab.value ? styles.activeTab : styles.tab}
-                  >
-                    <MediumText fontSize={14} lineHeight={22}>
-                      {tab.label}
-                    </MediumText>
-                  </TouchableOpacity>
-                ))
               }
-            </ScrollView>
+              infix={
+                <View style={styles.searchBar}>
+                  <Pressable onPress={handleSearchPress}>
+                    <Search />
+                  </Pressable>
+                  <TextInput
+                    ref={textInputRef}
+                    style={styles.searchInput}
+                    onChangeText={setSearchQuery}
+                    onSubmitEditing={handleSearchSubmit}
+                    value={searchQuery}
+                    placeholder="더 많은 기도 플랜을 찾아보세요"
+                    placeholderTextColor={"#B3B3B3"}
+                  />
+                </View>
+              }
+              suffix={
+                <Pressable onPress={onPressArchive}>
+                  <Archive />
+                </Pressable>
+              }
+            />
 
-            {/* Card List */}
-          </View>
+            {/* 현재 진행중인 기도 */}
+            {
+              currentPlan && (
+                <View style={[styles.container, isSearchActive && styles.hidden]}>
+                  {/* Title */}
+                  <BoldText
+                    style={styles.title}
+                    fontSize={16}
+                    lineHeight={24}
+                  >
+                    현재 진행 중인 기도
+                  </BoldText>
 
-          <View style={[styles.searchText, !isSearchActive && styles.hidden]}>
-            <RegularText
-              fontSize={16}
-              lineHeight={24}
-            >
-              '{searchQuery}'에 대한 검색결과입니다.
-            </RegularText>
+                  {/* Card */}
+                  <TouchableOpacity
+                    onPress={() => onPressPlan({
+                      id: currentPlan.plan_id,
+                      title: currentPlan.title,
+                      banner: currentPlan.thumbnail,
+                      isLiked: currentPlan.is_liked
+                    })}
+                  >
+                    <View style={styles.opacityBackground}>
+                      {/* Image */}
+                      <ImageBackground
+                        style={styles.image}
+                        source={currentPlan.s_thumbnail}
+                      >
+                        <LinearGradient
+                          colors={["rgba(0, 0, 0, 0)", "#161B29"]}
+                          style={styles.imageFilter}
+                        />
+                      </ImageBackground>
+
+                      <View style={{
+                        width: moderateScale(228)
+                      }}>
+                        {/* SubTitle */}
+                        <BoldText
+                          fontSize={16}
+                          lineHeight={24}
+                        >
+                          {currentPlan.title}
+                        </BoldText>
+
+                        {/* Content */}
+                        <RegularText
+                          numberOfLines={1}
+                          fontSize={14}
+                          lineHeight={22}
+                        >
+                          {currentPlan.description}
+                        </RegularText>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              )
+            }
+
+            {/* 기도 플랜 찾기 */}
+            <View style={isSearchActive && styles.hidden}>
+              {/* Title */}
+              <BoldText
+                style={[styles.title, { paddingHorizontal: moderateScale(24) }]}
+                fontSize={16}
+                lineHeight={24}
+              >
+                기도 플랜 찾기
+              </BoldText>
+
+              {/* Tabs (전체보기, 시간별 기도, 주제별 기도, 자유 기도) */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.tabList}
+              >
+                {
+                  Tabs.map(tab => (
+                    <TouchableOpacity
+                      key={tab.value}
+                      onPress={() => onPressTab(tab.value)}
+                      style={planType === tab.value ? styles.activeTab : styles.tab}
+                    >
+                      <MediumText fontSize={14} lineHeight={22}>
+                        {tab.label}
+                      </MediumText>
+                    </TouchableOpacity>
+                  ))
+                }
+              </ScrollView>
+
+              {/* Card List */}
+            </View>
+
+            <View style={[styles.searchText, !isSearchActive && styles.hidden]}>
+              <RegularText
+                fontSize={16}
+                lineHeight={24}
+              >
+                '{searchQuery}'에 대한 검색결과입니다.
+              </RegularText>
+            </View>
           </View>
-        </View>
-      )}
-      keyExtractor={(item) => item.plan_id}
-      renderItem={({ item }: { item: PlanType }) => <PlanCard plan={item} />}
-      numColumns={2}
-      columnWrapperStyle={styles.columnWrapper}
-    />
+        )}
+        renderItem={({ item }: { item: PlanType }) => <PlanCard plan={item} />}
+      />
+      <DownloadModal />
+    </ModalProvider>
   )
 }
 
