@@ -66,24 +66,37 @@ export function SessionProvider({ children }: PropsWithChildren) {
 // Modal Context
 interface ModalContextType {
   isModalVisible: boolean;
-  showModal: () => void;
+  planId: string;
+  auditDate: number;
+  showModal: ({ planId, auditDate }: { planId: string, auditDate: number }) => void;
   hideModal: () => void;
 }
 
 const ModalContext = createContext<ModalContextType>({
   isModalVisible: false,
+  planId: '',
+  auditDate: 0,
   showModal: () => { },
   hideModal: () => { },
 });
 
 export const ModalProvider = ({ children }: PropsWithChildren) => {
   const [isModalVisible, setModalVisible] = useState(false);
+  const [planId, setPlanId] = useState('');
+  const [auditDate, setAuditDate] = useState(0);
 
-  const showModal = () => setModalVisible(true);
-  const hideModal = () => setModalVisible(false);
+  const showModal = ({ planId, auditDate }: { planId: string, auditDate: number }) => {
+    setPlanId(planId);
+    setAuditDate(auditDate);
+    setModalVisible(true)
+  };
+  const hideModal = () => {
+    setPlanId('');
+    setModalVisible(false)
+  }
 
   return (
-    <ModalContext.Provider value={{ isModalVisible, showModal, hideModal }}>
+    <ModalContext.Provider value={{ isModalVisible, planId, auditDate, showModal, hideModal }}>
       {children}
     </ModalContext.Provider>
   );
