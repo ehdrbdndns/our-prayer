@@ -6,14 +6,17 @@ import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
+import { AUDIO_DIR } from "@/utils/audioFile";
 import { LectureType } from "@/utils/dataType";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
 import { Audio } from 'expo-av';
 import { Sound } from "expo-av/build/Audio";
+import * as FileSystem from 'expo-file-system';
 import { useKeepAwake } from 'expo-keep-awake';
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
+import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -109,13 +112,37 @@ export default function Lecture() {
   useEffect(() => {
     // Load sound
     const loadSound = async () => {
-      const { sound } = await Audio.Sound.createAsync({
-        uri: lecture.bgm
-      }, {
-        shouldPlay: true,
-        isLooping: true
-      });
-      bgmRef.current = sound;
+      const audio = await SecureStore.getItemAsync(`lecture-${lecture.lecture_id}`);
+      console.log('audio', audio);
+      if (audio) {
+        console.log('start audio');
+        const { bgm } = JSON.parse(audio);
+        const bgmUri = AUDIO_DIR + bgm;
+        console.log('bgm ', bgmUri);
+        try {
+          const fileInfo = await FileSystem.getInfoAsync(bgmUri);
+          console.log('fileInfo', fileInfo);
+          if (!fileInfo.exists) {
+            throw new Error('BGM file does not exist');
+          }
+
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: fileInfo.uri },
+            {
+              shouldPlay: true,
+              isLooping: true,
+            }
+          );
+
+          console.log('end audio');
+          bgmRef.current = sound;
+        } catch (e) {
+          console.log(e);
+        }
+      } else {
+        Alert.alert('다운로드된 오디오가 없습니다.', '플랜 페이지로 이동합니다.');
+        router.replace('/plan');
+      }
     }
 
     // have to unload sound when component is unmounted

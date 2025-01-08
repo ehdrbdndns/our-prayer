@@ -97,3 +97,18 @@ export interface QuestionReplyType {
   created_date: number;
   updated_date: number;
 }
+export interface AudioFileSystemType {
+  [lecture_id: string]: {
+    audios: {
+      lecture_audio_id: string,
+      uri: string,
+      caption: string,
+      start_time: number
+    }[],
+    bgm: string;
+  }
+}
+
+export interface PlanAuditType {
+  audit_updated_date: number;
+}

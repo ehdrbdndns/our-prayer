@@ -41,6 +41,13 @@ export default function PlanPage() {
     ? plan.plans.filter((row) => row.plan_id === plan.currentPlan?.plan_id)[0]
     : null;
 
+  const filteredPlans = plan ? plan.plans.filter((item) => {
+    if (isSearchActive) {
+      return item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+    return planType === '' || item.type === planType;
+  }) : [];
+
   const handleSearchPress = () => {
     if (textInputRef.current) {
       textInputRef.current.focus();
@@ -84,13 +91,6 @@ export default function PlanPage() {
   const onPressTab = (type: string) => {
     setPlanType(type);
   }
-
-  const filteredPlans = plan ? plan.plans.filter((item) => {
-    if (isSearchActive) {
-      return item.title.toLowerCase().includes(searchQuery.toLowerCase());
-    }
-    return planType === '' || item.type === planType;
-  }) : [];
 
   return (
     <ModalProvider>
