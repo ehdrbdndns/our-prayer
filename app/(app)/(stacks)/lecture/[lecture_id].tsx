@@ -6,7 +6,6 @@ import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
-import { AUDIO_DIR } from "@/utils/audioFile";
 import { LectureType } from "@/utils/dataType";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
@@ -113,16 +112,14 @@ export default function Lecture() {
     // Load sound
     const loadSound = async () => {
       const audio = await SecureStore.getItemAsync(`lecture-${lecture.lecture_id}`);
-      console.log('audio', audio);
       if (audio) {
-        console.log('start audio');
         const { bgm } = JSON.parse(audio);
-        const bgmUri = AUDIO_DIR + bgm;
-        console.log('bgm ', bgmUri);
+
         try {
-          const fileInfo = await FileSystem.getInfoAsync(bgmUri);
-          console.log('fileInfo', fileInfo);
+          const fileInfo = await FileSystem.getInfoAsync(bgm);
+
           if (!fileInfo.exists) {
+            // TODO go to plan page and download audio
             throw new Error('BGM file does not exist');
           }
 
@@ -133,9 +130,9 @@ export default function Lecture() {
               isLooping: true,
             }
           );
-
-          console.log('end audio');
           bgmRef.current = sound;
+
+          // Todo play audio when duration equals start_time
         } catch (e) {
           console.log(e);
         }

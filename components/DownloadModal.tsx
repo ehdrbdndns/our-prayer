@@ -3,18 +3,28 @@ import { addAudio } from '@/utils/audioFile';
 import api from '@/utils/axios';
 import { AudioFileSystemType } from '@/utils/dataType';
 import { moderateScale } from '@/utils/style';
-import { useQuery } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 import * as ProgressBar from 'react-native-progress';
 import { MediumText } from './text/MediumText';
 import { RegularText } from './text/RegularText';
 
+type InsertUserAudioRequestType = {
+  lecture_audio_id: string;
+  audio: string;
+}[]
+
 const { width: deviceWidth } = Dimensions.get('window');
 
 export default function DownloadModal() {
   const { planId, auditDate, isModalVisible, hideModal } = useModal();
+  const [progress, setProgress] = useState(0);
+  const [totalAudioCount, setTotalAudioCount] = useState(0);
+  const [completedDownloadCount, setCompletedDownloadCount] = useState(0);
+  const downloadAbortController = useRef<AbortController | null>(null);
 
   const { data: audio, isSuccess } = useQuery<AudioFileSystemType>({
     queryKey: ["lecture/audio", planId],
@@ -38,49 +48,114 @@ export default function DownloadModal() {
     enabled: !!planId
   });
 
+  const { mutate: insertUserAudioMutate } = useMutation({
+    mutationFn: async (req: InsertUserAudioRequestType) => {
+      if (!isModalVisible) return;
+
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api({
+        method: "POST",
+        url: "/lecture/userAudio",
+        data: { audios: req },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: async () => {
+      await AsyncStorage.setItem(`planAudit-${planId}`, JSON.stringify({ audit_updated_date: auditDate }));
+      setCompletedDownloadCount(prevCount => prevCount + 1);
+      setProgress((prevProgress) => prevProgress + 1 / totalAudioCount);
+
+      setTimeout(() => {
+        hideModal();
+        initValue();
+      }, 1000)
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+    },
+  })
+
   useEffect(() => {
     async function downloadAudios() {
+      downloadAbortController.current = new AbortController();
+      const { signal } = downloadAbortController.current;
       if (isSuccess && !!audio) {
-        Object.entries(audio).forEach(async ([lectureId, { audios, bgm }]) => {
-          console.log("start download bgm")
+        const lectureData: InsertUserAudioRequestType = [];
+        const total = Object.values(audio).reduce((acc, { audios }) => acc + audios.length + 1 + 1, 0) // audios(length) + bgm(1) + mutation(1)
+        setTotalAudioCount(total);
 
-          await addAudio({ path: `${lectureId}/bgm.mp3`, audio: bgm });
 
-          console.log("end download bgm")
+        for (const [lectureId, { audios, bgm }] of Object.entries(audio)) {
 
-          console.log("------")
+          if (signal.aborted) break;
 
-          console.log("start download audios")
-
-          audios.forEach(async ({ lecture_audio_id, uri }, index) => {
-            console.log("start download audio: ", index);
-            await addAudio({ path: `${lectureId}/audios/${lecture_audio_id}`, audio: uri });
-            console.log("end download audio: ", index);
-            console.log("------")
+          const bgmUri = await addAudio({ path: `${lectureId}/bgm`, audioUri: bgm });
+          setCompletedDownloadCount(prevCount => {
+            const newCount = prevCount + 1;
+            setProgress(newCount / total);
+            return newCount;
           });
 
-          console.log("end download audios")
+          lectureData.push({
+            lecture_audio_id: lectureId,
+            audio: bgmUri
+          })
 
-          console.log("------")
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1초 대기
 
-          console.log('save to local storage');
-          await SecureStore.setItemAsync(`planAudit-${planId}`, JSON.stringify({ audit_updated_date: auditDate }));
-          await SecureStore.setItemAsync(`lecture-${lectureId}`, JSON.stringify({
-            bgm: `${lectureId}/bgm.mp3`,
-            audios: audios.map(({ lecture_audio_id, caption, start_time }) => ({
-              caption,
-              start_time,
-              uri: `${lectureId}/audios/${lecture_audio_id}`,
-            })) || []
-          }));
+          for (const { lecture_audio_id, uri } of audios) {
+            if (signal.aborted) break;
 
-          console.log('end save to local storage');
-        });
+            const audioUri = await addAudio({ path: `${lectureId}/audios/${lecture_audio_id}`, audioUri: uri });
+            setCompletedDownloadCount(prevCount => {
+              const newCount = prevCount + 1;
+              setProgress(newCount / total);
+              return newCount;
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1초 대기
+
+            lectureData.push({
+              lecture_audio_id,
+              audio: audioUri
+            })
+          }
+        }
+
+        insertUserAudioMutate(lectureData);
       }
     }
 
-    downloadAudios();
+    if (isModalVisible) {
+      downloadAudios();
+    }
+
+    return () => {
+      initValue();
+    }
   }, [isSuccess])
+
+  const initValue = () => {
+    setProgress(0);
+    setTotalAudioCount(0);
+    setCompletedDownloadCount(0);
+  }
+
+  const onClickCancel = () => {
+    if (downloadAbortController.current) {
+      downloadAbortController.current.abort();
+    }
+
+    initValue();
+    hideModal();
+  }
 
   return (
     <Modal
@@ -100,16 +175,16 @@ export default function DownloadModal() {
 
           {/* loading state */}
           <View style={{ marginVertical: moderateScale(8) }}>
-            <ProgressBar.Bar color='#4F5FFF' progress={0.4} width={null} />
+            <ProgressBar.Bar color='#4F5FFF' progress={progress} width={null} />
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
               <RegularText>
-                0/5
+                {completedDownloadCount}/{totalAudioCount}
               </RegularText>
             </View>
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-            <TouchableOpacity onPress={hideModal}>
+            <TouchableOpacity onPress={onClickCancel}>
               <MediumText
                 fontSize={16}
                 color='#4F5FFF'

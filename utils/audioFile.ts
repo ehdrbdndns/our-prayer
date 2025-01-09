@@ -1,4 +1,5 @@
 import * as FileSystem from 'expo-file-system';
+import api from './axios';
 
 export const AUDIO_DIR = FileSystem.documentDirectory + 'audio/';
 const audioFileUri = ({
@@ -17,26 +18,61 @@ async function ensureDirExists(path: string) {
   }
 }
 
+const getFileExtensionFromMimeType = (mimeType: string) => {
+  let extension = '';
+
+  switch (mimeType) {
+    case 'audio/mpeg':
+      extension = 'mp3';
+      break;
+    case 'audio/mp4':
+    case 'audio/x-m4a':
+      extension = 'm4a';
+      break;
+    case 'audio/x-wav':
+      extension = 'wav';
+      break;
+    // 필요한 경우 다른 MIME 타입을 추가
+    default:
+      throw new Error('Unsupported MIME type: ' + mimeType);
+  }
+
+  return extension;
+};
+
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
 export async function addAudio({
-  path, audio
+  path, audioUri
 }: {
-  path: string, audio: string
+  path: string, audioUri: string
 }) {
   try {
-    const fileUri = audioFileUri({ path });
-    // console.log('download audio file: ', audio);
-    // console.log('fileUri: ' + fileUri);
-    await ensureDirExists(fileUri);
+    const response = await api.get(audioUri, { responseType: 'blob' });
+    const mimeType = response.headers['content-type'];
+    const extension = getFileExtensionFromMimeType(mimeType || '');
 
-    const { uri } = await FileSystem.downloadAsync(audio, fileUri);
+    const fileUri = audioFileUri({ path: `${path}.${extension}` });
+    const directory = fileUri.substring(0, fileUri.lastIndexOf('/'));
+    await ensureDirExists(directory);
 
-    console.log('downloaded audio file: ', uri);
+    const audioBlob = await response.data;
+    const base64Audio = await blobToBase64(audioBlob);
+    await FileSystem.writeAsStringAsync(fileUri, base64Audio, { encoding: FileSystem.EncodingType.Base64 });
 
-    console.log(await FileSystem.getInfoAsync(uri));
-
-    return uri;
+    return fileUri;
   } catch (e) {
     console.error("Couldn't download audio files:", e);
+    throw e;
   }
 }
 
@@ -67,30 +103,3 @@ export async function deleteAudio({
   const fileUri = audioFileUri({ path });
   await FileSystem.deleteAsync(fileUri);
 }
-
-// export async function addAudio({
-//   planId, audioId, audio
-// }: {
-//   planId: string, audioId: string, audio: string
-// }) {
-//   try {
-//     await ensureDirExists();
-
-//     console.log('Downloading audio file…');
-
-//     const fileUri = audioFileUri({ planId, audioId });
-
-//     const downloadResumable = FileSystem.createDownloadResumable(audio, fileUri, {}
-//       , ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-//         const progress = totalBytesWritten / totalBytesExpectedToWrite;
-//         console.log(`Download progress: ${progress}`);
-//       }
-//     );
-
-//     const result = await downloadResumable.downloadAsync();
-
-//     return result;
-//   } catch (e) {
-//     console.error("Couldn't download audio files:", e);
-//   }
-// }

@@ -4,10 +4,10 @@ import { useModal } from "@/ctx";
 import { PlanType } from "@/utils/dataType";
 import { useLikeMutation } from "@/utils/mutation";
 import { moderateScale } from "@/utils/style";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 import { BoldText } from "./text/BoldText";
@@ -28,10 +28,10 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
   useEffect(() => {
     // get Audio file from local storage
     const checkPlanAudit = async () => {
-      let audit = JSON.parse(await SecureStore.getItemAsync(`planAudit-${plan.plan_id}`) || '{}');
+      let audit = JSON.parse(await AsyncStorage.getItem(`planAudit-${plan.plan_id}`) || '{}');
       setIsDownloaded(!!audit && audit.audit_updated_date === plan.audit_updated_date);
       // for test
-      // setIsDownloaded(false);
+      setIsDownloaded(false);
     }
 
     checkPlanAudit();
