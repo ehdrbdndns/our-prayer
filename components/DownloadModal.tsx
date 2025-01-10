@@ -4,7 +4,8 @@ import api from '@/utils/axios';
 import { AudioFileSystemType } from '@/utils/dataType';
 import { moderateScale } from '@/utils/style';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -20,7 +21,10 @@ type InsertUserAudioRequestType = {
 const { width: deviceWidth } = Dimensions.get('window');
 
 export default function DownloadModal() {
-  const { planId, auditDate, isModalVisible, hideModal } = useModal();
+
+  const queryClient = useQueryClient();
+
+  const { planId, title, thumbnail, isLiked, auditDate, isModalVisible, hideModal } = useModal();
   const [progress, setProgress] = useState(0);
   const [totalAudioCount, setTotalAudioCount] = useState(0);
   const [completedDownloadCount, setCompletedDownloadCount] = useState(0);
@@ -75,6 +79,15 @@ export default function DownloadModal() {
       setTimeout(() => {
         hideModal();
         initValue();
+        router.push({
+          pathname: `/planDetail/[plan_id]`,
+          params: {
+            plan_id: planId,
+            title: title,
+            banner: thumbnail,
+            isLiked: String(isLiked),
+          },
+        });
       }, 1000)
     },
     onError: (error, newUser, context) => {

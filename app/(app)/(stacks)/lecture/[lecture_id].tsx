@@ -9,13 +9,13 @@ import Timer from "@/components/timer/Timer";
 import { LectureType } from "@/utils/dataType";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import { Sound } from "expo-av/build/Audio";
 import * as FileSystem from 'expo-file-system';
 import { useKeepAwake } from 'expo-keep-awake';
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -41,7 +41,8 @@ export default function Lecture() {
 
   const insets = useSafeAreaInsets();
 
-  const { lecture_id, plan_title } = useLocalSearchParams<{
+  const { plan_id, lecture_id, plan_title } = useLocalSearchParams<{
+    plan_id: string,
     lecture_id: string,
     plan_title: string
   }>();
@@ -87,57 +88,63 @@ export default function Lecture() {
 
   // Hide intro and show content after lecture data is loaded
   useEffect(() => {
-    if (isLectureSuccess && isShowedIntro) {
-      Animated.timing(introOpacity, {
-        toValue: 0,
-        duration: 1000,
-        useNativeDriver: true,
-      }).start(() => {
-        setShowIntro(false);
-        setShowContent(true);
-        setIsPlaying(true);
-        setDuration(lecture.time === 0 ? 1 : lecture.time);
-        setInitialRemainingTime(lecture.time);
-        Animated.timing(contentOpacity, {
-          toValue: 1,
+    async function hideIntro() {
+      if (isLectureSuccess && isShowedIntro) {
+
+        if (lecture.bgm === '') {
+          Alert.alert('오류', '파일을 다시 다운로드 해주세요.');
+          await AsyncStorage.removeItem(`planAudit-${plan_id}`);
+          router.replace('/plan');
+        }
+
+        Animated.timing(introOpacity, {
+          toValue: 0,
           duration: 1000,
           useNativeDriver: true,
-        }).start();
-      });
+        }).start(() => {
+          setShowIntro(false);
+          setShowContent(true);
+          setIsPlaying(true);
+          setDuration(lecture.time === 0 ? 1 : lecture.time);
+          setInitialRemainingTime(lecture.time);
+          Animated.timing(contentOpacity, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }).start();
+        });
+      }
     }
+
+    hideIntro();
   }, [isLectureSuccess, isShowedIntro]);
 
   // Load BGM when lecture is successfully loaded
   useEffect(() => {
     // Load sound
     const loadSound = async () => {
-      const audio = await SecureStore.getItemAsync(`lecture-${lecture.lecture_id}`);
-      if (audio) {
-        const { bgm } = JSON.parse(audio);
+      try {
+        const fileInfo = await FileSystem.getInfoAsync(lecture.bgm);
 
-        try {
-          const fileInfo = await FileSystem.getInfoAsync(bgm);
-
-          if (!fileInfo.exists) {
-            // TODO go to plan page and download audio
-            throw new Error('BGM file does not exist');
-          }
-
-          const { sound } = await Audio.Sound.createAsync(
-            { uri: fileInfo.uri },
-            {
-              shouldPlay: true,
-              isLooping: true,
-            }
-          );
-          bgmRef.current = sound;
-
-          // Todo play audio when duration equals start_time
-        } catch (e) {
-          console.log(e);
+        if (!fileInfo.exists) {
+          // TODO go to plan page and download audio
+          throw new Error('BGM file does not exist');
         }
-      } else {
-        Alert.alert('다운로드된 오디오가 없습니다.', '플랜 페이지로 이동합니다.');
+
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: fileInfo.uri },
+          {
+            shouldPlay: true,
+            isLooping: true,
+          }
+        );
+        bgmRef.current = sound;
+
+        // Todo play audio when duration equals start_time
+      } catch (e) {
+        console.log(e);
+        Alert.alert('오류', '파일을 다시 다운로드 해주세요.');
+        await AsyncStorage.removeItem(`planAudit-${lecture.plan_id}`);
         router.replace('/plan');
       }
     }

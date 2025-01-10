@@ -66,7 +66,10 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
             onPress: () => {
               showModal({
                 planId: plan.plan_id,
-                auditDate: plan.audit_updated_date
+                auditDate: plan.audit_updated_date,
+                thumbnail: plan.thumbnail,
+                title: plan.title,
+                isLiked: isLiked
               });
             }
           }

@@ -67,14 +67,24 @@ export function SessionProvider({ children }: PropsWithChildren) {
 interface ModalContextType {
   isModalVisible: boolean;
   planId: string;
+  thumbnail: string;
+  title: string;
+  isLiked: boolean;
   auditDate: number;
-  showModal: ({ planId, auditDate }: { planId: string, auditDate: number }) => void;
+  showModal: ({
+    planId, thumbnail, title, isLiked, auditDate
+  }: {
+    planId: string, thumbnail: string, title: string, isLiked: boolean, auditDate: number
+  }) => void;
   hideModal: () => void;
 }
 
 const ModalContext = createContext<ModalContextType>({
   isModalVisible: false,
   planId: '',
+  thumbnail: '',
+  title: '',
+  isLiked: false,
   auditDate: 0,
   showModal: () => { },
   hideModal: () => { },
@@ -83,11 +93,21 @@ const ModalContext = createContext<ModalContextType>({
 export const ModalProvider = ({ children }: PropsWithChildren) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [planId, setPlanId] = useState('');
+  const [thumbnail, setThumbnail] = useState('');
+  const [title, setTitle] = useState('');
+  const [isLiked, setIsLiked] = useState(false);
   const [auditDate, setAuditDate] = useState(0);
 
-  const showModal = ({ planId, auditDate }: { planId: string, auditDate: number }) => {
+  const showModal = ({
+    planId, thumbnail, title, isLiked, auditDate
+  }: {
+    planId: string, thumbnail: string, title: string, isLiked: boolean, auditDate: number
+  }) => {
     setPlanId(planId);
     setAuditDate(auditDate);
+    setThumbnail(thumbnail);
+    setTitle(title);
+    setIsLiked(isLiked);
     setModalVisible(true)
   };
   const hideModal = () => {
@@ -96,7 +116,7 @@ export const ModalProvider = ({ children }: PropsWithChildren) => {
   }
 
   return (
-    <ModalContext.Provider value={{ isModalVisible, planId, auditDate, showModal, hideModal }}>
+    <ModalContext.Provider value={{ isModalVisible, planId, title, thumbnail, isLiked, auditDate, showModal, hideModal }}>
       {children}
     </ModalContext.Provider>
   );
