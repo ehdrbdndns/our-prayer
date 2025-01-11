@@ -171,7 +171,7 @@ export default function Lecture() {
       pathname: '/prayerRecord',
       params: {
         lecture_id: lecture.lecture_id,
-        duration: repeatCount * Math.ceil(elapsedTime ? elapsedTime : 1)
+        duration: (repeatCount * duration) + Math.ceil(elapsedTime ? elapsedTime : 1)
       }
     });
   }

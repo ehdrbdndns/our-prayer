@@ -5,7 +5,7 @@ import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { useHistoryMutation } from "@/utils/mutation";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -28,12 +28,10 @@ export default function PrayerRecord() {
   const onPressSave = async () => {
     // Todo save data
     mutate({ lecture_id, duration, note });
-    router.push('/calendar');
   }
 
   const onPressCancel = () => {
     mutate({ lecture_id, duration, note: '' });
-    router.push('/calendar');
   }
 
   return (
