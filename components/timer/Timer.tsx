@@ -3,7 +3,8 @@ import Next from "@/assets/images/icon/next.svg";
 import Pause from "@/assets/images/icon/pause.svg";
 import Prev from "@/assets/images/icon/prev.svg";
 import { moderateScale } from "@/utils/style";
-import { Pressable, StyleSheet, View } from "react-native";
+import { useEffect } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { useCountdown } from "react-native-countdown-circle-timer";
 import PrimaryButton from "../button/PrimaryButton";
 import { BoldText } from "../text/BoldText";
@@ -24,6 +25,7 @@ type TimerProps = {
   onPressPlay: () => void;
   onComplete: () => void;
   onPressCompleteBtn: (elapsedTime: number) => void;
+  setElapsedTime: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function Timer(props: TimerProps) {
@@ -38,7 +40,8 @@ export default function Timer(props: TimerProps) {
     onPressPrev,
     onPressPlay,
     onComplete,
-    onPressCompleteBtn
+    onPressCompleteBtn,
+    setElapsedTime
   } = props as TimerProps;
 
   let countdown = useCountdown({
@@ -49,8 +52,13 @@ export default function Timer(props: TimerProps) {
     size: moderateScale(212),
     strokeWidth: moderateScale(3),
     rotation: 'counterclockwise',
+    updateInterval: 1,
     onComplete,
   });
+
+  useEffect(() => {
+    setElapsedTime(countdown.elapsedTime);
+  }, [countdown.elapsedTime]);
 
   const showRemainingTime = (remainingTime: number) => {
     const time = repeatCount > 0
@@ -62,6 +70,10 @@ export default function Timer(props: TimerProps) {
     const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
 
     return `${repeatCount > 0 ? '+' : ''}${minutes}:${formattedSeconds}`;
+  };
+
+  const handlePressPlay = async () => {
+    onPressPlay();
   };
 
   return (
@@ -118,30 +130,30 @@ export default function Timer(props: TimerProps) {
           )
           : (
             <View style={styles.controller}>
-              <Pressable
+              <TouchableOpacity
                 style={styles.controllerButton}
                 onPress={() => onPressPrev(countdown.remainingTime)}
               >
                 <Prev />
-              </Pressable>
+              </TouchableOpacity>
 
-              <Pressable
+              <TouchableOpacity
                 style={styles.controllerButton}
-                onPress={onPressPlay}
+                onPress={handlePressPlay}
               >
                 {
                   isPlaying
                     ? <Pause />
                     : <Play />
                 }
-              </Pressable>
+              </TouchableOpacity>
 
-              <Pressable
+              <TouchableOpacity
                 style={styles.controllerButton}
                 onPress={() => onPressNext(countdown.remainingTime)}
               >
                 <Next />
-              </Pressable>
+              </TouchableOpacity>
             </View>
           )
       }

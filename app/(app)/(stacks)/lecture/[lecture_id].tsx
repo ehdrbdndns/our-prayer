@@ -1,6 +1,7 @@
 import Delete from "@/assets/images/icon/delete.svg";
 import Music from "@/assets/images/icon/music.svg";
 import Mute from "@/assets/images/icon/mute.svg";
+import SoundBox from "@/components/\bSoundBox";
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
@@ -10,9 +11,6 @@ import { LectureType } from "@/utils/dataType";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Audio } from 'expo-av';
-import { Sound } from "expo-av/build/Audio";
-import * as FileSystem from 'expo-file-system';
 import { useKeepAwake } from 'expo-keep-awake';
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
@@ -66,13 +64,14 @@ export default function Lecture() {
   const [timerKey, setTimerKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMute, setIsMute] = useState(false);
+  const [isBgmMute, setIsBgmMute] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
   const [duration, setDuration] = useState(0);
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [userAdjustedTime, setUserAdjustedTime] = useState(0);
 
   const [mode, setMode] = useState<"default" | "text">('default');
-
-  const bgmRef = useRef<Sound>();
 
   // Show intro when component is mounted
   useEffect(() => {
@@ -102,11 +101,12 @@ export default function Lecture() {
           duration: 1000,
           useNativeDriver: true,
         }).start(() => {
+          const time = lecture.time === 0 ? 1 : (lecture.time * 60);
           setShowIntro(false);
           setShowContent(true);
           setIsPlaying(true);
-          setDuration(lecture.time === 0 ? 1 : lecture.time);
-          setInitialRemainingTime(lecture.time);
+          setDuration(time);
+          setInitialRemainingTime(time);
           Animated.timing(contentOpacity, {
             toValue: 1,
             duration: 1000,
@@ -119,51 +119,13 @@ export default function Lecture() {
     hideIntro();
   }, [isLectureSuccess, isShowedIntro]);
 
-  // Load BGM when lecture is successfully loaded
   useEffect(() => {
-    // Load sound
-    const loadSound = async () => {
-      try {
-        const fileInfo = await FileSystem.getInfoAsync(lecture.bgm);
+    setUserAdjustedTime(initialRemainingTime);
+  }, [initialRemainingTime])
 
-        if (!fileInfo.exists) {
-          // TODO go to plan page and download audio
-          throw new Error('BGM file does not exist');
-        }
-
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: fileInfo.uri },
-          {
-            shouldPlay: true,
-            isLooping: true,
-          }
-        );
-        bgmRef.current = sound;
-
-        // Todo play audio when duration equals start_time
-      } catch (e) {
-        console.log(e);
-        Alert.alert('오류', '파일을 다시 다운로드 해주세요.');
-        await AsyncStorage.removeItem(`planAudit-${lecture.plan_id}`);
-        router.replace('/plan');
-      }
-    }
-
-    // have to unload sound when component is unmounted
-    const unloadSound = async () => {
-      if (bgmRef.current) {
-        await bgmRef.current.unloadAsync();
-      }
-    }
-
-    if (isLectureSuccess && !!lecture.bgm) {
-      loadSound();
-    }
-
-    return () => {
-      unloadSound();
-    };
-  }, [lecture.bgm, isLectureSuccess]);
+  useEffect(() => {
+    setIsMute(!isPlaying);
+  }, [isPlaying])
 
   const onPressLeftArrow = () => {
     Alert.alert(
@@ -177,13 +139,7 @@ export default function Lecture() {
   }
 
   const onPressMusic = () => {
-    if (isMute) {
-      bgmRef.current?.playAsync();
-    } else {
-      bgmRef.current?.pauseAsync();
-    }
-
-    setIsMute(!isMute);
+    setIsBgmMute(!isBgmMute);
   }
 
   const onPressTab = (mode: "default" | "text") => {
@@ -222,6 +178,18 @@ export default function Lecture() {
 
   return (
     <View style={{ paddingTop: insets.top }}>
+      <SoundBox
+        plan_id={plan_id}
+        bgm={lecture.bgm}
+        audios={lectureAudios}
+        isBgmMute={isBgmMute}
+        isMute={isMute}
+        isPlaying={isPlaying}
+        repeatCount={repeatCount}
+        elapsedTime={elapsedTime}
+        userAdjustedTime={userAdjustedTime}
+      />
+
       {/* Intro */}
       {showIntro && (
         <Animated.View style={[styles.intro, { opacity: introOpacity }]}>
@@ -257,7 +225,7 @@ export default function Lecture() {
             suffix={
               <Pressable onPress={onPressMusic}>
                 {
-                  isMute
+                  isBgmMute
                     ? <Mute />
                     : <Music />
                 }
@@ -308,7 +276,7 @@ export default function Lecture() {
                 textAlign="left"
               >
                 {
-                  lectureAudios.reduce((acc, cur) => acc + cur.caption, '').replace('\\n', '\n')
+                  lectureAudios.map((row) => row.caption).join('\n\n')
                 }
               </BoldText>
             </ScrollView>
@@ -329,6 +297,7 @@ export default function Lecture() {
               duration={duration}
               initialRemainingTime={initialRemainingTime}
               isPlaying={isPlaying}
+              setElapsedTime={setElapsedTime}
               onPressNext={onPressNext}
               onPressPlay={onPressPlay}
               onPressPrev={onPressPrev}
