@@ -114,7 +114,6 @@ export default function CalendarPage() {
       return res.data;
     },
     onSuccess: (data) => {
-      console.log('onSuccess', data);
       if (data.length === 0) {
         setSelectedNoteList([<EmptyNote key="empty" />])
       } else {
