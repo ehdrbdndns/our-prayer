@@ -2,6 +2,7 @@ import BackgroundWithImage from '@/components/BackgroundWithImage';
 import { useSession } from '@/ctx';
 import { useUserMutation } from '@/utils/mutation';
 import { registerForPushNotificationsAsync } from '@/utils/notification';
+import { setBadgeCountAsync } from 'expo-notifications';
 import { Redirect, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 
@@ -9,6 +10,12 @@ export default function AppLayout() {
   const { session, isLoading, setSession } = useSession();
   const [isAppReady, setAppReady] = useState(false);
   const { mutate: userMutate } = useUserMutation();
+
+  // Reset badge count
+  useEffect(() => {
+    // TODO fix, when user show reply, badge count should be reset
+    setBadgeCountAsync(0);
+  }, []);
 
   // GET expo push token and save it to the server
   useEffect(() => {
