@@ -75,6 +75,7 @@ export default function Index() {
     }
   }, [session, isLoading]);
 
+  // GET expo push token and save it to the server
   useEffect(() => {
     async function registorExpoPushToken() {
       if (!!session && !isLoading) {

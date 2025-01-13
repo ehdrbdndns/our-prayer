@@ -66,7 +66,7 @@ export default function Root() {
     }, 0);
   }, [])
 
-  // Gets the push token and displays it in the UI, or in case of an error, displays the error message.
+  // Set up the notification listeners
   useEffect(() => {
     // This listener is fired whenever a notification is received while the app is foregrounded
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
