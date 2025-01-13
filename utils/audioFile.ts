@@ -11,10 +11,10 @@ const audioFileUri = ({
 async function ensureDirExists(path: string) {
   const dirInfo = await FileSystem.getInfoAsync(path);
   if (!dirInfo.exists) {
-    console.log("audio directory doesn't exist, creating…");
+    // console.log("audio directory doesn't exist, creating…");
     await FileSystem.makeDirectoryAsync(path, { intermediates: true });
   } else {
-    console.log("audio directory exists!");
+    // console.log("audio directory exists!");
   }
 }
 
