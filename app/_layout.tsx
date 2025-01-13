@@ -66,31 +66,6 @@ export default function Root() {
     }, 0);
   }, [])
 
-  // Set up the notification listeners
-  useEffect(() => {
-    // This listener is fired whenever a notification is received while the app is foregrounded
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      console.log('notification received on foreground', notification);
-    });
-
-    // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
-    // but may or may not be fired when the app is killed
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('notification response received', response);
-      console.log(JSON.stringify(response, null, 2));
-      console.log(JSON.stringify(response.notification.request.content.data, null, 2));
-
-      // Handle the notification response here
-    });
-
-    return () => {
-      notificationListener.current &&
-        Notifications.removeNotificationSubscription(notificationListener.current);
-      responseListener.current &&
-        Notifications.removeNotificationSubscription(responseListener.current);
-    };
-  }, []);
-
   // Hide the splash screen when the app is ready
   useEffect(() => {
     if (fontsLoaded) {
