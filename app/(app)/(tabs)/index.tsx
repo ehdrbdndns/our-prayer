@@ -14,17 +14,21 @@ import { useSession } from "@/ctx";
 import api from "@/utils/axios";
 import { BibleType } from "@/utils/dataType";
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
+import { useUserMutation } from "@/utils/mutation";
+import { registerForPushNotificationsAsync } from "@/utils/notification";
 import { useHistoryQuery, usePlanListQuery } from "@/utils/queries";
 import { moderateScale } from "@/utils/style";
 import { useQuery } from "@tanstack/react-query";
 import { Link, router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
 
-  const { session } = useSession();
+  const { session, isLoading, setSession } = useSession();
+  const [name, setName] = useState('');
 
   // fetch Bible data
   const { data: bible, isSuccess: isBibleSuccess } = useQuery<BibleType>({
@@ -56,12 +60,48 @@ export default function Index() {
   // fetch Plan data
   const { data: plan, isSuccess: isPlanSuccess } = usePlanListQuery();
 
-  const onHistoryPress = () => {
-    router.push("/calendar");
-  }
+  const { mutate: userMutate } = useUserMutation();
 
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
   const todayPrayerTime = calculateTodayPrayerTime(history || []);
+
+  const onPressHistory = () => {
+    router.push("/calendar");
+  }
+
+  useEffect(() => {
+    if (!isLoading && !session) {
+      router.push("/login");
+    }
+  }, [session, isLoading]);
+
+  useEffect(() => {
+    async function registorExpoPushToken() {
+      if (!!session && !isLoading) {
+        let expoPushToken = '';
+        try {
+          expoPushToken = await registerForPushNotificationsAsync();
+        } catch (e) {
+          console.error(e);
+          expoPushToken = '';
+        }
+
+        const { expo_push_token: existExpoPushToken, name } = JSON.parse(session);
+        setName(name);
+
+        if (existExpoPushToken !== expoPushToken) {
+          userMutate({ expoPushToken, alarm: expoPushToken !== '' });
+          setSession(JSON.stringify({ ...JSON.parse(session), expo_push_token: expoPushToken }))
+        }
+      }
+    }
+
+    registorExpoPushToken();
+  }, [session, isLoading])
+
+  if (!isHistorySuccess || !isPlanSuccess || !isBibleSuccess || isLoading) {
+    return null; // TODO : Add skeleton
+  }
 
   return (
     <ScrollView
@@ -92,7 +132,7 @@ export default function Index() {
         {/* Content */}
         <View style={styles.content}>
           <BoldText style={styles.intro} fontSize={24} lineHeight={36} letterSpacingPercent={-1}>
-            {`안녕하세요, ${session}님\n오늘의 기도를 시작해보세요.`}
+            {`안녕하세요, ${name}님\n오늘의 기도를 시작해보세요.`}
           </BoldText>
         </View>
 
@@ -149,7 +189,7 @@ export default function Index() {
 
           {/* Button */}
           <CustomButton
-            onPress={onHistoryPress}
+            onPress={onPressHistory}
             style={{
               flexDirection: "row",
               justifyContent: "flex-start",

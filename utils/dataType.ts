@@ -1,6 +1,7 @@
 export interface UserType {
   name: string;
   alarm: boolean;
+  expo_push_token: string;
   created_date: number; // Unix timestamp
 }
 

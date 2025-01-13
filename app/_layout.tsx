@@ -11,10 +11,11 @@ import {
   QueryClientProvider
 } from '@tanstack/react-query';
 import { Audio } from 'expo-av';
+import * as Notifications from 'expo-notifications';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setStatusBarStyle } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SessionProvider } from '../ctx';
 
 const queryClient = new QueryClient()
@@ -24,6 +25,15 @@ SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
   duration: 1000,
   fade: true,
+});
+
+// This handler determines how your app handles notifications that come in while the app is foregrounded.
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
 });
 
 export default function Root() {
@@ -37,6 +47,9 @@ export default function Root() {
     Inter_400Regular,
     IBMPlexMono_400Regular
   });
+
+  const notificationListener = useRef<Notifications.EventSubscription>();
+  const responseListener = useRef<Notifications.EventSubscription>();
 
   const [isAppReady, setAppReady] = useState(false);
 
@@ -53,6 +66,31 @@ export default function Root() {
     }, 0);
   }, [])
 
+  // Gets the push token and displays it in the UI, or in case of an error, displays the error message.
+  useEffect(() => {
+    // This listener is fired whenever a notification is received while the app is foregrounded
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      console.log('notification received on foreground', notification);
+    });
+
+    // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
+    // but may or may not be fired when the app is killed
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('notification response received', response);
+      console.log(JSON.stringify(response, null, 2));
+      console.log(JSON.stringify(response.notification.request.content.data, null, 2));
+
+      // Handle the notification response here
+    });
+
+    return () => {
+      notificationListener.current &&
+        Notifications.removeNotificationSubscription(notificationListener.current);
+      responseListener.current &&
+        Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
   // Hide the splash screen when the app is ready
   useEffect(() => {
     if (fontsLoaded) {
@@ -61,7 +99,7 @@ export default function Root() {
         setAppReady(true);
       }, 2000);
     }
-  }, [fontsLoaded])
+  }, [fontsLoaded, isAppReady])
 
   return (
     <QueryClientProvider client={queryClient}>

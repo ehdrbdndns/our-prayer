@@ -126,7 +126,11 @@ export const useUserMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ name, alarm }: { name?: string, alarm?: boolean }) => {
+    mutationFn: async ({
+      name, alarm, expoPushToken
+    }: {
+      name?: string, alarm?: boolean, expoPushToken?: string
+    }) => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
 
@@ -135,7 +139,8 @@ export const useUserMutation = () => {
         url: "/user",
         data: {
           name: name,
-          alarm: alarm
+          alarm: alarm,
+          expoPushToken: expoPushToken
         },
         headers: {
           "Authorization": `Bearer ${accessToken}`,
