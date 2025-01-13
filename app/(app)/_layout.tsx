@@ -1,15 +1,40 @@
 import BackgroundWithImage from '@/components/BackgroundWithImage';
 import { useSession } from '@/ctx';
+import { useUserMutation } from '@/utils/mutation';
+import { registerForPushNotificationsAsync } from '@/utils/notification';
 import { Redirect, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 export default function AppLayout() {
-  const { session, isLoading } = useSession();
+  const { session, isLoading, setSession } = useSession();
   const [isAppReady, setAppReady] = useState(false);
+  const { mutate: userMutate } = useUserMutation();
 
+  // GET expo push token and save it to the server
   useEffect(() => {
-    setAppReady(true);
-  }, [isLoading])
+    async function registorExpoPushToken() {
+      if (!!session && !isLoading) {
+        let expoPushToken = '';
+        try {
+          expoPushToken = await registerForPushNotificationsAsync();
+        } catch (e) {
+          console.error(e);
+          expoPushToken = '';
+        }
+
+        const { expo_push_token: existExpoPushToken } = JSON.parse(session);
+
+        if (existExpoPushToken !== expoPushToken) {
+          userMutate({ expoPushToken, alarm: expoPushToken !== '' });
+          setSession(JSON.stringify({ ...JSON.parse(session), expo_push_token: expoPushToken }))
+        }
+
+        setAppReady(true);
+      }
+    }
+
+    registorExpoPushToken();
+  }, [session, isLoading])
 
   if (!isAppReady) {
     return <BackgroundWithImage animation='fade' />;
