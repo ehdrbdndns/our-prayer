@@ -16,16 +16,18 @@ import { moderateScale, scaleHeight } from "@/utils/style";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MyPage() {
 
-  const queryClient = useQueryClient();
-  const { session, signOut } = useSession();
   const insets = useSafeAreaInsets();
+
+  const queryClient = useQueryClient();
+  const { session, signOut, isLoading, setSession } = useSession();
   const [enableAlarm, setEnableAlarm] = useState(false);
+  const [name, setName] = useState('');
 
   const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
   const { data: user, isSuccess: isUserSuccess } = useQuery<UserType>({
@@ -74,6 +76,14 @@ export default function MyPage() {
     },
   })
 
+  useEffect(() => {
+    if (!!session && !isLoading) {
+      const { name, alarm } = JSON.parse(session);
+      setName(name);
+      setEnableAlarm(alarm);
+    }
+  }, [session, isLoading]);
+
   // 연속 기도 일수
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
 
@@ -87,8 +97,14 @@ export default function MyPage() {
   const daysSinceSignup = user?.created_date ? calculateDaysSinceSignup(user.created_date) : 0;
 
   const onChangeAlarm = () => {
+
+
     userMutate({ alarm: !enableAlarm });
     setEnableAlarm(!enableAlarm);
+
+    if (!!session) {
+      setSession(JSON.stringify({ ...JSON.parse(session), alarm: !enableAlarm }));
+    }
   }
 
   const onPressEditName = () => {
@@ -116,6 +132,10 @@ export default function MyPage() {
     )
   }
 
+  if (isLoading) {
+    return null; // TODO : Add skeleton
+  }
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView
@@ -136,7 +156,7 @@ export default function MyPage() {
                 fontSize={24}
                 lineHeight={36}
               >
-                {session}
+                {name}
               </BoldText>
               <Edit
                 width={moderateScale(20)}

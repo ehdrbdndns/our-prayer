@@ -6,27 +6,48 @@ import { MediumText } from "@/components/text/MediumText";
 import { useSession } from '@/ctx';
 import { useUserMutation } from '@/utils/mutation';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
-import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditNickname() {
 
-  const queryClient = useQueryClient();
-  const { session, setSession } = useSession();
-  const [name, setName] = useState(session || '');
+  const { session, setSession, isLoading } = useSession();
+  const [name, setName] = useState('');
 
   const { mutate } = useUserMutation();
+
+  useEffect(() => {
+    if (!!session && !isLoading) {
+      const { name } = JSON.parse(session);
+      setName(name);
+
+      setSession(JSON.stringify({
+        ...JSON.parse(session),
+        name
+      }));
+    }
+  }, [session, isLoading])
+
   const onPressSave = () => {
     mutate({ name });
-    setSession(name);
+
+    if (!!session && !isLoading) {
+      setSession(JSON.stringify({
+        ...JSON.parse(session),
+        name
+      }));
+    }
     router.back();
   }
 
   const onPressBack = () => {
     router.back();
+  }
+
+  if (isLoading) {
+    return null; // TODO: loading component
   }
 
   return (
@@ -85,7 +106,7 @@ export default function EditNickname() {
               borderBottomColor: 'rgba(255, 255, 255, 0.1)',
               paddingBottom: moderateScale(8),
             }}
-            placeholder={session || '닉네임을 입력하세요'}
+            placeholder={name || '닉네임을 입력하세요'}
             placeholderTextColor={'#B3B3B3'}
             onChangeText={(v) => setName(v)}
           />

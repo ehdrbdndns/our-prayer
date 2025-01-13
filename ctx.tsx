@@ -1,7 +1,9 @@
 import * as SecureStore from 'expo-secure-store';
 import { createContext, useContext, useState, type PropsWithChildren } from 'react';
+import { Alert } from 'react-native';
 import { useStorageState } from './storage/useStorageState';
 import api from './utils/axios';
+import { registerForPushNotificationsAsync } from './utils/notification';
 
 // Session Context
 interface SessionType {
@@ -37,7 +39,19 @@ export function SessionProvider({ children }: PropsWithChildren) {
     <AuthContext.Provider
       value={{
         signUp: async () => {
-          const res = await api.post<SessionType>('/user/auth', { userType: 'local' });
+          let expoPushToken = '';
+
+          try {
+            expoPushToken = await registerForPushNotificationsAsync();
+          } catch (e) {
+            console.log(e);
+            Alert.alert('알림 설정에 실패했습니다.');
+          }
+          const res = await api.post<SessionType>('/user/auth', {
+            userType: 'local',
+            expoPushToken,
+            alarm: expoPushToken !== ''
+          });
 
           if (res.status !== 200) {
             throw new Error('계정 생성에 실패했습니다.');
@@ -47,7 +61,11 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
           await SecureStore.setItemAsync('accessToken', accessToken);
           await SecureStore.setItemAsync('refreshToken', refreshToken);
-          setSession(name);
+          setSession(JSON.stringify({
+            name,
+            expoPushToken,
+            alarm: expoPushToken !== ''
+          }));
         },
         signOut: async () => {
           await SecureStore.deleteItemAsync('accessToken');
