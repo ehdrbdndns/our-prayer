@@ -15,7 +15,7 @@ import * as Notifications from 'expo-notifications';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setStatusBarStyle } from "expo-status-bar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { SessionProvider } from '../ctx';
 
 const queryClient = new QueryClient()
@@ -47,9 +47,6 @@ export default function Root() {
     Inter_400Regular,
     IBMPlexMono_400Regular
   });
-
-  const notificationListener = useRef<Notifications.EventSubscription>();
-  const responseListener = useRef<Notifications.EventSubscription>();
 
   const [isAppReady, setAppReady] = useState(false);
 
