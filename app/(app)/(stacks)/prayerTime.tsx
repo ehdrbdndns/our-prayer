@@ -27,7 +27,6 @@ const times = Array.from({ length: 24 }, (_, i) => i + 1);
 
 const saveNotificationIds = async (ids: { [hour: number]: string }) => {
   try {
-    console.log(ids);
     await AsyncStorage.setItem('notificationIds', JSON.stringify(ids));
   } catch (e) {
     console.error('Failed to save notification IDs', e);
@@ -76,7 +75,7 @@ export default function PrayerTime() {
     const id = await Notifications.scheduleNotificationAsync({
       content: {
         title: "곧 기도 시간입니다.",
-        body: `${TimeHashTable[hour]}에 기도할 시간입니다.`,
+        body: "기도 시간 10분 전입니다.",
         sound: true,
       },
       trigger: {
@@ -125,7 +124,7 @@ export default function PrayerTime() {
 
     setSelectedTimes(tempSelectedTimes);
 
-    Alert.alert('저장되었습니다.', '기도 시간 설정이 저장되었습니다.',
+    Alert.alert('저장되었습니다.', '기도 시간이 저장되었습니다.',
       [
         {
           text: '확인',
