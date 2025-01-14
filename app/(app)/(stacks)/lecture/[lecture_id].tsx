@@ -46,11 +46,7 @@ export default function Lecture() {
   }>();
 
   // Fetch lecture data
-  const { data, isSuccess: isLectureSuccess } = useLectureQuery({ lecture_id });
-
-  if (isLectureSuccess && data === undefined) {
-    return <Redirect href="/plan" />
-  }
+  const { data, isSuccess: isLectureSuccess, isError: isLectureError } = useLectureQuery({ lecture_id });
 
   const lecture = data?.lecture || getDefaultLecture();
   const lectureAudios = data?.lectureAudios || [];
@@ -119,6 +115,15 @@ export default function Lecture() {
     hideIntro();
   }, [isLectureSuccess, isShowedIntro]);
 
+  // router.replace('/plan') and re download the file when lecture occurs error
+  useEffect(() => {
+    if (isLectureError) {
+      Alert.alert('오류', '파일을 다시 다운로드 해주세요.');
+      AsyncStorage.removeItem(`planAudit-${plan_id}`);
+      router.replace('/plan');
+    }
+  }, [isLectureError])
+
   useEffect(() => {
     setUserAdjustedTime(initialRemainingTime);
   }, [initialRemainingTime])
@@ -175,6 +180,11 @@ export default function Lecture() {
       }
     });
   }
+
+  if (isLectureSuccess && data === undefined) {
+    return <Redirect href="/plan" />
+  }
+
 
   return (
     <View style={{ paddingTop: insets.top }}>
