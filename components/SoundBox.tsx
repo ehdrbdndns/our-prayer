@@ -46,8 +46,6 @@ export default function SoundBox(props: SoundBoxProps) {
 
         if (!fileInfo.exists) {
           // TODO go to plan page and download audio
-          await AsyncStorage.removeItem(`planAudit-${plan_id}`);
-          router.replace('/plan');
           throw new Error('BGM file does not exist');
         }
 
