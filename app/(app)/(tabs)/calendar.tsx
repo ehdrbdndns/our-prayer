@@ -12,9 +12,9 @@ import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotal
 import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import { useMutation } from '@tanstack/react-query';
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from 'react-native-calendars';
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,7 +28,8 @@ LocaleConfig.locales['kr'] = {
 
 LocaleConfig.defaultLocale = 'kr';
 
-const Today = new Date().toISOString().split('T')[0];
+const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const Today = new Date().toLocaleDateString('sv-SE', { timeZone: userTimeZone });
 
 const EmptyNote = () => (
   <View key="emptyNote" style={styles.emptyQuestion}>
@@ -92,6 +93,7 @@ export default function CalendarPage() {
   const selectedDayRef = useRef(selectedDay)
   const [selectedNoteList, setSelectedNoteList] = useState<JSX.Element[]>([<EmptyNote key="empty" />]);
   const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
+
   const { mutate: retrieveHistoryNote } = useMutation({
     mutationFn: async (prayer_history_id_list: string[]) => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
@@ -162,19 +164,12 @@ export default function CalendarPage() {
   // 전체 기도 시간
   const totalPrayerTime = calculateTotalPrayerTime(history || []);
 
+
   useEffect(() => {
     if (!!markedDates[Today]) {
       retrieveHistoryNote(markedDates[Today].prayer_history_id_list);
     }
   }, [isHistorySuccess])
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!!markedDates[selectedDayRef.current]) {
-        retrieveHistoryNote(markedDates[selectedDayRef.current].prayer_history_id_list);
-      }
-    }, [])
-  )
 
   const onPressDay = async (day: DateData) => {
     setSelectedDay(day.dateString);

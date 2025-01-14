@@ -57,7 +57,11 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
         const dateString = date.toISOString().split('T')[0];
 
         const isActive = history.find(
-          (entry) => new Date(entry.created_date * 1000).toISOString().split('T')[0] === dateString
+          (entry) => {
+            const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const entryDate = new Date(entry.created_date * 1000).toLocaleDateString('sv-SE', { timeZone: userTimeZone });
+            return entryDate === dateString;
+          }
         ) !== undefined;
 
         days.push({ index: day + 1, isActive });

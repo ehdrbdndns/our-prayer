@@ -1,6 +1,7 @@
 import Delete from "@/assets/images/icon/delete.svg";
 import Music from "@/assets/images/icon/music.svg";
 import Mute from "@/assets/images/icon/mute.svg";
+import SoundBox from "@/components/\bSoundBox";
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
@@ -9,8 +10,7 @@ import Timer from "@/components/timer/Timer";
 import { LectureType } from "@/utils/dataType";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
-import { Audio } from 'expo-av';
-import { Sound } from "expo-av/build/Audio";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useKeepAwake } from 'expo-keep-awake';
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
@@ -39,17 +39,14 @@ export default function Lecture() {
 
   const insets = useSafeAreaInsets();
 
-  const { lecture_id, plan_title } = useLocalSearchParams<{
+  const { plan_id, lecture_id, plan_title } = useLocalSearchParams<{
+    plan_id: string,
     lecture_id: string,
     plan_title: string
   }>();
 
   // Fetch lecture data
-  const { data, isSuccess: isLectureSuccess } = useLectureQuery({ lecture_id });
-
-  if (isLectureSuccess && data === undefined) {
-    return <Redirect href="/plan" />
-  }
+  const { data, isSuccess: isLectureSuccess, isError: isLectureError } = useLectureQuery({ lecture_id });
 
   const lecture = data?.lecture || getDefaultLecture();
   const lectureAudios = data?.lectureAudios || [];
@@ -63,13 +60,14 @@ export default function Lecture() {
   const [timerKey, setTimerKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMute, setIsMute] = useState(false);
+  const [isBgmMute, setIsBgmMute] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
   const [duration, setDuration] = useState(0);
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [userAdjustedTime, setUserAdjustedTime] = useState(0);
 
   const [mode, setMode] = useState<"default" | "text">('default');
-
-  const bgmRef = useRef<Sound>();
 
   // Show intro when component is mounted
   useEffect(() => {
@@ -85,54 +83,54 @@ export default function Lecture() {
 
   // Hide intro and show content after lecture data is loaded
   useEffect(() => {
-    if (isLectureSuccess && isShowedIntro) {
-      Animated.timing(introOpacity, {
-        toValue: 0,
-        duration: 1000,
-        useNativeDriver: true,
-      }).start(() => {
-        setShowIntro(false);
-        setShowContent(true);
-        setIsPlaying(true);
-        setDuration(lecture.time === 0 ? 1 : lecture.time);
-        setInitialRemainingTime(lecture.time);
-        Animated.timing(contentOpacity, {
-          toValue: 1,
+    async function hideIntro() {
+      if (isLectureSuccess && isShowedIntro) {
+
+        if (lecture.bgm === '') {
+          Alert.alert('오류', '파일을 다시 다운로드 해주세요.');
+          await AsyncStorage.removeItem(`planAudit-${plan_id}`);
+          router.replace('/plan');
+        }
+
+        Animated.timing(introOpacity, {
+          toValue: 0,
           duration: 1000,
           useNativeDriver: true,
-        }).start();
-      });
-    }
-  }, [isLectureSuccess, isShowedIntro]);
-
-  // Load BGM when lecture is successfully loaded
-  useEffect(() => {
-    // Load sound
-    const loadSound = async () => {
-      const { sound } = await Audio.Sound.createAsync({
-        uri: lecture.bgm
-      }, {
-        shouldPlay: true,
-        isLooping: true
-      });
-      bgmRef.current = sound;
-    }
-
-    // have to unload sound when component is unmounted
-    const unloadSound = async () => {
-      if (bgmRef.current) {
-        await bgmRef.current.unloadAsync();
+        }).start(() => {
+          const time = lecture.time === 0 ? 1 : (lecture.time * 60);
+          setShowIntro(false);
+          setShowContent(true);
+          setIsPlaying(true);
+          setDuration(time);
+          setInitialRemainingTime(time);
+          Animated.timing(contentOpacity, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }).start();
+        });
       }
     }
 
-    if (isLectureSuccess && !!lecture.bgm) {
-      loadSound();
-    }
+    hideIntro();
+  }, [isLectureSuccess, isShowedIntro]);
 
-    return () => {
-      unloadSound();
-    };
-  }, [lecture.bgm, isLectureSuccess]);
+  // router.replace('/plan') and re download the file when lecture occurs error
+  useEffect(() => {
+    if (isLectureError) {
+      Alert.alert('오류', '파일을 다시 다운로드 해주세요.');
+      AsyncStorage.removeItem(`planAudit-${plan_id}`);
+      router.replace('/plan');
+    }
+  }, [isLectureError])
+
+  useEffect(() => {
+    setUserAdjustedTime(initialRemainingTime);
+  }, [initialRemainingTime])
+
+  useEffect(() => {
+    setIsMute(!isPlaying);
+  }, [isPlaying])
 
   const onPressLeftArrow = () => {
     Alert.alert(
@@ -146,13 +144,7 @@ export default function Lecture() {
   }
 
   const onPressMusic = () => {
-    if (isMute) {
-      bgmRef.current?.playAsync();
-    } else {
-      bgmRef.current?.pauseAsync();
-    }
-
-    setIsMute(!isMute);
+    setIsBgmMute(!isBgmMute);
   }
 
   const onPressTab = (mode: "default" | "text") => {
@@ -184,13 +176,30 @@ export default function Lecture() {
       pathname: '/prayerRecord',
       params: {
         lecture_id: lecture.lecture_id,
-        duration: repeatCount * Math.ceil(elapsedTime ? elapsedTime : 1)
+        duration: (repeatCount * duration) + Math.ceil(elapsedTime ? elapsedTime : 1)
       }
     });
   }
 
+  if (isLectureSuccess && data === undefined) {
+    return <Redirect href="/plan" />
+  }
+
+
   return (
     <View style={{ paddingTop: insets.top }}>
+      <SoundBox
+        plan_id={plan_id}
+        bgm={lecture.bgm}
+        audios={lectureAudios}
+        isBgmMute={isBgmMute}
+        isMute={isMute}
+        isPlaying={isPlaying}
+        repeatCount={repeatCount}
+        elapsedTime={elapsedTime}
+        userAdjustedTime={userAdjustedTime}
+      />
+
       {/* Intro */}
       {showIntro && (
         <Animated.View style={[styles.intro, { opacity: introOpacity }]}>
@@ -226,7 +235,7 @@ export default function Lecture() {
             suffix={
               <Pressable onPress={onPressMusic}>
                 {
-                  isMute
+                  isBgmMute
                     ? <Mute />
                     : <Music />
                 }
@@ -277,7 +286,7 @@ export default function Lecture() {
                 textAlign="left"
               >
                 {
-                  lectureAudios.reduce((acc, cur) => acc + cur.caption, '').replace('\\n', '\n')
+                  lectureAudios.map((row) => row.caption).join('\n\n')
                 }
               </BoldText>
             </ScrollView>
@@ -298,6 +307,7 @@ export default function Lecture() {
               duration={duration}
               initialRemainingTime={initialRemainingTime}
               isPlaying={isPlaying}
+              setElapsedTime={setElapsedTime}
               onPressNext={onPressNext}
               onPressPlay={onPressPlay}
               onPressPrev={onPressPrev}

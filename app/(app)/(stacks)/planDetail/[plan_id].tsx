@@ -53,8 +53,9 @@ export default function PlanDetailPage() {
     router.push({
       pathname: '/lecture/[lecture_id]',
       params: {
+        plan_id: plan_id,
+        plan_title: title,
         lecture_id: lecture_id,
-        plan_title: title
       }
     })
   }

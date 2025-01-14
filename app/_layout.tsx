@@ -11,6 +11,7 @@ import {
   QueryClientProvider
 } from '@tanstack/react-query';
 import { Audio } from 'expo-av';
+import * as Notifications from 'expo-notifications';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setStatusBarStyle } from "expo-status-bar";
@@ -24,6 +25,15 @@ SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
   duration: 1000,
   fade: true,
+});
+
+// This handler determines how your app handles notifications that come in while the app is foregrounded.
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
 });
 
 export default function Root() {
@@ -61,7 +71,7 @@ export default function Root() {
         setAppReady(true);
       }, 2000);
     }
-  }, [fontsLoaded])
+  }, [fontsLoaded, isAppReady])
 
   return (
     <QueryClientProvider client={queryClient}>

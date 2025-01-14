@@ -25,10 +25,11 @@
     },
     "plugins": [
       "expo-router",
+      "expo-secure-store",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/logo.png",
           "resizeMode": "contain",
           "backgroundColor": "#242527"
         }
@@ -47,7 +48,12 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
         }
       ],
-      "expo-secure-store"
+      [
+        "expo-notifications",
+        {
+          "enableBackgroundRemoteNotifications": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -66,6 +72,10 @@
     },
     "packagerOpts": {
       "config": "metro.config.js"
+    },
+    "splash": {
+      "image": "./assets/images/logo.png",
+      "backgroundColor": "#242527"
     }
   }
 }

@@ -25,7 +25,11 @@ export default function login() {
     // TEST LOGIN For Test
     await SecureStore.setItemAsync('accessToken', process.env.EXPO_PUBLIC_TEST_ACCESS_KEY || '');
     await SecureStore.setItemAsync('refreshToken', process.env.EXPO_PUBLIC_TEST_REFRESH_KEY || '');
-    setSession('강한 요한');
+    setSession(JSON.stringify({
+      name: '강한 요한',
+      alarm: true,
+      expo_push_token: ''
+    }));
 
     // TODO: save the user's login status
 

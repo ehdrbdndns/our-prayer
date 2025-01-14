@@ -66,7 +66,7 @@ export const usePlanQuery = ({ plan_id }: { plan_id: string }) => {
 };
 
 export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
-  return useQuery<LectureResponseType>({
+  return useQuery<LectureResponseType | null>({
     queryKey: ["lecture", lecture_id],
     queryFn: async () => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
@@ -84,7 +84,11 @@ export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
         lecture: {
           ...res.data.lecture,
           time: Number(res.data.lecture.time)
-        }
+        },
+        lectureAudios: res.data.lectureAudios.map((row) => ({
+          ...row,
+          start_time: Number(row.start_time)
+        }))
       }
 
       return data;
