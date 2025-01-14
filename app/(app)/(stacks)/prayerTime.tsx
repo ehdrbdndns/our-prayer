@@ -8,8 +8,11 @@ import { BoldText } from '@/components/text/BoldText';
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from '@/components/text/RegularText';
 import { moderateScale, scaleHeight } from "@/utils/style";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import { router } from "expo-router";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TimeHashTable: { [key: number]: string } = {
@@ -19,13 +22,142 @@ const TimeHashTable: { [key: number]: string } = {
   19: '오후 7시', 20: '오후 8시', 21: '오후 9시', 22: '오후 10시', 23: '오후 11시', 24: '오후 12시'
 };
 
+// 1 ~ 24시간대 배열 생성
 const times = Array.from({ length: 24 }, (_, i) => i + 1);
+
+const saveNotificationIds = async (ids: { [hour: number]: string }) => {
+  try {
+    console.log(ids);
+    await AsyncStorage.setItem('notificationIds', JSON.stringify(ids));
+  } catch (e) {
+    console.error('Failed to save notification IDs', e);
+  }
+};
+
+const getNotificationIds = async () => {
+  try {
+    const ids = await AsyncStorage.getItem('notificationIds');
+    return ids ? JSON.parse(ids) : {};
+  } catch (e) {
+    console.error('Failed to fetch notification IDs', e);
+    return {};
+  }
+};
 
 export default function PrayerTime() {
   const insets = useSafeAreaInsets();
 
+  const [selectedTimes, setSelectedTimes] = useState<boolean[]>(Array.from({ length: 24 }, () => false));
+  const [tempSelectedTimes, setTempSelectedTimes] = useState<boolean[]>(Array.from({ length: 24 }, () => false));
+  const [notificationIds, setNotificationIds] = useState<{ [hour: number]: string }>({});
+
+  useEffect(() => {
+    const fetchNotificationIds = async () => {
+      const ids = await getNotificationIds();
+      setNotificationIds(ids);
+      Object.keys(ids).forEach((hour) => {
+        setSelectedTimes((prev) => {
+          const newTimes = [...prev];
+          newTimes[Number(hour)] = true;
+          return newTimes;
+        });
+        setTempSelectedTimes((prev) => {
+          const newTimes = [...prev];
+          newTimes[Number(hour)] = true;
+          return newTimes;
+        });
+      });
+    };
+
+    fetchNotificationIds();
+  }, []);
+
+  const scheduleNotification = async (hour: number) => {
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "곧 기도 시간입니다.",
+        body: `${TimeHashTable[hour]}에 기도할 시간입니다.`,
+        sound: true,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour: hour - 1,
+        minute: 50
+      },
+    });
+
+    setNotificationIds((prev) => {
+      const newIds = { ...prev, [hour]: id };
+      saveNotificationIds(newIds);
+      return newIds;
+    });
+  };
+
+  const cancelNotification = async (hour: number) => {
+    const id = notificationIds[hour];
+    if (id) {
+      await Notifications.cancelScheduledNotificationAsync(id);
+      setNotificationIds((prev) => {
+        const newIds = { ...prev };
+        delete newIds[hour];
+        saveNotificationIds(newIds);
+        return newIds;
+      });
+    }
+  }
+
+  const onTimeSelect = (hour: number) => {
+    setTempSelectedTimes((prev) => {
+      const newTimes = [...prev];
+      newTimes[hour] = !tempSelectedTimes[hour];
+      return newTimes;
+    });
+  }
+
+  const onPressSave = () => {
+    tempSelectedTimes.forEach(async (selected, hour) => {
+      if (selected && !selectedTimes[hour]) {
+        await scheduleNotification(hour);
+      } else if (!selected && selectedTimes[hour]) {
+        await cancelNotification(hour);
+      }
+    });
+
+    setSelectedTimes(tempSelectedTimes);
+
+    Alert.alert('저장되었습니다.', '기도 시간 설정이 저장되었습니다.',
+      [
+        {
+          text: '확인',
+          onPress: () => router.back(),
+        },
+      ],
+      { cancelable: false }
+    );
+  }
+
   const onPressBack = () => {
-    router.back();
+    const hasChanges = tempSelectedTimes.some((selected, hour) => selected !== selectedTimes[hour]);
+
+    if (!hasChanges) {
+      router.back();
+    } else {
+      Alert.alert(
+        '변경사항이 저장되지 않았습니다.',
+        '정말 나가시겠습니까?',
+        [
+          {
+            text: '취소',
+            style: 'cancel',
+          },
+          {
+            text: '나가기',
+            onPress: () => router.back(),
+          },
+        ],
+        { cancelable: false }
+      );
+    }
   }
 
   return (
@@ -52,7 +184,9 @@ export default function PrayerTime() {
           </View>
         }
         suffix={
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => onPressSave()}
+          >
             <MediumText
               fontSize={16}
               color="#959FFF"
@@ -86,9 +220,13 @@ export default function PrayerTime() {
           contentContainerStyle={{ gap: moderateScale(12) }}
         >
           {times.map((time: number) => (
-            <CustomButton key={time} style={styles.button}>
+            <CustomButton
+              key={time}
+              style={styles.button}
+              onPress={() => onTimeSelect(time)}
+            >
               <View style={styles.buttonContent}>
-                {time === 1 ? <CheckedCircle /> : <UnCheckedCircle />}
+                {tempSelectedTimes[time] ? <CheckedCircle /> : <UnCheckedCircle />}
                 <BoldText fontSize={12} lineHeight={22}>
                   {TimeHashTable[time]}
                 </BoldText>
