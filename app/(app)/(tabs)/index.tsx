@@ -1,7 +1,5 @@
 import Fire from "@/assets/images/icon/fire.svg";
-import Search from "@/assets/images/icon/search.svg";
 import Star from "@/assets/images/icon/star.svg";
-import Logo from "@/assets/images/text-s-logo.svg";
 import CustomButton from "@/components/button/CustomButton";
 import Header from "@/components/Header";
 import MyPrayerPlan from "@/components/MyPrayerPlan";
@@ -17,7 +15,7 @@ import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils
 import { useHistoryQuery, usePlanListQuery } from "@/utils/queries";
 import { moderateScale } from "@/utils/style";
 import { useQuery } from "@tanstack/react-query";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
@@ -57,6 +55,7 @@ export default function Index() {
 
   // fetch Plan data
   const { data: plan, isSuccess: isPlanSuccess } = usePlanListQuery();
+  const likedPlans = plan?.plans.filter((plan) => plan.is_liked);
 
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
   const todayPrayerTime = calculateTodayPrayerTime(history || []);
@@ -88,19 +87,19 @@ export default function Index() {
         <Header
           style={styles.header}
           prefix={
-            <Link href="/login">
-              <Logo
-                style={{ marginLeft: moderateScale(4) }}
-                width={moderateScale(82)}
-                height={moderateScale(18)}
-              />
-            </Link>
-          }
-          suffix={
-            <Search
-              width={moderateScale(24)}
-              height={moderateScale(24)}
-            />
+            // <Link href="/login">
+            //   <Logo
+            //     style={{ marginLeft: moderateScale(4) }}
+            //     width={moderateScale(82)}
+            //     height={moderateScale(18)}
+            //   />
+            // </Link>
+            <BoldText
+              fontSize={18}
+              color="rgba(255, 255, 255, 0.8)"
+            >
+              우리의 기도
+            </BoldText>
           }
         />
 
@@ -146,7 +145,6 @@ export default function Index() {
           }
 
         </View>
-
         {/* 기도 일자 데이터 */}
         <View style={[styles.content, { marginBottom: moderateScale(40) }]}>
           {/* Title */}
@@ -186,13 +184,13 @@ export default function Index() {
         </View>
 
         {/* 기도 플랜 */}
-        <View style={[styles.content, { paddingRight: 0 }]}>
-          {
-            isPlanSuccess
-              ? <MyPrayerPlan plans={plan?.plans || []} />
-              : ''
-          }
-        </View>
+        {
+          (likedPlans && likedPlans.length > 0) ? (
+            <View style={[styles.content, { paddingRight: 0 }]}>
+              <MyPrayerPlan plans={likedPlans} />
+            </View>
+          ) : null // TODO : Add skeleton loader
+        }
 
         {/* 공유 카드 */}
         <ShareCard />
