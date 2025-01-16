@@ -380,7 +380,7 @@ export default function MyPage() {
               기도 시간 설정하기
             </BoldText>
           </CustomButton>
-          <CustomButton style={styles.button}>
+          {/* <CustomButton style={styles.button}>
             <BoldText
               color="#FFFFFF"
               fontSize={14}
@@ -389,7 +389,7 @@ export default function MyPage() {
             >
               카카오 계정 연동하기
             </BoldText>
-          </CustomButton>
+          </CustomButton> */}
           <CustomButton style={styles.button}>
             <BoldText
               color="#FFFFFF"
