@@ -119,6 +119,7 @@ export default function EditQuestion() {
         prefix={
           <View style={styles.headerPrefix}>
             <TouchableOpacity
+              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
               onPress={onPressBack}
             >
               <LeftArrow
@@ -136,7 +137,8 @@ export default function EditQuestion() {
         }
         suffix={
           <TouchableOpacity
-            onPress={() => { }}
+            onPress={onPressSave}
+            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
           >
             <MediumText
               fontSize={16}

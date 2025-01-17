@@ -57,7 +57,7 @@ const HistoryNote = ({
   >
     <View style={styles.note}>
       {
-        note === null ? (
+        (note === null || note === '') ? (
           <RegularText
             style={{ marginBottom: moderateScale(8) }}
             color="#B3B3B3"
@@ -219,6 +219,7 @@ export default function CalendarPage() {
             <View style={styles.headerPrefix}>
               <TouchableOpacity
                 onPress={onPressBack}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
               >
                 <LeftArrow
                   width={moderateScale(24)}

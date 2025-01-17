@@ -78,7 +78,7 @@ export default function PlanDetailPage() {
           style={styles.header}
           prefix={
             <View style={styles.headerPrefix}>
-              <Pressable onPress={onPressLeftArrow}>
+              <Pressable onPress={onPressLeftArrow} hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}>
                 <LeftArrow />
               </Pressable>
               <MediumText>{title}</MediumText>
@@ -89,6 +89,7 @@ export default function PlanDetailPage() {
               fill={isLiked ? "#FF7D71" : "transparent"}
               stroke={isLiked ? "#FF7D71" : "white"}
               onPress={onPressHeart}
+              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
             />
           }
         />

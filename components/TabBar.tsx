@@ -72,6 +72,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
             onPress={onPress}
             onLongPress={onLongPress}
             key={key}
+            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
           >
             {/* ICON */}
             <View style={name === "calendar" ? styles.mainTabButtonImage : styles.tabButtonImage}>

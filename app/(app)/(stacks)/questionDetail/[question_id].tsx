@@ -155,6 +155,7 @@ export default function QuestionDetail() {
             <View style={styles.headerPrefix}>
               <TouchableOpacity
                 onPress={onPressBack}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
               >
                 <Left
                   width={moderateScale(24)}
@@ -206,12 +207,18 @@ export default function QuestionDetail() {
 
             <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
               {/* Edit */}
-              <TouchableOpacity onPress={onPressEdit}>
+              <TouchableOpacity
+                onPress={onPressEdit}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+              >
                 <Edit width={moderateScale(24)} height={moderateScale(24)} />
               </TouchableOpacity>
 
               {/* Trash */}
-              <TouchableOpacity onPress={onPressDelete}>
+              <TouchableOpacity
+                onPress={onPressDelete}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+              >
                 <Trash width={moderateScale(24)} height={moderateScale(24)} />
               </TouchableOpacity>
             </View>

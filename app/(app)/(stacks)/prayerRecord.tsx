@@ -40,7 +40,10 @@ export default function PrayerRecord() {
         style={styles.header}
         prefix={<View></View>}
         suffix={
-          <TouchableOpacity onPress={onPressSave}>
+          <TouchableOpacity
+            onPress={onPressSave}
+            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+          >
             <MediumText
               fontSize={16}
               color="#959FFF"

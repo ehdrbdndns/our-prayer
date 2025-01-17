@@ -131,6 +131,7 @@ export default function PlanPage() {
                 <Pressable
                   onPress={onPressLeftArrow}
                   style={[styles.headerPrefix, !isSearchActive && styles.hidden]}
+                  hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
                 >
                   <LeftArrow />
                 </Pressable>
@@ -152,7 +153,7 @@ export default function PlanPage() {
                 </View>
               }
               suffix={
-                <Pressable onPress={onPressArchive}>
+                <Pressable onPress={onPressArchive} hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}>
                   <Archive />
                 </Pressable>
               }

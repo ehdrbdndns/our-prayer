@@ -131,6 +131,7 @@ export default function Timer(props: TimerProps) {
           : (
             <View style={styles.controller}>
               <TouchableOpacity
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
                 style={styles.controllerButton}
                 onPress={() => onPressPrev(countdown.remainingTime)}
               >
@@ -140,6 +141,7 @@ export default function Timer(props: TimerProps) {
               <TouchableOpacity
                 style={styles.controllerButton}
                 onPress={handlePressPlay}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
               >
                 {
                   isPlaying
@@ -149,6 +151,7 @@ export default function Timer(props: TimerProps) {
               </TouchableOpacity>
 
               <TouchableOpacity
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
                 style={styles.controllerButton}
                 onPress={() => onPressNext(countdown.remainingTime)}
               >

@@ -61,7 +61,7 @@ export default function HistoryDetailPage() {
     onSuccess: async () => {
       // invalid history detail cache
       await queryClient.invalidateQueries({ queryKey: ["history", history_id] });
-      router.back();
+      router.replace('/calendar');
     },
     onError: (error, newUser, context) => {
       console.error('onError', error, newUser, context);
@@ -161,6 +161,7 @@ export default function HistoryDetailPage() {
           <View style={styles.headerPrefix}>
             <TouchableOpacity
               onPress={onPressBack}
+              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
             >
               <LeftArrow
                 width={moderateScale(24)}
@@ -177,7 +178,8 @@ export default function HistoryDetailPage() {
         }
         suffix={
           <TouchableOpacity
-            onPress={() => { }}
+            onPress={onPressSave}
+            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
           >
             <MediumText
               fontSize={16}

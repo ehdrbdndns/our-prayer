@@ -228,12 +228,18 @@ export default function Lecture() {
           <Header
             style={styles.header}
             prefix={
-              <Pressable onPress={onPressLeftArrow}>
+              <Pressable
+                onPress={onPressLeftArrow}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+              >
                 <Delete />
               </Pressable>
             }
             suffix={
-              <Pressable onPress={onPressMusic}>
+              <Pressable
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+                onPress={onPressMusic}
+              >
                 {
                   isBgmMute
                     ? <Mute />
