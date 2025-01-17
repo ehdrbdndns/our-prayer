@@ -10,12 +10,13 @@ import { RegularText } from "@/components/text/RegularText";
 import { ModalProvider } from "@/ctx";
 import { PlanType } from "@/utils/dataType";
 import { usePlanListQuery } from "@/utils/queries";
-import { moderateScale, normalizeFontSize } from "@/utils/style";
+import { moderateScale, normalizeFontSize, scaleHeight } from "@/utils/style";
+import { useQueryClient } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
-import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tabs = [
@@ -30,6 +31,9 @@ export default function PlanPage() {
   const insets = useSafeAreaInsets();
 
   const textInputRef = useRef<TextInput>(null);
+  const queryClient = useQueryClient();
+
+  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [planType, setPlanType] = useState('');
@@ -59,6 +63,14 @@ export default function PlanPage() {
       setIsSearchActive(true);
     }
   };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    await queryClient.refetchQueries({ queryKey: ["plan"] });
+
+    setRefreshing(false);
+  }
 
   const onPressArchive = () => {
     router.push("/archivePlan");
@@ -101,6 +113,15 @@ export default function PlanPage() {
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.plan_id}
         columnWrapperStyle={styles.columnWrapper}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#FFFFFF"]}
+            tintColor={"#FFFFFF"}
+            progressViewOffset={scaleHeight(50)}
+          />
+        }
         ListHeaderComponent={(
           <View style={{ paddingTop: insets.top }}>
             {/* Header */}

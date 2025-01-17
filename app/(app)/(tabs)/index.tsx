@@ -13,18 +13,22 @@ import api from "@/utils/axios";
 import { BibleType } from "@/utils/dataType";
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
 import { useHistoryQuery, usePlanListQuery } from "@/utils/queries";
-import { moderateScale } from "@/utils/style";
-import { useQuery } from "@tanstack/react-query";
+import { moderateScale, scaleHeight } from "@/utils/style";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
 
-  const { session, isLoading, setSession } = useSession();
+  const queryClient = useQueryClient();
+
+  const { session, isLoading } = useSession();
+
   const [name, setName] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   // fetch Bible data
   const { data: bible, isSuccess: isBibleSuccess } = useQuery<BibleType>({
@@ -51,10 +55,10 @@ export default function Index() {
   });
 
   // fetch History data for 3 weeks
-  const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
+  const { data: history, isSuccess: isHistorySuccess, isFetched: isHistoryLoading } = useHistoryQuery();
 
   // fetch Plan data
-  const { data: plan, isSuccess: isPlanSuccess } = usePlanListQuery();
+  const { data: plan, isSuccess: isPlanSuccess, isFetched: isPlanLoading } = usePlanListQuery();
   const likedPlans = plan?.plans.filter((plan) => plan.is_liked);
 
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
@@ -77,10 +81,28 @@ export default function Index() {
     return null; // TODO : Add skeleton
   }
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    await queryClient.refetchQueries({ queryKey: ["history"] });
+    await queryClient.refetchQueries({ queryKey: ["plan"] });
+
+    setRefreshing(false);
+  }
+
   return (
     <ScrollView
-      style={styles.scrollViewContent}
+      style={[styles.scrollViewContent]}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#FFFFFF"]}
+          tintColor={"#FFFFFF"}
+          progressViewOffset={scaleHeight(50)}
+        />
+      }
     >
       <SafeAreaView style={styles.container}>
         {/* Header */}

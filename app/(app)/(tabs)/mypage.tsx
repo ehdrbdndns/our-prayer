@@ -19,7 +19,7 @@ import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
+import { Alert, RefreshControl, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MyPage() {
@@ -27,7 +27,10 @@ export default function MyPage() {
   const insets = useSafeAreaInsets();
 
   const queryClient = useQueryClient();
+
   const { session, signOut, isLoading, setSession } = useSession();
+
+  const [refreshing, setRefreshing] = useState(false);
   const [enableAlarm, setEnableAlarm] = useState(false);
   const [name, setName] = useState('');
 
@@ -97,6 +100,15 @@ export default function MyPage() {
 
   // 가입한 날로부터 경과한 일수
   const daysSinceSignup = user?.created_date ? calculateDaysSinceSignup(user.created_date) : 0;
+
+  const onRefetch = async () => {
+    setRefreshing(true);
+
+    await queryClient.refetchQueries({ queryKey: ["history"] });
+    await queryClient.refetchQueries({ queryKey: ["user"] });
+
+    setRefreshing(false);
+  }
 
   const onChangeAlarm = async () => {
     const newEnableAlarm = !enableAlarm;
@@ -183,6 +195,14 @@ export default function MyPage() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: scaleHeight(20) }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefetch}
+            colors={['#FFFFFF']}
+            tintColor={'#FFFFFF'}
+          />
+        }
       >
         <View style={{
           marginTop: scaleHeight(60),
