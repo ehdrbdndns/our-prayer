@@ -117,7 +117,7 @@ export const useHistoryMutation = () => {
     onError: (error, newUser, context) => {
       console.error('onError', error, newUser, context);
       Alert.alert('오류', '기록 저장에 실패했습니다.');
-      router.replace('/')
+      router.replace('/');
     },
   })
 }
