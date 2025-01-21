@@ -18,6 +18,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -184,6 +185,14 @@ export default function MyPage() {
         }
       ]
     )
+  }
+
+  // 서비스 이용 약관
+  const onPressServicePolicy = async () => { }
+
+  // 개인정보처리방침
+  const onPressPrivacyPolicy = async () => {
+    await WebBrowser.openBrowserAsync('https://sunny-book-517.notion.site/our-prayer-182748b531d080049a59e5a00cc3980f');
   }
 
   if (isLoading) {
@@ -420,7 +429,10 @@ export default function MyPage() {
               Our Pray에 문의하기
             </BoldText>
           </CustomButton>
-          <CustomButton style={styles.button}>
+          <CustomButton
+            onPress={onPressServicePolicy}
+            style={styles.button}
+          >
             <BoldText
               color="#FFFFFF"
               fontSize={14}
@@ -430,17 +442,20 @@ export default function MyPage() {
               서비스 이용 약관
             </BoldText>
           </CustomButton>
-        </View>
-
-        {/* 개인 정보 처리 방침 */}
-        <TouchableOpacity style={styles.textButton}>
-          <MediumText
-            fontSize={12}
-            color="#B3B3B3"
+          <CustomButton
+            onPress={onPressPrivacyPolicy}
+            style={styles.button}
           >
-            개인 정보 처리 방침
-          </MediumText>
-        </TouchableOpacity>
+            <BoldText
+              color="#FFFFFF"
+              fontSize={14}
+              lineHeight={22}
+              letterSpacingPercent={-1}
+            >
+              개인 정보 처리 방침
+            </BoldText>
+          </CustomButton>
+        </View>
 
         {/* 회원 탈퇴 */}
         <TouchableOpacity onPress={onPressDeleteAccount} style={styles.textButton}>
