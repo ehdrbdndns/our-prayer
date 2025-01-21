@@ -8,10 +8,11 @@ import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
 import { LectureType } from "@/utils/dataType";
+import { KEEP_AWAKE_TAG } from "@/utils/keepAwake";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useKeepAwake } from 'expo-keep-awake';
+import { activateKeepAwakeAsync, deactivateKeepAwake, useKeepAwake } from 'expo-keep-awake';
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
@@ -35,7 +36,7 @@ const getDefaultLecture = (): LectureType => ({
 
 export default function Lecture() {
   // Keep screen awake while the component is mounted
-  useKeepAwake();
+  useKeepAwake(KEEP_AWAKE_TAG);
 
   const insets = useSafeAreaInsets();
 
@@ -69,8 +70,18 @@ export default function Lecture() {
 
   const [mode, setMode] = useState<"default" | "text">('default');
 
-  // Show intro when component is mounted
+  // Show intro when component is mounted and activate keep awake
   useEffect(() => {
+
+    async function activateKeepAwake() {
+      await activateKeepAwakeAsync(KEEP_AWAKE_TAG);
+    }
+
+    async function deactivateKeepAwakeAsync() {
+      await deactivateKeepAwake(KEEP_AWAKE_TAG);
+      await deactivateKeepAwake();
+    }
+
     setTimeout(async () => {
       setShowIntro(true);
       Animated.timing(introOpacity, {
@@ -79,6 +90,12 @@ export default function Lecture() {
         useNativeDriver: true,
       }).start(() => setIsShowedIntro(true));
     }, 500);
+
+    activateKeepAwake();
+
+    return () => {
+      deactivateKeepAwakeAsync();
+    }
   }, []);
 
   // Hide intro and show content after lecture data is loaded
@@ -171,7 +188,7 @@ export default function Lecture() {
     setTimerKey(timerKey + 1);
   }
 
-  const onPressCompleteBtn = (elapsedTime: number) => {
+  const onPressCompleteBtn = async (elapsedTime: number) => {
     router.replace({
       pathname: '/prayerRecord',
       params: {
