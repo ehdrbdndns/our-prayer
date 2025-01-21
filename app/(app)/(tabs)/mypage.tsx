@@ -197,6 +197,11 @@ export default function MyPage() {
     await WebBrowser.openBrowserAsync('https://sunny-book-517.notion.site/our-prayer-182748b531d080049a59e5a00cc3980f');
   }
 
+  // 문의하기
+  const onPressContact = async () => {
+    await WebBrowser.openBrowserAsync('https://docs.google.com/forms/d/e/1FAIpQLSeOyd4YtHlkRXYJtXDzgcLoLh6659zRi-mqiyrHjbwpQJAgRQ/viewform?usp=dialog');
+  }
+
   if (isLoading) {
     return null; // TODO : Add skeleton
   }
@@ -244,7 +249,7 @@ export default function MyPage() {
             lineHeight={16}
             color='#B3B3B3'
           >
-            Our Pray와 함께한지 {daysSinceSignup}일이 되었어요
+            '우리의 기도'와 함께한지 {daysSinceSignup}일이 되었어요
           </BoldText>
         </View>
 
@@ -421,14 +426,17 @@ export default function MyPage() {
               카카오 계정 연동하기
             </BoldText>
           </CustomButton> */}
-          <CustomButton style={styles.button}>
+          <CustomButton
+            onPress={onPressContact}
+            style={styles.button}
+          >
             <BoldText
               color="#FFFFFF"
               fontSize={14}
               lineHeight={22}
               letterSpacingPercent={-1}
             >
-              Our Pray에 문의하기
+              '우리의 기도'에 문의하기
             </BoldText>
           </CustomButton>
           <CustomButton
