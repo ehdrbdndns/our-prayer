@@ -62,7 +62,7 @@ export default function Timer(props: TimerProps) {
 
   const showRemainingTime = (remainingTime: number) => {
     const time = repeatCount > 0
-      ? (Math.floor(duration * (repeatCount - 1) + countdown.elapsedTime))
+      ? (Math.floor(duration * (repeatCount - 1) + (countdown.elapsedTime ? countdown.elapsedTime : 1))) // elapsedTime이 0일 때 화면이 깜빡이는 현상 방지
       : remainingTime;
 
     const minutes = Math.floor(time / 60)
