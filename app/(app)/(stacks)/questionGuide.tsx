@@ -23,6 +23,7 @@ export default function QuestionGuide() {
           <View style={styles.headerPrefix}>
             <TouchableOpacity
               onPress={onPressBack}
+              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
             >
               <LeftArrow
                 width={moderateScale(24)}
