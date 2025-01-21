@@ -45,7 +45,7 @@ export default function PlanDetailPage() {
   }
 
   const onPressLeftArrow = () => {
-    router.push('/plan');
+    router.replace('/plan');
   }
 
   const onPressLecture = ({ lecture_id }: { lecture_id: string }) => {
