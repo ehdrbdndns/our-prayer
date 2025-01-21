@@ -5,6 +5,7 @@ import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { useHistoryMutation } from "@/utils/mutation";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
@@ -27,6 +28,10 @@ export default function PrayerRecord() {
 
   const onPressSave = async () => {
     // Todo save data
+    const lectureHistory = await AsyncStorage.getItem('lecture-history');
+    const lectureHistoryData = lectureHistory ? JSON.parse(lectureHistory) : {};
+    lectureHistoryData[lecture_id] = lectureHistoryData[lecture_id] ? lectureHistoryData[lecture_id] + 1 : 1;
+    await AsyncStorage.setItem('lecture-history', JSON.stringify(lectureHistoryData));
     mutate({ lecture_id, duration, note });
   }
 
