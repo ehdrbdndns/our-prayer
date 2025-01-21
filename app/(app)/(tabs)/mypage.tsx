@@ -188,7 +188,9 @@ export default function MyPage() {
   }
 
   // 서비스 이용 약관
-  const onPressServicePolicy = async () => { }
+  const onPressServicePolicy = async () => {
+    await WebBrowser.openBrowserAsync('https://sunny-book-517.notion.site/our-prayer-182748b531d08033a65af055af5659de?pvs=4')
+  }
 
   // 개인정보처리방침
   const onPressPrivacyPolicy = async () => {
