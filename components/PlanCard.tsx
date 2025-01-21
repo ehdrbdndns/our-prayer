@@ -116,6 +116,7 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
               fill={isLiked ? "#FF7D71" : "transparent"}
               stroke={isLiked ? "#FF7D71" : "white"}
               onPress={onPressHeart}
+              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
             />
           ) : (
             <Download

@@ -3,6 +3,7 @@ import Heart from "@/assets/images/icon/heart.svg";
 import LeftArrow from "@/assets/images/icon/leftArrow.svg";
 import Play from '@/assets/images/icon/play.svg';
 import RightShortArrow from '@/assets/images/icon/rightShortArrow.svg';
+import UnChckedCircle from '@/assets/images/icon/unCheckedCircle.svg';
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
@@ -10,9 +11,11 @@ import { RegularText } from "@/components/text/RegularText";
 import { useLikeMutation } from '@/utils/mutation';
 import { usePlanQuery } from '@/utils/queries';
 import { moderateScale } from "@/utils/style";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import * as WebBrowser from 'expo-web-browser';
+import { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -23,16 +26,27 @@ export default function PlanDetailPage() {
     plan_id, title, banner,
     isLiked: isLikedFromParam,
   } = useLocalSearchParams<{
-    plan_id: string;
-    title: string;
-    banner: string;
-    isLiked: string;
+    plan_id: string,
+    title: string,
+    banner: string,
+    isLiked: string
   }>();
 
+  const [lectureHistoryDict, setLectureHistoryDict] = useState<{ [key: string]: number }>({});
   const { data, isSuccess: isPlanSuccess } = usePlanQuery({ plan_id });
 
   const plan = data?.plan;
   const lectures = data?.lectures || [];
+
+  useEffect(() => {
+    async function fetchLectureHistory() {
+      const lectureHistory = await AsyncStorage.getItem('lecture-history');
+      const lectureHistoryData = lectureHistory ? JSON.parse(lectureHistory) : {};
+      setLectureHistoryDict(lectureHistoryData);
+    }
+
+    fetchLectureHistory();
+  }, [])
 
   const { isLiked, mutateLike } = useLikeMutation({
     plan_id,
@@ -45,13 +59,13 @@ export default function PlanDetailPage() {
   }
 
   const onPressLeftArrow = () => {
-    router.push('/plan');
+    router.replace('/plan');
   }
 
   const onPressLecture = ({ lecture_id }: { lecture_id: string }) => {
     // Todo - add params
     router.push({
-      pathname: '/lecture/[lecture_id]',
+      pathname: '/lectureDetail/[lecture_id]',
       params: {
         plan_id: plan_id,
         plan_title: title,
@@ -78,7 +92,7 @@ export default function PlanDetailPage() {
           style={styles.header}
           prefix={
             <View style={styles.headerPrefix}>
-              <Pressable onPress={onPressLeftArrow}>
+              <Pressable onPress={onPressLeftArrow} hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}>
                 <LeftArrow />
               </Pressable>
               <MediumText>{title}</MediumText>
@@ -89,6 +103,7 @@ export default function PlanDetailPage() {
               fill={isLiked ? "#FF7D71" : "transparent"}
               stroke={isLiked ? "#FF7D71" : "white"}
               onPress={onPressHeart}
+              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
             />
           }
         />
@@ -209,10 +224,19 @@ export default function PlanDetailPage() {
                     style={[styles.card, styles.lecture]}
                   >
                     {/* CheckBox */}
-                    <CheckedCircle
-                      width={moderateScale(22)}
-                      height={moderateScale(22)}
-                    />
+                    {
+                      (lectureHistoryDict[row.lecture_id] && lectureHistoryDict[row.lecture_id] > 0) ? (
+                        <CheckedCircle
+                          width={moderateScale(22)}
+                          height={moderateScale(22)}
+                        />
+                      ) : (
+                        <UnChckedCircle
+                          width={moderateScale(22)}
+                          height={moderateScale(22)}
+                        />
+                      )
+                    }
 
                     {/* Content */}
                     <View style={styles.lectureContent}>

@@ -1,7 +1,6 @@
-import Kakao from "@/assets/images/kakao-logo.svg";
 import BackgroundWithImage from "@/components/BackgroundWithImage";
-import CustomButton from "@/components/button/CustomButton";
 import PrimaryButton from "@/components/button/PrimaryButton";
+import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { useSession } from "@/ctx";
 import { moderateScale } from "@/utils/style";
@@ -52,14 +51,19 @@ export default function login() {
         </View>
 
         {/* LOGO TEXT */}
-        <Image
+        {/* <Image
           source={require('@/assets/images/text-logo.png')}
           style={{
             width: moderateScale(156),
             height: moderateScale(34),
           }}
           contentFit="fill"
-        />
+        /> */}
+        <BoldText
+          fontSize={36}
+        >
+          우리의 기도
+        </BoldText>
 
         {/* LOGO */}
         <View style={{
@@ -90,7 +94,7 @@ export default function login() {
           </PrimaryButton>
 
           {/* KakaoButton */}
-          <CustomButton onPress={onPressKakao} style={{ backgroundColor: '#FEE500' }}>
+          {/* <CustomButton onPress={onPressKakao} style={{ backgroundColor: '#FEE500' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Kakao
                 width={18}
@@ -109,7 +113,7 @@ export default function login() {
                 카카오로 시작하기
               </MediumText>
             </View>
-          </CustomButton>
+          </CustomButton> */}
         </View>
       </SafeAreaView>
     </BackgroundWithImage>

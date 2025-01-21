@@ -18,8 +18,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
+import { Alert, RefreshControl, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MyPage() {
@@ -27,7 +28,10 @@ export default function MyPage() {
   const insets = useSafeAreaInsets();
 
   const queryClient = useQueryClient();
+
   const { session, signOut, isLoading, setSession } = useSession();
+
+  const [refreshing, setRefreshing] = useState(false);
   const [enableAlarm, setEnableAlarm] = useState(false);
   const [name, setName] = useState('');
 
@@ -97,6 +101,15 @@ export default function MyPage() {
 
   // 가입한 날로부터 경과한 일수
   const daysSinceSignup = user?.created_date ? calculateDaysSinceSignup(user.created_date) : 0;
+
+  const onRefetch = async () => {
+    setRefreshing(true);
+
+    await queryClient.refetchQueries({ queryKey: ["history"] });
+    await queryClient.refetchQueries({ queryKey: ["user"] });
+
+    setRefreshing(false);
+  }
 
   const onChangeAlarm = async () => {
     const newEnableAlarm = !enableAlarm;
@@ -174,6 +187,21 @@ export default function MyPage() {
     )
   }
 
+  // 서비스 이용 약관
+  const onPressServicePolicy = async () => {
+    await WebBrowser.openBrowserAsync('https://sunny-book-517.notion.site/our-prayer-182748b531d08033a65af055af5659de?pvs=4')
+  }
+
+  // 개인정보처리방침
+  const onPressPrivacyPolicy = async () => {
+    await WebBrowser.openBrowserAsync('https://sunny-book-517.notion.site/our-prayer-182748b531d080049a59e5a00cc3980f');
+  }
+
+  // 문의하기
+  const onPressContact = async () => {
+    await WebBrowser.openBrowserAsync('https://docs.google.com/forms/d/e/1FAIpQLSeOyd4YtHlkRXYJtXDzgcLoLh6659zRi-mqiyrHjbwpQJAgRQ/viewform?usp=dialog');
+  }
+
   if (isLoading) {
     return null; // TODO : Add skeleton
   }
@@ -183,6 +211,14 @@ export default function MyPage() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: scaleHeight(20) }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefetch}
+            colors={['#FFFFFF']}
+            tintColor={'#FFFFFF'}
+          />
+        }
       >
         <View style={{
           marginTop: scaleHeight(60),
@@ -213,7 +249,7 @@ export default function MyPage() {
             lineHeight={16}
             color='#B3B3B3'
           >
-            Our Pray와 함께한지 {daysSinceSignup}일이 되었어요
+            '우리의 기도'와 함께한지 {daysSinceSignup}일이 되었어요
           </BoldText>
         </View>
 
@@ -380,7 +416,7 @@ export default function MyPage() {
               기도 시간 설정하기
             </BoldText>
           </CustomButton>
-          <CustomButton style={styles.button}>
+          {/* <CustomButton style={styles.button}>
             <BoldText
               color="#FFFFFF"
               fontSize={14}
@@ -389,18 +425,24 @@ export default function MyPage() {
             >
               카카오 계정 연동하기
             </BoldText>
-          </CustomButton>
-          <CustomButton style={styles.button}>
+          </CustomButton> */}
+          <CustomButton
+            onPress={onPressContact}
+            style={styles.button}
+          >
             <BoldText
               color="#FFFFFF"
               fontSize={14}
               lineHeight={22}
               letterSpacingPercent={-1}
             >
-              Our Pray에 문의하기
+              '우리의 기도'에 문의하기
             </BoldText>
           </CustomButton>
-          <CustomButton style={styles.button}>
+          <CustomButton
+            onPress={onPressServicePolicy}
+            style={styles.button}
+          >
             <BoldText
               color="#FFFFFF"
               fontSize={14}
@@ -410,17 +452,20 @@ export default function MyPage() {
               서비스 이용 약관
             </BoldText>
           </CustomButton>
-        </View>
-
-        {/* 개인 정보 처리 방침 */}
-        <TouchableOpacity style={styles.textButton}>
-          <MediumText
-            fontSize={12}
-            color="#B3B3B3"
+          <CustomButton
+            onPress={onPressPrivacyPolicy}
+            style={styles.button}
           >
-            개인 정보 처리 방침
-          </MediumText>
-        </TouchableOpacity>
+            <BoldText
+              color="#FFFFFF"
+              fontSize={14}
+              lineHeight={22}
+              letterSpacingPercent={-1}
+            >
+              개인 정보 처리 방침
+            </BoldText>
+          </CustomButton>
+        </View>
 
         {/* 회원 탈퇴 */}
         <TouchableOpacity onPress={onPressDeleteAccount} style={styles.textButton}>

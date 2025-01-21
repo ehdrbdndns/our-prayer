@@ -1,6 +1,6 @@
 import { moderateScale } from "@/utils/style";
 import { Image } from "expo-image";
-import { StyleSheet, View } from "react-native";
+import { Share, StyleSheet, View } from "react-native";
 import CustomButton from "./button/CustomButton";
 import { BoldText } from "./text/BoldText";
 import { MediumText } from "./text/MediumText";
@@ -9,6 +9,14 @@ import { RegularText } from "./text/RegularText";
 const ShareImage = require("@/assets/images/share.png");
 
 export default function ShareCard() {
+
+  const onPressBtn = () => {
+    Share.share({
+      message: "'우리의 기도'앱을 통해 기도에 대해 배우고, 기도 습관을 형성해보세요!",
+      // url: "XXXXXXXXXXXXXXXXXXXXXXXXXX", TODO : 앱스토어 링크 추가
+    })
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -18,7 +26,7 @@ export default function ShareCard() {
           fontSize={12}
           lineHeight={20}
         >
-          Send Our Prayer
+          공유하기
         </BoldText>
 
         <View style={styles.row}>
@@ -28,7 +36,7 @@ export default function ShareCard() {
             lineHeight={24}
           >
             {
-              "Our Pray 앱을 공유하고\n함께 기도의 힘을 경험해보세요"
+              "'우리의 기도' 앱을 공유하고\n함께 기도의 힘을 경험해보세요"
             }
           </BoldText>
 
@@ -43,12 +51,13 @@ export default function ShareCard() {
           lineHeight={20}
         >
           {
-            "Our Pray 앱은 이단이나 사이비와 전혀 관련이 없는,\n신뢰할 수 있는 기도 환경을 제공합니다."
+            "'우리의 기도' 앱은 이단이나 사이비와 전혀 관련이 없는,\n신뢰할 수 있는 기도 환경을 제공합니다."
           }
         </RegularText>
 
         {/* button */}
         <CustomButton
+          onPress={onPressBtn}
           style={styles.button}
         >
           <MediumText

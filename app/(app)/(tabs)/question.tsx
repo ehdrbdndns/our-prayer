@@ -15,12 +15,15 @@ import { moderateScale } from "@/utils/style";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useState } from 'react';
+import { Alert, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function QuestionPage() {
 
   const queryClient = useQueryClient();
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const { data: questionList } = useQuery<QuestionType[]>({
     queryKey: ["question"],
@@ -89,6 +92,14 @@ export default function QuestionPage() {
   })
 
   const { mutate: deleteQuestion } = useDeleteQuestionMutation();
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    await queryClient.refetchQueries({ queryKey: ["question"] });
+
+    setRefreshing(false);
+  }
 
   const onPressDelete = (question_id: string) => {
     Alert.alert('삭제', '삭제된 질문 내용은 되돌릴 수 없습니다.', [
@@ -191,7 +202,16 @@ export default function QuestionPage() {
             <ScrollView
               style={{ paddingHorizontal: moderateScale(24) }}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollView}>
+              contentContainerStyle={styles.scrollView}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={["#FFFFFF"]}
+                  tintColor={"#FFFFFF"}
+                />
+              }
+            >
               {
                 (questionList ?? []).map((question) => {
                   return (
@@ -236,12 +256,18 @@ export default function QuestionPage() {
 
                         <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
                           {/* Edit */}
-                          <TouchableOpacity onPress={() => onPressEdit(question.question_id)}>
+                          <TouchableOpacity
+                            onPress={() => onPressEdit(question.question_id)}
+                            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+                          >
                             <Edit width={moderateScale(24)} height={moderateScale(24)} />
                           </TouchableOpacity>
 
                           {/* Trash */}
-                          <TouchableOpacity onPress={() => onPressDelete(question.question_id)}>
+                          <TouchableOpacity
+                            onPress={() => onPressDelete(question.question_id)}
+                            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+                          >
                             <Trash width={moderateScale(24)} height={moderateScale(24)} />
                           </TouchableOpacity>
                         </View>

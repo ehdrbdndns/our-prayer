@@ -4,7 +4,7 @@ import api from '@/utils/axios';
 import { AudioFileSystemType } from '@/utils/dataType';
 import { moderateScale } from '@/utils/style';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useRef, useState } from 'react';
@@ -21,8 +21,6 @@ type InsertUserAudioRequestType = {
 const { width: deviceWidth } = Dimensions.get('window');
 
 export default function DownloadModal() {
-
-  const queryClient = useQueryClient();
 
   const { planId, title, thumbnail, isLiked, auditDate, isModalVisible, hideModal } = useModal();
   const [progress, setProgress] = useState(0);
@@ -142,6 +140,8 @@ export default function DownloadModal() {
           }
         }
 
+        if (signal.aborted) return;
+
         insertUserAudioMutate(lectureData);
       }
     }
@@ -183,7 +183,7 @@ export default function DownloadModal() {
             lineHeight={27}
             textAlign='left'
           >
-            다운로드중입니다...
+            오디오 파일을 다운로드중입니다...
           </MediumText>
 
           {/* loading state */}

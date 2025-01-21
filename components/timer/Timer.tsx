@@ -62,7 +62,7 @@ export default function Timer(props: TimerProps) {
 
   const showRemainingTime = (remainingTime: number) => {
     const time = repeatCount > 0
-      ? (Math.floor(duration * (repeatCount - 1) + countdown.elapsedTime))
+      ? (Math.floor(duration * (repeatCount - 1) + (countdown.elapsedTime ? countdown.elapsedTime : 1))) // elapsedTime이 0일 때 화면이 깜빡이는 현상 방지
       : remainingTime;
 
     const minutes = Math.floor(time / 60)
@@ -131,6 +131,7 @@ export default function Timer(props: TimerProps) {
           : (
             <View style={styles.controller}>
               <TouchableOpacity
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
                 style={styles.controllerButton}
                 onPress={() => onPressPrev(countdown.remainingTime)}
               >
@@ -140,6 +141,7 @@ export default function Timer(props: TimerProps) {
               <TouchableOpacity
                 style={styles.controllerButton}
                 onPress={handlePressPlay}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
               >
                 {
                   isPlaying
@@ -149,6 +151,7 @@ export default function Timer(props: TimerProps) {
               </TouchableOpacity>
 
               <TouchableOpacity
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
                 style={styles.controllerButton}
                 onPress={() => onPressNext(countdown.remainingTime)}
               >

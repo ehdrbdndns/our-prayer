@@ -11,11 +11,11 @@ import { HistoryType } from '@/utils/dataType';
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotalPrayerTime, formatPrayerTime } from '@/utils/date';
 import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from 'react-native-calendars';
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -57,7 +57,7 @@ const HistoryNote = ({
   >
     <View style={styles.note}>
       {
-        note === null ? (
+        (note === null || note === '') ? (
           <RegularText
             style={{ marginBottom: moderateScale(8) }}
             color="#B3B3B3"
@@ -89,9 +89,14 @@ const HistoryNote = ({
 
 export default function CalendarPage() {
 
+  const queryClient = useQueryClient();
+
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedDay, setSelectedDay] = useState(Today);
-  const selectedDayRef = useRef(selectedDay)
   const [selectedNoteList, setSelectedNoteList] = useState<JSX.Element[]>([<EmptyNote key="empty" />]);
+
+  const selectedDayRef = useRef(selectedDay)
+
   const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
 
   const { mutate: retrieveHistoryNote } = useMutation({
@@ -171,6 +176,14 @@ export default function CalendarPage() {
     }
   }, [isHistorySuccess])
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    await queryClient.refetchQueries({ queryKey: ["history"] });
+
+    setRefreshing(false);
+  }
+
   const onPressDay = async (day: DateData) => {
     setSelectedDay(day.dateString);
     selectedDayRef.current = day.dateString;
@@ -188,6 +201,15 @@ export default function CalendarPage() {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={['#FFFFFF']}
+          tintColor={'#FFFFFF'}
+          progressViewOffset={moderateScale(50)}
+        />
+      }
     >
       <SafeAreaView>
         {/* Header */}
@@ -197,6 +219,7 @@ export default function CalendarPage() {
             <View style={styles.headerPrefix}>
               <TouchableOpacity
                 onPress={onPressBack}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
               >
                 <LeftArrow
                   width={moderateScale(24)}

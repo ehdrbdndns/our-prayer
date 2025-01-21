@@ -1,7 +1,5 @@
 import Fire from "@/assets/images/icon/fire.svg";
-import Search from "@/assets/images/icon/search.svg";
 import Star from "@/assets/images/icon/star.svg";
-import Logo from "@/assets/images/text-s-logo.svg";
 import CustomButton from "@/components/button/CustomButton";
 import Header from "@/components/Header";
 import MyPrayerPlan from "@/components/MyPrayerPlan";
@@ -15,18 +13,22 @@ import api from "@/utils/axios";
 import { BibleType } from "@/utils/dataType";
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
 import { useHistoryQuery, usePlanListQuery } from "@/utils/queries";
-import { moderateScale } from "@/utils/style";
-import { useQuery } from "@tanstack/react-query";
-import { Link, router } from "expo-router";
+import { moderateScale, scaleHeight } from "@/utils/style";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
 
-  const { session, isLoading, setSession } = useSession();
+  const queryClient = useQueryClient();
+
+  const { session, isLoading } = useSession();
+
   const [name, setName] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   // fetch Bible data
   const { data: bible, isSuccess: isBibleSuccess } = useQuery<BibleType>({
@@ -53,10 +55,11 @@ export default function Index() {
   });
 
   // fetch History data for 3 weeks
-  const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
+  const { data: history, isSuccess: isHistorySuccess, isFetched: isHistoryLoading } = useHistoryQuery();
 
   // fetch Plan data
-  const { data: plan, isSuccess: isPlanSuccess } = usePlanListQuery();
+  const { data: plan, isSuccess: isPlanSuccess, isFetched: isPlanLoading } = usePlanListQuery();
+  const likedPlans = plan?.plans.filter((plan) => plan.is_liked);
 
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
   const todayPrayerTime = calculateTodayPrayerTime(history || []);
@@ -78,29 +81,47 @@ export default function Index() {
     return null; // TODO : Add skeleton
   }
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    await queryClient.refetchQueries({ queryKey: ["history"] });
+    await queryClient.refetchQueries({ queryKey: ["plan"] });
+
+    setRefreshing(false);
+  }
+
   return (
     <ScrollView
-      style={styles.scrollViewContent}
+      style={[styles.scrollViewContent]}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#FFFFFF"]}
+          tintColor={"#FFFFFF"}
+          progressViewOffset={scaleHeight(50)}
+        />
+      }
     >
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <Header
           style={styles.header}
           prefix={
-            <Link href="/login">
-              <Logo
-                style={{ marginLeft: moderateScale(4) }}
-                width={moderateScale(82)}
-                height={moderateScale(18)}
-              />
-            </Link>
-          }
-          suffix={
-            <Search
-              width={moderateScale(24)}
-              height={moderateScale(24)}
-            />
+            // <Link href="/login">
+            //   <Logo
+            //     style={{ marginLeft: moderateScale(4) }}
+            //     width={moderateScale(82)}
+            //     height={moderateScale(18)}
+            //   />
+            // </Link>
+            <BoldText
+              fontSize={18}
+              color="rgba(255, 255, 255, 0.8)"
+            >
+              우리의 기도
+            </BoldText>
           }
         />
 
@@ -146,7 +167,6 @@ export default function Index() {
           }
 
         </View>
-
         {/* 기도 일자 데이터 */}
         <View style={[styles.content, { marginBottom: moderateScale(40) }]}>
           {/* Title */}
@@ -186,13 +206,13 @@ export default function Index() {
         </View>
 
         {/* 기도 플랜 */}
-        <View style={[styles.content, { paddingRight: 0 }]}>
-          {
-            isPlanSuccess
-              ? <MyPrayerPlan plans={plan?.plans || []} />
-              : ''
-          }
-        </View>
+        {
+          (likedPlans && likedPlans.length > 0) ? (
+            <View style={[styles.content, { paddingRight: 0 }]}>
+              <MyPrayerPlan plans={likedPlans} />
+            </View>
+          ) : null // TODO : Add skeleton loader
+        }
 
         {/* 공유 카드 */}
         <ShareCard />

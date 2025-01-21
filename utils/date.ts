@@ -49,7 +49,12 @@ export const calculateTodayPrayerTime = (history: HistoryType[]): string => {
 export const calculateTotalPrayerTime = (history: HistoryType[]): { time: string, unit: string } => {
   const totalHours = history.reduce((total, { duration }) => total + duration, 0) / 3600; // 초 단위를 시간 단위로 변환
 
-  if (totalHours < 100) {
+  if (totalHours < 1) {
+    return {
+      time: '0',
+      unit: '시간'
+    };
+  } else if (totalHours < 100) {
     return {
       time: totalHours.toFixed(),
       unit: '시간'

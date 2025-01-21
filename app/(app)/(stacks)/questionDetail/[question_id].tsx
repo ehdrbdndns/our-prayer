@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from 'react';
 import { Alert, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -29,8 +30,10 @@ export default function QuestionDetail() {
 
   const queryClient = useQueryClient();
 
-  const { session } = useSession();
+  const { session, isLoading } = useSession();
   const { question_id } = useLocalSearchParams<{ question_id: string }>();
+
+  const [name, setName] = useState<string>('');
 
   const { data: question } = useQuestionQuery(question_id);
   const { data: replys } = useQuery<QuestionReplyType[]>({
@@ -106,6 +109,13 @@ export default function QuestionDetail() {
     },
   });
 
+  useEffect(() => {
+    if (!!session && !isLoading) {
+      const { name } = JSON.parse(session);
+      setName(name)
+    }
+  }, [session, isLoading])
+
   const onPressDelete = () => {
     Alert.alert('삭제', '삭제된 질문 내용은 되돌릴 수 없습니다.', [
       {
@@ -145,6 +155,7 @@ export default function QuestionDetail() {
             <View style={styles.headerPrefix}>
               <TouchableOpacity
                 onPress={onPressBack}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
               >
                 <Left
                   width={moderateScale(24)}
@@ -196,12 +207,18 @@ export default function QuestionDetail() {
 
             <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
               {/* Edit */}
-              <TouchableOpacity onPress={onPressEdit}>
+              <TouchableOpacity
+                onPress={onPressEdit}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+              >
                 <Edit width={moderateScale(24)} height={moderateScale(24)} />
               </TouchableOpacity>
 
               {/* Trash */}
-              <TouchableOpacity onPress={onPressDelete}>
+              <TouchableOpacity
+                onPress={onPressDelete}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+              >
                 <Trash width={moderateScale(24)} height={moderateScale(24)} />
               </TouchableOpacity>
             </View>
@@ -259,7 +276,7 @@ export default function QuestionDetail() {
                           fontSize={14}
                           color='#B3B3B3'
                         >
-                          {`나 (${session})`}
+                          {`나 (${name})`}
                         </MediumText>
                       </View>
                     )
