@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { Alert } from 'react-native';
 
 const api = axios.create({ baseURL: process.env.EXPO_PUBLIC_API_URL });
 api.defaults.headers.common['Content-Type'] = 'application/json';
@@ -49,9 +50,13 @@ const onError = async (error: any) => {
           return new Error('예기치 못한 오류가 발생했습니다. 다시 로그인해주세요.');
       }
     }
+
+    Alert.alert('오류가 발생했습니다.', error.response.data.message);
+
     return Promise.reject(error);
   } catch (error) {
     console.error(error);
+    Alert.alert('오류가 발생했습니다.', '예기치 못한 오류가 발생했습니다. 다시 로그인해주세요.');
     return new Error('예기치 못한 오류가 발생했습니다. 다시 로그인해주세요.');
   }
 }
