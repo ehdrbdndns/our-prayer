@@ -43,12 +43,12 @@ export default function AppLayout() {
     registorExpoPushToken();
   }, [session, isLoading])
 
-  if (!isAppReady) {
-    return <BackgroundWithImage animation='fade' />;
-  }
-
   if (!isLoading && !session) {
     return <Redirect href="/login" />
+  }
+
+  if (!isAppReady) {
+    return <BackgroundWithImage animation='fade' />;
   }
 
   return (
