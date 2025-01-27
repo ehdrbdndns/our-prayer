@@ -33,8 +33,8 @@ export const usePlanListQuery = () => {
       currentPlan: null,
       plans: []
     },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
+    staleTime: 2 * 60 * 60 * 1000, // 2시간
+    gcTime: 2 * 60 * 60 * 1000, // 2시간
   });
 };
 
@@ -60,8 +60,8 @@ export const usePlanQuery = ({ plan_id }: { plan_id: string }) => {
         }
       };
     },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
+    staleTime: 2 * 60 * 60 * 1000, // 2시간
+    gcTime: 2 * 60 * 60 * 1000, // 2시간
   });
 };
 
@@ -93,8 +93,8 @@ export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
 
       return data;
     },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
+    staleTime: 2 * 60 * 60 * 1000, // 2시간
+    gcTime: 2 * 60 * 60 * 1000, // 2시간
   });
 };
 
@@ -115,8 +115,8 @@ export const useHistoryQuery = (historyRange?: number) => {
       return res.data;
     },
     placeholderData: [],
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
+    staleTime: 2 * 60 * 60 * 1000, // 2시간
+    gcTime: 2 * 60 * 60 * 1000, // 2시간
   });
 }
 
