@@ -279,6 +279,7 @@ export default function MyPage() {
             </View>
             <TouchableOpacity
               onPress={onPressHistory}
+              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
             >
               <MediumText
                 fontSize={12}

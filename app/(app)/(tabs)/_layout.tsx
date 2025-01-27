@@ -21,7 +21,7 @@ export default function TabLayout() {
     >
       <Tabs.Screen name="index" />
       <Tabs.Screen name="plan" />
-      <Tabs.Screen name="calendar" />
+      <Tabs.Screen name="currentPlan" />
       <Tabs.Screen name="question" />
       <Tabs.Screen name="mypage" />
     </Tabs>

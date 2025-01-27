@@ -112,7 +112,7 @@ export default function PlanDetailPage() {
           <Image
             resizeMode="cover"
             style={styles.bannerImage}
-            source={{ uri: banner }}
+            source={{ uri: banner || data?.plan.thumbnail }}
           />
         </View>
 
@@ -124,7 +124,7 @@ export default function PlanDetailPage() {
             fontSize={24}
             lineHeight={29}
           >
-            {title}
+            {title || data?.plan.title}
           </BoldText>
 
           {/* Desc Plan */}

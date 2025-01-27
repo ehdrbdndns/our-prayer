@@ -161,7 +161,14 @@ export default function Lecture() {
   }
 
   const onPressMusic = () => {
-    setIsBgmMute(!isBgmMute);
+    Alert.alert(
+      isBgmMute ? '배경음악을 키겠습니까?' : '배경음악을 끄겠습니까?', // title
+      '', // message
+      [                     // buttons
+        { text: '취소', style: 'cancel' },
+        { text: '확인', onPress: () => setIsBgmMute(!isBgmMute) }
+      ]
+    )
   }
 
   const onPressTab = (mode: "default" | "text") => {
