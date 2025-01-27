@@ -9,21 +9,21 @@ export const calculateContinuousPrayerDays = (history: HistoryType[]): number =>
   // 날짜별로 기록을 그룹화
   const dateSet = new Set<string>();
   history.forEach(entry => {
-    const date = new Date(entry.created_date * 1000).toISOString().split('T')[0];
-    dateSet.add(date);
+    dateSet.add(formatDateToHyphenated(entry.created_date));
   });
 
   const dates = Array.from(dateSet).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
   let continuousDays = 0;
-  let today = new Date().toISOString().split('T')[0];
-  let yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0];
+  let today = formatDateToHyphenated(new Date().getTime() / 1000);
+  let yesterday = formatDateToHyphenated(new Date(new Date().setDate(new Date().getDate() - 1)).getTime() / 1000);
 
   // 연속 기도 일수 계산
   for (let i = dates.length - 1; i >= 0; i--) {
+    // console.log(dates[i], today, yesterday);
     if (dates[i] === today || dates[i] === yesterday) {
       continuousDays++;
-      yesterday = new Date(new Date(dates[i]).setDate(new Date(dates[i]).getDate() - 1)).toISOString().split('T')[0];
+      yesterday = formatDateToHyphenated(new Date(new Date(dates[i]).setDate(new Date(dates[i]).getDate() - 1)).getTime() / 1000);
     } else {
       break;
     }
@@ -113,7 +113,7 @@ export const formatPrayerTime = (created_date: number, duration: number): string
 };
 
 /**
- * Unix 타임스탬프를 받아서 "YYYY년 MM월 DD일" 형식의 문자열로 변환하는 함수
+ * Unix 타임스탬프를 받아서 로컬 시간 기준 "YYYY년 MM월 DD일" 형식의 문자열로 변환하는 함수
  * @param unixTime 10자리 Unix 타임스탬프 (초 단위)
  * @returns 형식화된 문자열
  */
@@ -124,4 +124,18 @@ export const formatDateToKorean = (unixTime: number): string => {
   const day = String(date.getDate()).padStart(2, '0');
 
   return `${year}년 ${month}월 ${day}일`;
+};
+
+/**
+ * Unix 타임스탬프를 받아서 로컬시간기준 "YYYY-MM-DD" 형식의 문자열로 변환하는 함수
+ * @param unixTime 10자리 Unix 타임스탬프 (초 단위)
+ * @returns 형식화된 문자열
+ */
+export const formatDateToHyphenated = (unixTime: number): string => {
+  const date = new Date(unixTime * 1000); // 초 단위를 밀리초 단위로 변환
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 1을 더함
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 };
