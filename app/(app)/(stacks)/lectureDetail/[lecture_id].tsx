@@ -316,7 +316,7 @@ export default function Lecture() {
                 textAlign="left"
               >
                 {
-                  lectureAudios.map((row) => row.caption).join('\n\n')
+                  lectureAudios.sort((a, b) => a.start_time - b.start_time).map((row) => row.caption).join('\n\n')
                 }
               </BoldText>
             </ScrollView>
