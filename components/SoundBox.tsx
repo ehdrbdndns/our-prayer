@@ -141,7 +141,7 @@ export default function SoundBox(props: SoundBoxProps) {
 
             // Reduce BGM volume
             if (bgmRef.current) {
-              await bgmRef.current.setVolumeAsync(0.3);
+              await bgmRef.current.setVolumeAsync(0.1);
             }
 
             // Play sound and restore BGM volume when finished
