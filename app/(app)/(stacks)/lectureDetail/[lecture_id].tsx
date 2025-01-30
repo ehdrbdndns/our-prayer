@@ -316,7 +316,7 @@ export default function Lecture() {
                 textAlign="left"
               >
                 {
-                  lectureAudios.map((row) => row.caption).join('\n\n')
+                  lectureAudios.sort((a, b) => a.start_time - b.start_time).map((row) => row.caption).join('\n\n')
                 }
               </BoldText>
             </ScrollView>
@@ -325,6 +325,7 @@ export default function Lecture() {
             style={[styles.textFilter, mode === 'default' && styles.hidden]}
             start={{ x: 0.5, y: 0 }}
             colors={['transparent', 'rgba(43, 47, 58, 1)']}
+            pointerEvents="none"
           />
 
           {/* Timer */}
