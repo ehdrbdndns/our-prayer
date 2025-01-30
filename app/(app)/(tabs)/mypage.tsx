@@ -20,7 +20,7 @@ import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
+import { Alert, Linking, RefreshControl, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MyPage() {
@@ -121,7 +121,8 @@ export default function MyPage() {
       // 알람 활성화
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('알림 권한이 필요합니다.');
+        // TODO: 안드로이드일 경우 다른 처리 방식 필요.
+        Linking.openURL('app-settings:')
         return;
       }
 
