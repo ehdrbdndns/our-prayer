@@ -61,7 +61,7 @@ export default function SoundBox(props: SoundBoxProps) {
         // Todo play audio when duration equals start_time
       } catch (e) {
         console.log(e);
-        Alert.alert('오류', '파일을 다시 다운로드 해주세요.');
+        Alert.alert('알림!', '새로운 오디오 파일이 추가되었습니다. 파일을 다시 다운로드 해주세요.');
         await AsyncStorage.removeItem(`planAudit-${plan_id}`);
         router.replace('/plan');
       }
@@ -86,12 +86,19 @@ export default function SoundBox(props: SoundBoxProps) {
   // SET AUDIO
   useEffect(() => {
     const loadAudios = async () => {
-      for (const audio of audios) {
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: audio.audio },
-          { shouldPlay: false, isLooping: false }
-        );
-        audioRefs.current[audio.lecture_audio_id] = sound;
+      try {
+        for (const audio of audios) {
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: audio.audio },
+            { shouldPlay: false, isLooping: false }
+          );
+          audioRefs.current[audio.lecture_audio_id] = sound;
+        }
+      } catch (e) {
+        console.log(e);
+        Alert.alert('알림!', '새로운 오디오 파일이 추가되었습니다. 파일을 다시 다운로드 해주세요.');
+        await AsyncStorage.removeItem(`planAudit-${plan_id}`);
+        router.replace('/plan');
       }
     };
 

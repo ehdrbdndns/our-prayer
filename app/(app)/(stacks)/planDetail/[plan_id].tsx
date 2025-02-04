@@ -16,7 +16,7 @@ import { ImageBackground } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PlanDetailPage() {
@@ -38,6 +38,31 @@ export default function PlanDetailPage() {
   const plan = data?.plan;
   const lectures = data?.lectures || [];
 
+  // check if plan is downloaded
+  useEffect(() => {
+    // get Audio file from local storage
+    const checkPlanAudit = async () => {
+      if (plan !== undefined) {
+        let audit = JSON.parse(await AsyncStorage.getItem(`planAudit-${plan?.plan_id}`) || '{}');
+
+        if (!audit || audit.audit_updated_date !== plan.audit_updated_date) {
+          Alert.alert('알림!', '새로운 오디오 파일이 추가되었습니다. 파일을 다시 다운로드 해주세요.', [
+            {
+              text: '확인',
+              onPress: async () => {
+                await AsyncStorage.removeItem(`planAudit-${plan_id}`);
+                router.replace('/plan');
+              }
+            }
+          ])
+        }
+      }
+    }
+
+    checkPlanAudit();
+  }, [plan]);
+
+  // fetch lecture history from AsyncStorage
   useEffect(() => {
     async function fetchLectureHistory() {
       const lectureHistory = await AsyncStorage.getItem('lecture-history');
@@ -81,7 +106,7 @@ export default function PlanDetailPage() {
   return (
     // Background
     <ImageBackground
-      source={{ uri: banner }}
+      source={{ uri: banner || data?.plan.thumbnail }}
       style={{ flex: 1 }}
       blurRadius={30}
     >

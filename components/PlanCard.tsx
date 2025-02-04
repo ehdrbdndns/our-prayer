@@ -30,8 +30,6 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
     const checkPlanAudit = async () => {
       let audit = JSON.parse(await AsyncStorage.getItem(`planAudit-${plan.plan_id}`) || '{}');
       setIsDownloaded(!!audit && audit.audit_updated_date === plan.audit_updated_date);
-      // for test
-      // setIsDownloaded(false);
     }
 
     checkPlanAudit();
