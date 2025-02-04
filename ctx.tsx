@@ -1,6 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
 import { createContext, useContext, useState, type PropsWithChildren } from 'react';
-import { Alert } from 'react-native';
 import { useStorageState } from './storage/useStorageState';
 import api from './utils/axios';
 import { registerForPushNotificationsAsync } from './utils/notification';
@@ -39,14 +38,14 @@ export function SessionProvider({ children }: PropsWithChildren) {
     <AuthContext.Provider
       value={{
         signUp: async () => {
-          let expoPushToken = '';
+          let expoPushToken = 'not physical device';
 
           try {
             expoPushToken = await registerForPushNotificationsAsync();
           } catch (e) {
             console.log(e);
-            Alert.alert('알림 설정에 실패했습니다.');
           }
+
           const res = await api.post<SessionType>('/user/auth', {
             userType: 'local',
             expoPushToken,
