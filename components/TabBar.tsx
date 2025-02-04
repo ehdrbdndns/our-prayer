@@ -4,6 +4,7 @@ import MyPage from "@/assets/images/icon/tab/mypage.svg";
 import Plan from "@/assets/images/icon/tab/plan.svg";
 import Prayer from "@/assets/images/icon/tab/prayer.svg";
 import Question from "@/assets/images/icon/tab/question.svg";
+import { usePlanListQuery } from "@/utils/queries";
 import { moderateScale } from "@/utils/style";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { router } from "expo-router";
@@ -42,6 +43,16 @@ const ImageSourceDict: {
 };
 
 export default function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const { data: plan, isLoading: isPlanLoading, isSuccess: isPlanSuccess } = usePlanListQuery();
+
+  const currentPlan = plan?.currentPlan
+    ? plan.plans.filter((row) => row.plan_id === plan.currentPlan?.plan_id)[0]
+    : null;
+
+  if (isPlanLoading) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       {state.routes.map((route, index) => {
@@ -62,11 +73,14 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
 
           if (!isFocused && !event.defaultPrevented) {
             if (name === "currentPlan") {
-              router.push("/calendar");
+              if (!!currentPlan) {
+                router.replace(`/planDetail/${currentPlan.plan_id}?backToLink=''`);
+              } else {
+                navigate("plan");
+              }
             } else {
               navigate(name);
             }
-
           }
         }
 
