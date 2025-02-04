@@ -13,23 +13,24 @@ import { usePlanQuery } from '@/utils/queries';
 import { moderateScale } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router";
+import { Href, router, useLocalSearchParams } from "expo-router";
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PlanDetailPage() {
   const insets = useSafeAreaInsets();
 
   const {
-    plan_id, title, banner,
+    plan_id, title, banner, backToLink,
     isLiked: isLikedFromParam,
   } = useLocalSearchParams<{
     plan_id: string,
     title: string,
     banner: string,
     isLiked: string
+    backToLink?: string
   }>();
 
   const [lectureHistoryDict, setLectureHistoryDict] = useState<{ [key: string]: number }>({});
@@ -38,6 +39,31 @@ export default function PlanDetailPage() {
   const plan = data?.plan;
   const lectures = data?.lectures || [];
 
+  // check if plan is downloaded
+  useEffect(() => {
+    // get Audio file from local storage
+    const checkPlanAudit = async () => {
+      if (plan !== undefined) {
+        let audit = JSON.parse(await AsyncStorage.getItem(`planAudit-${plan?.plan_id}`) || '{}');
+
+        if (!audit || audit.audit_updated_date !== plan.audit_updated_date) {
+          Alert.alert('알림!', '새로운 오디오 파일이 추가되었습니다. 파일을 다시 다운로드 해주세요.', [
+            {
+              text: '확인',
+              onPress: async () => {
+                await AsyncStorage.removeItem(`planAudit-${plan_id}`);
+                router.replace('/plan');
+              }
+            }
+          ])
+        }
+      }
+    }
+
+    checkPlanAudit();
+  }, [plan]);
+
+  // fetch lecture history from AsyncStorage
   useEffect(() => {
     async function fetchLectureHistory() {
       const lectureHistory = await AsyncStorage.getItem('lecture-history');
@@ -59,7 +85,11 @@ export default function PlanDetailPage() {
   }
 
   const onPressLeftArrow = () => {
-    router.replace('/plan');
+    if (backToLink !== undefined) {
+      router.replace(backToLink as Href);
+    } else {
+      router.back();
+    }
   }
 
   const onPressLecture = ({ lecture_id }: { lecture_id: string }) => {
@@ -81,7 +111,7 @@ export default function PlanDetailPage() {
   return (
     // Background
     <ImageBackground
-      source={{ uri: banner }}
+      source={{ uri: banner || data?.plan.thumbnail }}
       style={{ flex: 1 }}
       blurRadius={30}
     >
@@ -95,7 +125,7 @@ export default function PlanDetailPage() {
               <Pressable onPress={onPressLeftArrow} hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}>
                 <LeftArrow />
               </Pressable>
-              <MediumText>{title}</MediumText>
+              <MediumText>{title || data?.plan.title}</MediumText>
             </View>
           }
           suffix={

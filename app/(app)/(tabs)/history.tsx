@@ -1,5 +1,4 @@
 import Fire from '@/assets/images/icon/fire.svg';
-import LeftArrow from '@/assets/images/icon/leftArrow.svg';
 import OneStar from '@/assets/images/icon/one-start.svg';
 import Stars from '@/assets/images/icon/star.svg';
 import Header from "@/components/Header";
@@ -87,7 +86,7 @@ const HistoryNote = ({
   </TouchableOpacity >
 )
 
-export default function CalendarPage() {
+export default function HistoryPage() {
 
   const queryClient = useQueryClient();
 
@@ -227,15 +226,6 @@ export default function CalendarPage() {
           style={styles.header}
           prefix={
             <View style={styles.headerPrefix}>
-              <TouchableOpacity
-                onPress={onPressBack}
-                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-              >
-                <LeftArrow
-                  width={moderateScale(24)}
-                  height={moderateScale(24)}
-                />
-              </TouchableOpacity>
               <MediumText
                 color="#FFF"
                 fontSize={16}

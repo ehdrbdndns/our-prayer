@@ -14,8 +14,8 @@ import { moderateScale, normalizeFontSize, scaleHeight } from "@/utils/style";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import React, { useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useRef, useState } from "react";
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -51,6 +51,10 @@ export default function PlanPage() {
     }
     return planType === '' || item.type === planType;
   }) : [];
+
+  useFocusEffect(useCallback(() => {
+    queryClient.refetchQueries({ queryKey: ["plan"] });
+  }, []))
 
   const handleSearchPress = () => {
     if (textInputRef.current) {

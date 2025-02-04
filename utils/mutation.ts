@@ -112,7 +112,12 @@ export const useHistoryMutation = () => {
       // wait for 1 second
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      router.replace('/calendar');
+      router.replace({
+        pathname: `/calendar`,
+        params: {
+          backToLink: '/',
+        }
+      });
     },
     onError: (error, newUser, context) => {
       console.error('onError', error, newUser, context);
