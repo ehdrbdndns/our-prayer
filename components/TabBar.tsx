@@ -74,7 +74,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
           if (!isFocused && !event.defaultPrevented) {
             if (name === "currentPlan") {
               if (!!currentPlan) {
-                router.replace(`/planDetail/${currentPlan.plan_id}?backToLink=''`);
+                router.push(`/planDetail/${currentPlan.plan_id}`);
               } else {
                 navigate("plan");
               }

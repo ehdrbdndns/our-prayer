@@ -88,7 +88,7 @@ export default function PlanDetailPage() {
     if (backToLink !== undefined) {
       router.replace(backToLink as Href);
     } else {
-      router.replace('/plan');
+      router.back();
     }
   }
 
