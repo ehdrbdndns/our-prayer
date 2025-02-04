@@ -12,7 +12,7 @@ import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotal
 import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { router } from "expo-router";
+import { Href, router, useLocalSearchParams } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -91,6 +91,12 @@ export default function CalendarPage() {
 
   const queryClient = useQueryClient();
 
+  const {
+    backToLink
+  } = useLocalSearchParams<{
+    backToLink?: string,
+  }>();
+
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDay, setSelectedDay] = useState(Today);
   const [selectedNoteList, setSelectedNoteList] = useState<JSX.Element[]>([<EmptyNote key="empty" />]);
@@ -116,7 +122,7 @@ export default function CalendarPage() {
         },
       });
 
-      return res.data;
+      return res.data.sort((a, b) => b.created_date - a.created_date);
     },
     onSuccess: (data) => {
       if (data.length === 0) {
@@ -195,7 +201,11 @@ export default function CalendarPage() {
   }
 
   const onPressBack = () => {
-    router.back();
+    if (backToLink !== undefined) {
+      router.replace(backToLink as Href);
+    } else {
+      router.back();
+    }
   }
 
   return (
