@@ -1,3 +1,4 @@
+import Calendar from "@/assets/images/icon/tab/calendar.svg";
 import Home from "@/assets/images/icon/tab/home.svg";
 import MyPage from "@/assets/images/icon/tab/mypage.svg";
 import Plan from "@/assets/images/icon/tab/plan.svg";
@@ -9,7 +10,7 @@ import { router } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 import { MediumText } from "./text/MediumText";
 
-type TabBarKeys = 'index' | 'currentPlan' | 'plan' | 'question' | 'mypage';
+type TabBarKeys = 'index' | 'currentPlan' | 'plan' | 'question' | 'mypage' | 'history';
 
 const ImageSourceDict: {
   [key in TabBarKeys]: { image: (props: { color: string }) => JSX.Element; text: string };
@@ -29,6 +30,10 @@ const ImageSourceDict: {
   question: {
     image: ({ color }) => <Question width={moderateScale(24)} height={moderateScale(24)} color={color} />,
     text: '질문하기',
+  },
+  history: {
+    image: ({ color }) => <Calendar width={moderateScale(24)} height={moderateScale(24)} color={color} />,
+    text: '기록',
   },
   mypage: {
     image: ({ color }) => <MyPage width={moderateScale(24)} height={moderateScale(24)} color={color} />,
