@@ -30,15 +30,24 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
     const checkPlanAudit = async () => {
       let audit = JSON.parse(await AsyncStorage.getItem(`planAudit-${plan.plan_id}`) || '{}');
       setIsDownloaded(!!audit && audit.audit_updated_date === plan.audit_updated_date);
-      // for test
-      // setIsDownloaded(false);
     }
 
     checkPlanAudit();
   }, []);
 
   const onPressHeart = () => {
-    mutateLike();
+    Alert.alert('즐겨찾기', isLiked ? '즐겨찾기를 취소하시겠습니까?' : '즐겨찾기를 등록하시겠습니까?', [
+      {
+        text: '취소',
+        style: 'cancel'
+      },
+      {
+        text: '확인',
+        onPress: () => {
+          mutateLike();
+        }
+      }
+    ])
   }
 
   const onPressCard = () => {
@@ -50,6 +59,7 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
           title: plan.title,
           banner: plan.thumbnail,
           isLiked: String(isLiked),
+          backToLink: '/plan'
         },
       });
     } else {
@@ -116,7 +126,7 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
               fill={isLiked ? "#FF7D71" : "transparent"}
               stroke={isLiked ? "#FF7D71" : "white"}
               onPress={onPressHeart}
-              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+              hitSlop={{ top: 18, bottom: 18, left: 18, right: 18 }}
             />
           ) : (
             <Download

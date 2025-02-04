@@ -119,7 +119,7 @@ export default function DownloadModal() {
             audio: bgmUri
           })
 
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 1초 대기
+          await new Promise(resolve => setTimeout(resolve, 100)); // .1초 대기
 
           for (const { lecture_audio_id, uri } of audios) {
             if (signal.aborted) break;
@@ -131,7 +131,7 @@ export default function DownloadModal() {
               return newCount;
             });
 
-            await new Promise(resolve => setTimeout(resolve, 1000)); // 1초 대기
+            await new Promise(resolve => setTimeout(resolve, 100)); // .1초 대기
 
             lectureData.push({
               lecture_audio_id,
@@ -191,7 +191,7 @@ export default function DownloadModal() {
             <ProgressBar.Bar color='#4F5FFF' progress={progress} width={null} />
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
               <RegularText>
-                {completedDownloadCount}/{totalAudioCount}
+                {Math.floor((completedDownloadCount / totalAudioCount) * 100)}%
               </RegularText>
             </View>
           </View>
