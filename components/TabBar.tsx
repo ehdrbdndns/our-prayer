@@ -5,6 +5,7 @@ import Prayer from "@/assets/images/icon/tab/prayer.svg";
 import Question from "@/assets/images/icon/tab/question.svg";
 import { moderateScale } from "@/utils/style";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { router } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 import { MediumText } from "./text/MediumText";
 
@@ -55,9 +56,12 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
           });
 
           if (!isFocused && !event.defaultPrevented) {
-            navigate(name, {
+            if (name === "currentPlan") {
+              router.push("/calendar");
+            } else {
+              navigate(name);
+            }
 
-            });
           }
         }
 

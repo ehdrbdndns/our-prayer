@@ -59,6 +59,7 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
           title: plan.title,
           banner: plan.thumbnail,
           isLiked: String(isLiked),
+          backToLink: '/plan'
         },
       });
     } else {
