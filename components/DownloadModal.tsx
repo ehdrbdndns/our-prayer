@@ -191,7 +191,7 @@ export default function DownloadModal() {
             <ProgressBar.Bar color='#4F5FFF' progress={progress} width={null} />
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
               <RegularText>
-                {Math.floor((completedDownloadCount / totalAudioCount) * 100)}%
+                {Math.floor((completedDownloadCount / (totalAudioCount ? totalAudioCount : 1)) * 100)}%
               </RegularText>
             </View>
           </View>
