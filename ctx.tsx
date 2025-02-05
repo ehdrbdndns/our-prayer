@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { createContext, useContext, useState, type PropsWithChildren } from 'react';
 import { useStorageState } from './storage/useStorageState';
@@ -69,6 +70,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         signOut: async () => {
           await SecureStore.deleteItemAsync('accessToken');
           await SecureStore.deleteItemAsync('refreshToken');
+          await AsyncStorage.clear();
           setSession(null);
         },
         setSession,
