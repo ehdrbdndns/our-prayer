@@ -53,7 +53,12 @@ export default function Root() {
   // Set the status bar style to light and set the audio mode
   useEffect(() => {
     const setAudioMode = async () => {
-      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+      await Audio.setAudioModeAsync({
+        interruptionModeIOS: 2, // your experience's audio lowers the volume ("ducks") of audio from other apps while your audio plays.
+        interruptionModeAndroid: 2, // your experience's audio lowers the volume ("ducks") of audio from other apps while your audio plays.
+        playsInSilentModeIOS: true, //A boolean selecting if your experience's audio should play in silent mode on iOS.
+        staysActiveInBackground: true, // A boolean selecting if your experience's audio should continue to play when the app is in the background on Android and iOS.
+      });
     };
 
     setAudioMode();
