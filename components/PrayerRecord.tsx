@@ -125,8 +125,8 @@ const styles = StyleSheet.create({
   },
   block: {
     backgroundColor: "#51525C",
-    width: moderateScale(28),
-    height: moderateScale(28),
+    width: moderateScale(28, 1),
+    height: moderateScale(28, 1),
     borderRadius: moderateScale(4),
     justifyContent: "center",
     alignItems: "center"

@@ -3,7 +3,7 @@ import { Dimensions } from "react-native";
 const BASE_WIDTH = 375;
 const BASE_HEIGHT = 812;
 
-const MAX_WIDTH = 768;
+const MAX_WIDTH = 640;
 
 export const deviceWidth = Math.min(Dimensions.get('window').width, MAX_WIDTH);
 export const deviceHeight = Dimensions.get('window').height;
