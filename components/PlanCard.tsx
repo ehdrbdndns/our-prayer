@@ -8,12 +8,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 import { BoldText } from "./text/BoldText";
 import { RegularText } from "./text/RegularText";
 
-export default function PlanCard({ plan }: { plan: PlanType }) {
+export default function PlanCard({ plan, refreshing }: { plan: PlanType, refreshing: boolean }) {
 
   const { showModal } = useModal();
 
@@ -25,15 +25,12 @@ export default function PlanCard({ plan }: { plan: PlanType }) {
     plan_like_id: plan.plan_like_id
   })
 
-  useEffect(() => {
-    // get Audio file from local storage
-    const checkPlanAudit = async () => {
-      let audit = JSON.parse(await AsyncStorage.getItem(`planAudit-${plan.plan_id}`) || '{}');
-      setIsDownloaded(!!audit && audit.audit_updated_date === plan.audit_updated_date);
-    }
+  const checkPlanAudit = async () => {
+    let audit = JSON.parse(await AsyncStorage.getItem(`planAudit-${plan.plan_id}`) || '{}');
+    setIsDownloaded(!!audit && audit.audit_updated_date === plan.audit_updated_date);
+  }
 
-    checkPlanAudit();
-  }, []);
+  checkPlanAudit();
 
   const onPressHeart = () => {
     Alert.alert('즐겨찾기', isLiked ? '즐겨찾기를 취소하시겠습니까?' : '즐겨찾기를 등록하시겠습니까?', [
