@@ -13,7 +13,7 @@ export default function ShareCard() {
   const onPressBtn = () => {
     Share.share({
       message: "'우리의 기도'앱을 통해 기도에 대해 배우고, 기도 습관을 형성해보세요!",
-      // url: "XXXXXXXXXXXXXXXXXXXXXXXXXX", TODO : 앱스토어 링크 추가
+      url: "https://apps.apple.com/kr/app/%EC%9A%B0%EB%A6%AC%EC%9D%98-%EA%B8%B0%EB%8F%84/id6740837756"
     })
   }
 
