@@ -99,18 +99,18 @@ export default function DownloadModal() {
       const { signal } = downloadAbortController.current;
       if (isSuccess && !!audio) {
         const lectureData: InsertUserAudioRequestType = [];
-        const total = Object.values(audio).reduce((acc, { audios }) => acc + audios.length + 1 + 1, 0) // audios(length) + bgm(1) + mutation(1)
-        setTotalAudioCount(total);
-
+        const _totalAudioCount = Object.values(audio).reduce((acc, { audios }) => acc + audios.length + 1 + 1, 0) // audios(length) + bgm(1) + mutation(1)
+        setTotalAudioCount(_totalAudioCount);
 
         for (const [lectureId, { audios, bgm }] of Object.entries(audio)) {
 
           if (signal.aborted) break;
 
+          // download bgm
           const bgmUri = await addAudio({ path: `${lectureId}/bgm`, audioUri: bgm });
           setCompletedDownloadCount(prevCount => {
             const newCount = prevCount + 1;
-            setProgress(newCount / total);
+            setProgress(newCount / _totalAudioCount);
             return newCount;
           });
 
@@ -121,13 +121,14 @@ export default function DownloadModal() {
 
           await new Promise(resolve => setTimeout(resolve, 100)); // .1초 대기
 
+          // download audios
           for (const { lecture_audio_id, uri } of audios) {
             if (signal.aborted) break;
 
             const audioUri = await addAudio({ path: `${lectureId}/audios/${lecture_audio_id}`, audioUri: uri });
             setCompletedDownloadCount(prevCount => {
               const newCount = prevCount + 1;
-              setProgress(newCount / total);
+              setProgress(newCount / _totalAudioCount);
               return newCount;
             });
 
