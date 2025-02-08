@@ -23,15 +23,21 @@ export default function PrayerRecord() {
   }>();
 
   const [note, setNote] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  const { mutate } = useHistoryMutation()
+  const { mutate } = useHistoryMutation(() => setIsSaving(false))
 
   const onPressSave = async () => {
-    // Todo save data
+    if (isSaving) return;
+
+    setIsSaving(true);
+
+    // save lecture history in AsyncStorage
     const lectureHistory = await AsyncStorage.getItem('lecture-history');
     const lectureHistoryData = lectureHistory ? JSON.parse(lectureHistory) : {};
     lectureHistoryData[lecture_id] = lectureHistoryData[lecture_id] ? lectureHistoryData[lecture_id] + 1 : 1;
     await AsyncStorage.setItem('lecture-history', JSON.stringify(lectureHistoryData));
+
     mutate({ lecture_id, duration, note });
   }
 

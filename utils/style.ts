@@ -3,7 +3,9 @@ import { Dimensions } from "react-native";
 const BASE_WIDTH = 375;
 const BASE_HEIGHT = 812;
 
-export const deviceWidth = Dimensions.get('window').width;
+const MAX_WIDTH = 640;
+
+export const deviceWidth = Math.min(Dimensions.get('window').width, MAX_WIDTH);
 export const deviceHeight = Dimensions.get('window').height;
 
 const widthRatio = deviceWidth / BASE_WIDTH;
