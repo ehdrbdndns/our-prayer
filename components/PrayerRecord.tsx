@@ -84,7 +84,6 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
             <CustomText
               color="#B3B3B3"
               fontSize={10}
-              lineHeight={10}
               letterSpacingPercent={-1}
             >
               {weekData.week}

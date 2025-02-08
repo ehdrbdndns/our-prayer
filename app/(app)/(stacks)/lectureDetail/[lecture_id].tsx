@@ -279,7 +279,7 @@ export default function Lecture() {
               <View style={[styles.tab, mode === 'default' && styles.activeTab]}>
                 <RegularText
                   fontSize={14}
-                  lineHeight={15}
+                  lineHeight={21}
                   color={mode === 'default' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
                 >
                   기본 모드
@@ -292,7 +292,7 @@ export default function Lecture() {
                   <View style={[styles.tab, mode === 'text' && styles.activeTab]}>
                     <RegularText
                       fontSize={14}
-                      lineHeight={15}
+                      lineHeight={21}
                       color={mode === 'text' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
                     >
                       텍스트 모드

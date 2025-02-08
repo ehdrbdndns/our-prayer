@@ -238,7 +238,7 @@ export default function PlanDetailPage() {
             <RegularText
               style={styles.lectureIndicator}
               fontSize={14}
-              lineHeight={15}
+              lineHeight={21}
               color="#B3B3B3"
             >
               {`전체 회차 수: ${lectures.length}회차`}
