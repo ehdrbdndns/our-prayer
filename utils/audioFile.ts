@@ -64,11 +64,11 @@ export async function addAudio({
 
     const fileUri = audioFileUri({ path: `${path}.${extension}` });
 
+    const directory = fileUri.substring(0, fileUri.lastIndexOf('/'));
+    await ensureDirExists(directory);
+
     if (Platform.OS === 'ios') {
       // Todo: 서버로부터 확장자 정보를 가져와서 downloadAsync를 사용하도록 수정
-      const directory = fileUri.substring(0, fileUri.lastIndexOf('/'));
-      await ensureDirExists(directory);
-
       const audioBlob = await response.data;
       const base64Audio = await blobToBase64(audioBlob);
 
