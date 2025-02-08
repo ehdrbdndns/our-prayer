@@ -152,10 +152,10 @@ export default function Lecture() {
   const onPressLeftArrow = () => {
     Alert.alert(
       '그만두시겠습니까?', // title
-      '기도 기록이 저장되지 않습니다.', // message
+      '기도 기록 페이지로 넘어갑니다.', // message
       [                     // buttons
         { text: '취소', style: 'cancel' },
-        { text: '그만두기', onPress: () => router.back() }
+        { text: '그만두기', onPress: () => onPressCompleteBtn(elapsedTime) }
       ]
     )
   }
