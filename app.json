@@ -9,14 +9,15 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
       "infoPlist": {
         "UIBackgroundModes": [ "audio" ]
       }
     },
     "android": {
-      "package": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj"
+      "package": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
