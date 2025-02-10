@@ -19,7 +19,7 @@ export default function HistoryDetailPage() {
   const queryClient = useQueryClient();
   const { history_id } = useLocalSearchParams<{ history_id: string }>();
   const { data: historyDetail, isSuccess: isHistorySuccess } = useQuery<HistoryType>({
-    queryKey: ["history", history_id],
+    queryKey: ["historyDetail", history_id],
     queryFn: async () => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
@@ -34,10 +34,9 @@ export default function HistoryDetailPage() {
         });
 
       return res.data;
-    },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
+    }
   });
+
   const { mutate: updateHistoryMutate } = useMutation({
     mutationFn: async () => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
@@ -60,13 +59,15 @@ export default function HistoryDetailPage() {
     },
     onSuccess: async () => {
       // invalid history detail cache
+      await queryClient.invalidateQueries({ queryKey: ["history"] });
       await queryClient.invalidateQueries({ queryKey: ["history", history_id] });
-      router.replace('/calendar');
+      router.back();
     },
     onError: (error, newUser, context) => {
       console.error('onError', error, newUser, context);
     },
-  })
+  });
+
   const { mutate: deleteHistoryMutate } = useMutation({
     mutationFn: async () => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
@@ -74,7 +75,7 @@ export default function HistoryDetailPage() {
 
       const res = await api<HistoryType[]>({
         method: "DELETE",
-        url: "/history",
+        url: "/history/detail",
         data: {
           prayer_history_id: history_id,
         },
@@ -87,8 +88,7 @@ export default function HistoryDetailPage() {
       return res.data;
     },
     onSuccess: async () => {
-      // invalid history detail cache
-      await queryClient.invalidateQueries({ queryKey: ["history", history_id] });
+      await queryClient.invalidateQueries({ queryKey: ["history"] });
       router.back();
     },
     onError: (error, newUser, context) => {
@@ -135,7 +135,7 @@ export default function HistoryDetailPage() {
   const onPressDelete = () => {
     Alert.alert(
       '기도 기록 내용을 삭제하시겠습니까?',
-      '기도 시간은 삭제되지 않습니다.',
+      '삭제된 내용은 되돌릴 수 없습니다.',
       [
         {
           text: '취소',
