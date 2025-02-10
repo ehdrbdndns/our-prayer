@@ -14,6 +14,7 @@ export default function StackLayout() {
       screenOptions={{
         headerShown: false,
         headerShadowVisible: false,
+        gestureEnabled: false,
       }}
       screenLayout={ScreenLayout}
     >
