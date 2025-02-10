@@ -7,7 +7,7 @@ import { useHistoryMutation } from "@/utils/mutation";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -25,6 +25,7 @@ export default function PrayerRecord() {
   const [note, setNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [boldTextOpacity, setBoldTextOpacity] = useState(1); // BoldText의 opacity 상태
+  const textInputRef = useRef<TextInput>(null); // TextInput의 참조 생성
 
   const { mutate } = useHistoryMutation(() => setIsSaving(false))
 
@@ -46,78 +47,91 @@ export default function PrayerRecord() {
     mutate({ lecture_id, duration, note: '' });
   }
 
+  const onComplete = () => {
+    if (textInputRef.current) {
+      textInputRef.current.blur(); // TextInput에 포커스 잃게 하기
+    }
+  }
+
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, paddingHorizontal: moderateScale(24) }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <SafeAreaView style={styles.container}>
-        <Header
-          style={styles.header}
-          prefix={<View></View>}
-          suffix={
-            <TouchableOpacity
-              onPress={onPressSave}
-              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-            >
+    <>
+      <View
+        style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(15, 20, 26, 0.4)' }}
+      />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? insets.bottom : 0}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <SafeAreaView style={styles.container}>
+          <Header
+            style={styles.header}
+            prefix={<View></View>}
+            suffix={
+              <TouchableOpacity
+                style={{ opacity: boldTextOpacity === 1 ? 0 : 1 }}
+                onPress={onComplete}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+              >
+                <MediumText
+                  fontSize={16}
+                  color="#959FFF"
+                >
+                  완료하기
+                </MediumText>
+              </TouchableOpacity>
+            }
+          />
+          <BoldText
+            style={[styles.title, { opacity: boldTextOpacity }]} // opacity 상태 적용
+            fontSize={24}
+            lineHeight={36}
+          >
+            {"떠오르는 생각들을 기록하며\n기도를 마무리해보세요"}
+          </BoldText>
+
+          <View style={styles.textInput}>
+            <TextInput
+              ref={textInputRef}
+              value={note}
+              multiline={true}
+              maxLength={1500}
+              style={styles.text}
+              scrollEnabled={true}
+              onChangeText={(v) => setNote(v)}
+              placeholderTextColor={"#B3B3B3"}
+              placeholder="여기를 탭하여 입력하세요(최대 1500자)"
+              onFocus={() => setBoldTextOpacity(0.5)} // TextInput이 포커스될 때 opacity 변경
+              onBlur={() => setBoldTextOpacity(1)} // TextInput이 포커스를 잃을 때 opacity 복원
+            />
+          </View>
+
+          <View style={[styles.buttonList, { bottom: insets.bottom, opacity: boldTextOpacity !== 1 ? 0 : 1 }]}>
+            <CustomButton onPress={onPressCancel} style={[styles.button, styles.secondaryButton]}>
               <MediumText
-                fontSize={16}
-                color="#959FFF"
+                fontSize={14}
+              >
+                괜찮습니다
+              </MediumText>
+            </CustomButton>
+            <PrimaryButton onPress={onPressSave} style={styles.button}>
+              <MediumText
+                fontSize={14}
               >
                 저장하기
               </MediumText>
-            </TouchableOpacity>
-          }
-        />
-        <BoldText
-          style={[styles.title, { opacity: boldTextOpacity }]} // opacity 상태 적용
-          fontSize={24}
-          lineHeight={36}
-        >
-          {"떠오르는 생각들을 기록하며\n기도를 마무리해보세요"}
-        </BoldText>
-
-        <View style={styles.textInput}>
-          {/* TODO 1500자 제한 */}
-          <TextInput
-            value={note}
-            multiline={true}
-            maxLength={1500}
-            style={styles.text}
-            scrollEnabled={true}
-            onChangeText={(v) => setNote(v)}
-            placeholderTextColor={"#B3B3B3"}
-            placeholder="여기를 탭하여 입력하세요(최대 1500자)"
-            onFocus={() => setBoldTextOpacity(0.5)} // TextInput이 포커스될 때 opacity 변경
-            onBlur={() => setBoldTextOpacity(1)} // TextInput이 포커스를 잃을 때 opacity 복원
-          />
-        </View>
-
-        <View style={[styles.buttonList, { bottom: insets.bottom, opacity: boldTextOpacity !== 1 ? 0 : 1 }]}>
-          <CustomButton onPress={onPressCancel} style={[styles.button, styles.secondaryButton]}>
-            <MediumText
-              fontSize={14}
-            >
-              괜찮습니다
-            </MediumText>
-          </CustomButton>
-          <PrimaryButton onPress={onPressSave} style={styles.button}>
-            <MediumText
-              fontSize={14}
-            >
-              저장하기
-            </MediumText>
-          </PrimaryButton>
-        </View>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+            </PrimaryButton>
+          </View>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(15, 20, 26, 0.4)',
+    width: '100%',
   },
   header: {
     marginBottom: moderateScale(20)
