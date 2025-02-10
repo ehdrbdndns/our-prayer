@@ -16,7 +16,8 @@
       }
     },
     "android": {
-      "package": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj"
+      "package": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

@@ -71,6 +71,8 @@ const HistoryNote = ({
             style={{ marginBottom: moderateScale(8) }}
             fontSize={16}
             lineHeight={28}
+            numberOfLines={6}
+            ellipsizeMode="tail"
           >
             {note}
           </RegularText>
@@ -100,10 +102,11 @@ export default function CalendarPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDay, setSelectedDay] = useState(Today);
   const [selectedNoteList, setSelectedNoteList] = useState<JSX.Element[]>([<EmptyNote key="empty" />]);
+  const [markedDates, setMarkedDates] = useState<{ [key: string]: { marked: boolean, dotColor: string, prayer_history_id_list: string[] } }>({});
 
   const selectedDayRef = useRef(selectedDay)
 
-  const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
+  const { data: history, isSuccess: isHistorySuccess, isFetching: isHistoryFetching } = useHistoryQuery();
 
   const { mutate: retrieveHistoryNote } = useMutation({
     mutationFn: async (prayer_history_id_list: string[]) => {
@@ -147,24 +150,36 @@ export default function CalendarPage() {
     },
   })
 
-  const markedDates = {
-    ...history?.reduce((acc, cur) => {
-      const date = new Date(cur.created_date * 1000);
-      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  useEffect(() => {
+    if (!isHistoryFetching && isHistorySuccess) {
+      const _markedDates = {
+        ...history?.reduce((acc, cur) => {
+          const date = new Date(cur.created_date * 1000);
+          const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-      if (!acc[formattedDate]) {
-        acc[formattedDate] = {
-          prayer_history_id_list: [cur.prayer_history_id],
-          marked: true,
-          dotColor: '#959FFF',
-        };
-      } else {
-        acc[formattedDate].prayer_history_id_list.push(cur.prayer_history_id);
+          if (!acc[formattedDate]) {
+            acc[formattedDate] = {
+              prayer_history_id_list: [cur.prayer_history_id],
+              marked: true,
+              dotColor: '#959FFF',
+            };
+          } else {
+            acc[formattedDate].prayer_history_id_list.push(cur.prayer_history_id);
+          }
+
+          return acc;
+        }, {} as { [key: string]: { prayer_history_id_list: string[], marked: boolean; dotColor: string } })
       }
 
-      return acc;
-    }, {} as { [key: string]: { prayer_history_id_list: string[], marked: boolean; dotColor: string } })
-  }
+      setMarkedDates(_markedDates);
+
+      if (!!_markedDates[selectedDay]) {
+        retrieveHistoryNote(_markedDates[selectedDay].prayer_history_id_list);
+      } else {
+        setSelectedNoteList([<EmptyNote key={'empty'} />]);
+      }
+    }
+  }, [isHistoryFetching, isHistorySuccess])
 
   // 연속 기도 일수
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
@@ -174,13 +189,6 @@ export default function CalendarPage() {
 
   // 전체 기도 시간
   const totalPrayerTime = calculateTotalPrayerTime(history || []);
-
-
-  useEffect(() => {
-    if (!!markedDates[Today]) {
-      retrieveHistoryNote(markedDates[Today].prayer_history_id_list);
-    }
-  }, [isHistorySuccess])
 
   const onRefresh = async () => {
     setRefreshing(true);

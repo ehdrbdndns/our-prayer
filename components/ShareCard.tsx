@@ -52,7 +52,7 @@ export default function ShareCard() {
           lineHeight={20}
         >
           {
-            "'우리의 기도' 앱은 이단이나 사이비와 전혀 관련이 없는,\n신뢰할 수 있는 기도 환경을 제공합니다."
+            "‘우리의 기도’ 앱은 바른 신앙을 바탕으로\n 안전하고 신뢰할 수 있는 기도 환경을 제공합니다."
           }
         </RegularText>
 

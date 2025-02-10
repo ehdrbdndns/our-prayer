@@ -152,10 +152,10 @@ export default function Lecture() {
   const onPressLeftArrow = () => {
     Alert.alert(
       '그만두시겠습니까?', // title
-      '기도 기록이 저장되지 않습니다.', // message
+      '기도 기록 페이지로 넘어갑니다.', // message
       [                     // buttons
         { text: '취소', style: 'cancel' },
-        { text: '그만두기', onPress: () => router.back() }
+        { text: '그만두기', onPress: () => onPressCompleteBtn(elapsedTime) }
       ]
     )
   }
@@ -279,7 +279,7 @@ export default function Lecture() {
               <View style={[styles.tab, mode === 'default' && styles.activeTab]}>
                 <RegularText
                   fontSize={14}
-                  lineHeight={15}
+                  lineHeight={21}
                   color={mode === 'default' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
                 >
                   기본 모드
@@ -292,7 +292,7 @@ export default function Lecture() {
                   <View style={[styles.tab, mode === 'text' && styles.activeTab]}>
                     <RegularText
                       fontSize={14}
-                      lineHeight={15}
+                      lineHeight={21}
                       color={mode === 'text' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
                     >
                       텍스트 모드
