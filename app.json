@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
       "infoPlist": {
         "UIBackgroundModes": [ "audio" ]
