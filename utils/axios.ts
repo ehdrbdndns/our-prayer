@@ -51,7 +51,8 @@ const onError = async (error: any) => {
       }
     }
 
-    Alert.alert('오류가 발생했습니다.', error.response.data.message);
+    // Alert.alert('오류가 발생했습니다.', error.response.data.message);
+    console.error(error.response.data.message)
 
     return Promise.reject(error);
   } catch (error) {
