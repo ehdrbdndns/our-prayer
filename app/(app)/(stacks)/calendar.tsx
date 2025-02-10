@@ -71,6 +71,8 @@ const HistoryNote = ({
             style={{ marginBottom: moderateScale(8) }}
             fontSize={16}
             lineHeight={28}
+            numberOfLines={6}
+            ellipsizeMode="tail"
           >
             {note}
           </RegularText>

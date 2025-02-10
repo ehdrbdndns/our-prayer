@@ -60,7 +60,7 @@ export default function HistoryDetailPage() {
     onSuccess: async () => {
       // invalid history detail cache
       await queryClient.invalidateQueries({ queryKey: ["history"] });
-      await queryClient.invalidateQueries({ queryKey: ["history", history_id] });
+      await queryClient.invalidateQueries({ queryKey: ["historyDetail", history_id] });
       router.back();
     },
     onError: (error, newUser, context) => {
