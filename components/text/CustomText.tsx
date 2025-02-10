@@ -49,7 +49,6 @@ export default function CustomText({
 
 const styles = StyleSheet.create({
   text: {
-    includeFontPadding: false, // 안드로이드 패딩 제거
     textAlignVertical: 'center', // 텍스트 정렬
   },
 });

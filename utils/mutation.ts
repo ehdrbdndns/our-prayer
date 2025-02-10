@@ -78,7 +78,7 @@ export const useLikeMutation = ({
   return { isLiked, mutateLike };
 };
 
-export const useHistoryMutation = () => {
+export const useHistoryMutation = (callback: () => void) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -109,8 +109,10 @@ export const useHistoryMutation = () => {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["history"] });
 
-      // wait for 1 second
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // wait for 300ms
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      callback();
 
       router.replace({
         pathname: `/calendar`,
@@ -122,6 +124,9 @@ export const useHistoryMutation = () => {
     onError: (error, newUser, context) => {
       console.error('onError', error, newUser, context);
       Alert.alert('오류', '기록 저장에 실패했습니다.');
+
+      callback();
+
       router.replace('/');
     },
   })

@@ -13,7 +13,8 @@ export default function ShareCard() {
   const onPressBtn = () => {
     Share.share({
       message: "'우리의 기도'앱을 통해 기도에 대해 배우고, 기도 습관을 형성해보세요!",
-      // url: "XXXXXXXXXXXXXXXXXXXXXXXXXX", TODO : 앱스토어 링크 추가
+      // To Do: add android link
+      url: "https://apps.apple.com/kr/app/%EC%9A%B0%EB%A6%AC%EC%9D%98-%EA%B8%B0%EB%8F%84/id6740837756"
     })
   }
 
@@ -51,7 +52,7 @@ export default function ShareCard() {
           lineHeight={20}
         >
           {
-            "'우리의 기도' 앱은 이단이나 사이비와 전혀 관련이 없는,\n신뢰할 수 있는 기도 환경을 제공합니다."
+            "‘우리의 기도’ 앱은 바른 신앙을 바탕으로\n 안전하고 신뢰할 수 있는 기도 환경을 제공합니다."
           }
         </RegularText>
 

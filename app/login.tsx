@@ -1,4 +1,6 @@
+import Kakao from '@/assets/images/kakao-logo.svg';
 import BackgroundWithImage from "@/components/BackgroundWithImage";
+import CustomButton from "@/components/button/CustomButton";
 import PrimaryButton from "@/components/button/PrimaryButton";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
@@ -59,6 +61,7 @@ export default function login() {
           }}
           contentFit="fill"
         /> */}
+
         <BoldText
           fontSize={36}
         >
@@ -94,6 +97,30 @@ export default function login() {
           </PrimaryButton>
 
           {/* KakaoButton */}
+          {
+            process.env.EXPO_PUBLIC_MODE === 'development' ? (
+              <CustomButton onPress={onPressKakao} style={{ backgroundColor: '#FEE500' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Kakao
+                    width={18}
+                    height={18}
+                    style={{
+                      position: 'absolute',
+                      left: moderateScale(-28),
+                    }}
+                  />
+                  <MediumText
+                    fontSize={15}
+                    lineHeight={27}
+                    letterSpacingPercent={-1}
+                    color="#000000"
+                  >
+                    카카오로 시작하기
+                  </MediumText>
+                </View>
+              </CustomButton>
+            ) : null
+          }
           {/* <CustomButton onPress={onPressKakao} style={{ backgroundColor: '#FEE500' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Kakao

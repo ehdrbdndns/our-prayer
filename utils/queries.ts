@@ -92,9 +92,7 @@ export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
       }
 
       return data;
-    },
-    staleTime: 2 * 60 * 60 * 1000, // 2시간
-    gcTime: 2 * 60 * 60 * 1000, // 2시간
+    }
   });
 };
 
