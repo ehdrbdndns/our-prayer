@@ -4,7 +4,7 @@ import api from '@/utils/axios';
 import { AudioFileSystemType } from '@/utils/dataType';
 import { moderateScale } from '@/utils/style';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useRef, useState } from 'react';
@@ -21,6 +21,8 @@ type InsertUserAudioRequestType = {
 const { width: deviceWidth } = Dimensions.get('window');
 
 export default function DownloadModal() {
+
+  const queryClient = useQueryClient();
 
   const { planId, title, thumbnail, isLiked, auditDate, isModalVisible, hideModal } = useModal();
   const [progress, setProgress] = useState(0);
@@ -71,6 +73,8 @@ export default function DownloadModal() {
     },
     onSuccess: async () => {
       await AsyncStorage.setItem(`planAudit-${planId}`, JSON.stringify({ audit_updated_date: auditDate }));
+      await queryClient.invalidateQueries({ queryKey: ["plan", planId] });
+      await queryClient.invalidateQueries({ queryKey: ["lecture"] });
       setCompletedDownloadCount(prevCount => prevCount + 1);
       setProgress((prevProgress) => prevProgress + 1 / totalAudioCount);
 
