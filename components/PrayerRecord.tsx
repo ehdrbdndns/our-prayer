@@ -42,7 +42,7 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
 
     const startOfCurrentWeek = getMonday(today);
 
-    for (let week = 1; week <= 3; week++) {
+    for (let week = 3; week >= 1; week--) {
       const startOfWeek = new Date(startOfCurrentWeek);
       startOfWeek.setDate(startOfCurrentWeek.getDate() - (3 - week) * 7);
 
@@ -67,7 +67,7 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
         days.push({ index: day + 1, isActive });
       }
 
-      records.push({ week: `${week} Week`, days });
+      records.push({ week: `${(4 - week)} Week`, days });
     }
 
     return records;
