@@ -8,7 +8,7 @@ import { moderateScale, normalizeFontSize } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PrayerRecord() {
@@ -24,6 +24,7 @@ export default function PrayerRecord() {
 
   const [note, setNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [boldTextOpacity, setBoldTextOpacity] = useState(1); // BoldText의 opacity 상태
 
   const { mutate } = useHistoryMutation(() => setIsSaving(false))
 
@@ -46,70 +47,76 @@ export default function PrayerRecord() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Header
-        style={styles.header}
-        prefix={<View></View>}
-        suffix={
-          <TouchableOpacity
-            onPress={onPressSave}
-            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-          >
+    <KeyboardAvoidingView
+      style={{ flex: 1, paddingHorizontal: moderateScale(24) }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <SafeAreaView style={styles.container}>
+        <Header
+          style={styles.header}
+          prefix={<View></View>}
+          suffix={
+            <TouchableOpacity
+              onPress={onPressSave}
+              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+            >
+              <MediumText
+                fontSize={16}
+                color="#959FFF"
+              >
+                저장하기
+              </MediumText>
+            </TouchableOpacity>
+          }
+        />
+        <BoldText
+          style={[styles.title, { opacity: boldTextOpacity }]} // opacity 상태 적용
+          fontSize={24}
+          lineHeight={36}
+        >
+          {"떠오르는 생각들을 기록하며\n기도를 마무리해보세요"}
+        </BoldText>
+
+        <View style={styles.textInput}>
+          {/* TODO 1500자 제한 */}
+          <TextInput
+            value={note}
+            multiline={true}
+            maxLength={1500}
+            style={styles.text}
+            scrollEnabled={true}
+            onChangeText={(v) => setNote(v)}
+            placeholderTextColor={"#B3B3B3"}
+            placeholder="여기를 탭하여 입력하세요(최대 1500자)"
+            onFocus={() => setBoldTextOpacity(0.5)} // TextInput이 포커스될 때 opacity 변경
+            onBlur={() => setBoldTextOpacity(1)} // TextInput이 포커스를 잃을 때 opacity 복원
+          />
+        </View>
+
+        <View style={[styles.buttonList, { bottom: insets.bottom, opacity: boldTextOpacity !== 1 ? 0 : 1 }]}>
+          <CustomButton onPress={onPressCancel} style={[styles.button, styles.secondaryButton]}>
             <MediumText
-              fontSize={16}
-              color="#959FFF"
+              fontSize={14}
+            >
+              괜찮습니다
+            </MediumText>
+          </CustomButton>
+          <PrimaryButton onPress={onPressSave} style={styles.button}>
+            <MediumText
+              fontSize={14}
             >
               저장하기
             </MediumText>
-          </TouchableOpacity>
-        }
-      />
-      <BoldText
-        style={styles.title}
-        fontSize={24}
-        lineHeight={36}
-      >
-        {"떠오르는 생각들을 기록하며\n기도를 마무리해보세요"}
-      </BoldText>
-
-      <View style={styles.textInput}>
-        {/* TODO 1500자 제한 */}
-        <TextInput
-          value={note}
-          multiline={true}
-          maxLength={1500}
-          style={styles.text}
-          scrollEnabled={true}
-          onChangeText={(v) => setNote(v)}
-          placeholderTextColor={"#B3B3B3"}
-          placeholder="여기를 탭하여 입력하세요(최대 1500자)"
-        />
-      </View>
-
-      <View style={[styles.buttonList, { bottom: insets.bottom }]}>
-        <CustomButton onPress={onPressCancel} style={[styles.button, styles.secondaryButton]}>
-          <MediumText
-            fontSize={14}
-          >
-            괜찮습니다
-          </MediumText>
-        </CustomButton>
-        <PrimaryButton onPress={onPressSave} style={styles.button}>
-          <MediumText
-            fontSize={14}
-          >
-            저장하기
-          </MediumText>
-        </PrimaryButton>
-      </View>
-    </SafeAreaView>
+          </PrimaryButton>
+        </View>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
     backgroundColor: 'rgba(15, 20, 26, 0.4)',
   },
   header: {
