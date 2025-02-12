@@ -99,13 +99,11 @@ export default function EditNickname() {
             style={{
               fontFamily: 'NotoSansKR_400Regular',
               fontSize: normalizeFontSize(16),
-              lineHeight: normalizeFontSize(26),
               color: '#FFF',
               width: '100%',
               borderBottomWidth: 1,
               borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-              paddingBottom: moderateScale(8),
-              textAlignVertical: 'top'
+              paddingBottom: Platform.OS === 'ios' ? moderateScale(8) : 0,
             }}
             placeholder={name || '닉네임을 입력하세요'}
             placeholderTextColor={'#B3B3B3'}
