@@ -14,7 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Href, router, useLocalSearchParams } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useRef, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Platform, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from 'react-native-calendars';
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -220,7 +220,7 @@ export default function HistoryPage() {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={['#FFFFFF']}
+          colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
           tintColor={'#FFFFFF'}
           progressViewOffset={moderateScale(50)}
         />

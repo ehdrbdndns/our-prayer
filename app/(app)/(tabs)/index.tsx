@@ -208,7 +208,9 @@ export default function Index() {
         }
 
         {/* 공유 카드 */}
-        <ShareCard />
+        <View style={styles.shareCard}>
+          <ShareCard />
+        </View>
       </SafeAreaView>
     </ScrollView>
   );
@@ -267,5 +269,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F141A',
     paddingVertical: moderateScale(12),
     paddingHorizontal: moderateScale(24)
+  },
+
+  // 공유 카드
+  shareCard: {
+    marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(40),
   }
 });

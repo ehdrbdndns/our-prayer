@@ -20,7 +20,7 @@ import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
-import { Alert, Linking, RefreshControl, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, Platform, RefreshControl, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MyPage() {
@@ -216,7 +216,7 @@ export default function MyPage() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefetch}
-            colors={['#FFFFFF']}
+            colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
             tintColor={'#FFFFFF'}
           />
         }
