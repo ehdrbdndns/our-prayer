@@ -43,7 +43,14 @@ export default function PrayerRecord() {
     mutate({ lecture_id, duration, note });
   }
 
-  const onPressCancel = () => {
+  const onPressCancel = async () => {
+
+    // save lecture history in AsyncStorage
+    const lectureHistory = await AsyncStorage.getItem('lecture-history');
+    const lectureHistoryData = lectureHistory ? JSON.parse(lectureHistory) : {};
+    lectureHistoryData[lecture_id] = lectureHistoryData[lecture_id] ? lectureHistoryData[lecture_id] + 1 : 1;
+    await AsyncStorage.setItem('lecture-history', JSON.stringify(lectureHistoryData));
+
     mutate({ lecture_id, duration, note: '' });
   }
 

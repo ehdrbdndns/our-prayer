@@ -49,7 +49,7 @@ export default function ArchivePlan() {
   });
 
   const onPressLeftArrow = () => {
-    router.push('/plan');
+    router.back();
   }
 
   const filteredPlans = plan?.plans.filter((plan) => plan.is_liked) || [];
@@ -81,7 +81,7 @@ export default function ArchivePlan() {
         </View>
       )}
       keyExtractor={(item) => item.plan_id}
-      renderItem={({ item }: { item: PlanType }) => <PlanCard plan={item} />}
+      renderItem={({ item }: { item: PlanType }) => <PlanCard refreshing plan={item} />}
       numColumns={2}
       columnWrapperStyle={styles.columnWrapper}
     />

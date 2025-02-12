@@ -52,7 +52,7 @@ export default function PlanDetailPage() {
               text: '확인',
               onPress: async () => {
                 await AsyncStorage.removeItem(`planAudit-${plan_id}`);
-                router.replace('/plan');
+                router.dismissTo('/plan');
               }
             }
           ])
@@ -86,7 +86,7 @@ export default function PlanDetailPage() {
 
   const onPressLeftArrow = () => {
     if (backToLink !== undefined) {
-      router.replace(backToLink as Href);
+      router.dismissTo(backToLink as Href);
     } else {
       router.back();
     }

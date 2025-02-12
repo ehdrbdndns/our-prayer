@@ -168,7 +168,7 @@ export default function CalendarPage() {
 
   const onPressBack = () => {
     if (backToLink !== undefined) {
-      router.replace(backToLink as Href);
+      router.dismissTo(backToLink as Href);
     } else {
       router.back();
     }

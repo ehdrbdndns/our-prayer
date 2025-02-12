@@ -114,7 +114,7 @@ export const useHistoryMutation = (callback: () => void) => {
 
       callback();
 
-      router.replace({
+      router.dismissTo({
         pathname: `/calendar`,
         params: {
           backToLink: '/',
@@ -127,7 +127,7 @@ export const useHistoryMutation = (callback: () => void) => {
 
       callback();
 
-      router.replace('/');
+      router.dismissTo('/');
     },
   })
 }
