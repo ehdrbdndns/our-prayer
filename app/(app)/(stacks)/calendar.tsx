@@ -3,12 +3,13 @@ import LeftArrow from '@/assets/images/icon/leftArrow.svg';
 import OneStar from '@/assets/images/icon/one-start.svg';
 import Stars from '@/assets/images/icon/star.svg';
 import Header from "@/components/Header";
+import HistoryNote from '@/components/HistoryNote';
 import PrayerState from '@/components/PrayerState';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
 import api from '@/utils/axios';
 import { HistoryType } from '@/utils/dataType';
-import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotalPrayerTime, formatPrayerTime } from '@/utils/date';
+import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
 import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -42,51 +43,6 @@ const EmptyNote = () => (
       기도 기록이 없습니다.
     </RegularText>
   </View>
-)
-
-const HistoryNote = ({
-  note, created_date, duration, onPressNote
-}: {
-  note: string;
-  created_date: number;
-  duration: number;
-  onPressNote: () => void;
-}) => (
-  <TouchableOpacity
-    onPress={onPressNote}
-  >
-    <View style={styles.note}>
-      {
-        (note === null || note === '') ? (
-          <RegularText
-            style={{ marginBottom: moderateScale(8) }}
-            color="#B3B3B3"
-            fontSize={14}
-            lineHeight={26}
-          >
-            기도 메모를 남겨주세요.
-          </RegularText>
-        ) : (
-          <RegularText
-            style={{ marginBottom: moderateScale(8) }}
-            fontSize={16}
-            lineHeight={28}
-            numberOfLines={6}
-            ellipsizeMode="tail"
-          >
-            {note}
-          </RegularText>
-        )
-      }
-      <MediumText
-        color="#B3B3B3"
-        fontSize={14}
-        lineHeight={26}
-      >
-        {formatPrayerTime(created_date, duration)}
-      </MediumText>
-    </View >
-  </TouchableOpacity >
 )
 
 export default function CalendarPage() {
@@ -132,15 +88,17 @@ export default function CalendarPage() {
         setSelectedNoteList([<EmptyNote key="empty" />])
       } else {
         setSelectedNoteList(
-          data.map((row) => <HistoryNote
-            key={row.prayer_history_id}
-            note={row.note}
-            created_date={row.created_date}
-            duration={row.duration}
-            onPressNote={() => {
-              router.push(`/historyDetail/${row.prayer_history_id}`)
-            }}
-          />)
+          data.map(
+            (row) => <HistoryNote
+              key={row.prayer_history_id}
+              note={row.note}
+              created_date={row.created_date}
+              duration={row.duration}
+              onPressNote={() => {
+                router.push(`/historyDetail/${row.prayer_history_id}`)
+              }}
+            />
+          )
         )
       }
     },
