@@ -218,9 +218,10 @@ export default function HistoryDetailPage() {
         />
       </View>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{
           paddingHorizontal: moderateScale(24),
+          marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(24),
         }}
       >
         <View style={[styles.buttonList]}>
