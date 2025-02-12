@@ -299,6 +299,14 @@ export default function CalendarPage() {
           </MediumText>
           {selectedNoteList.map((note) => note)}
         </View>
+        {
+          Platform.OS === 'ios' ? null : (
+            <View style={{ height: 40 }} />
+          )
+        }
+        <View>
+
+        </View>
       </SafeAreaView>
     </ScrollView>
   )

@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: moderateScale(20),
     gap: moderateScale(8),
+    marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(24),
   },
   button: {
     flex: 1,

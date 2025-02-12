@@ -39,7 +39,7 @@ const EmptyNote = () => (
       fontSize={14}
       lineHeight={24}
     >
-      기도 기록이 없습니다.
+      기도 기록이 없습니다
     </RegularText>
   </View>
 )
@@ -288,6 +288,12 @@ export default function HistoryPage() {
           </MediumText>
           {selectedNoteList.map((note) => note)}
         </View>
+
+        {
+          Platform.OS === 'ios' ? null : (
+            <View style={{ height: 40 }} />
+          )
+        }
       </SafeAreaView>
     </ScrollView>
   )
