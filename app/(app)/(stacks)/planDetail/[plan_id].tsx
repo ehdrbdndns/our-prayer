@@ -4,6 +4,7 @@ import LeftArrow from "@/assets/images/icon/leftArrow.svg";
 import Play from '@/assets/images/icon/play.svg';
 import RightShortArrow from '@/assets/images/icon/rightShortArrow.svg';
 import UnChckedCircle from '@/assets/images/icon/unCheckedCircle.svg';
+import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
@@ -15,8 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import { Href, router, useLocalSearchParams } from "expo-router";
 import * as WebBrowser from 'expo-web-browser';
-import { useEffect, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Image, Platform, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PlanDetailPage() {
@@ -38,6 +39,61 @@ export default function PlanDetailPage() {
 
   const plan = data?.plan;
   const lectures = data?.lectures || [];
+
+  const [prevScrollY, setPrevScrollY] = useState(0);
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
+
+  const buttonOpacity = useRef(new Animated.Value(0));
+  const buttonTranslateY = useRef(new Animated.Value(20));
+
+  const handleScroll = (event: any) => {
+    const currentScrollY = event.nativeEvent.contentOffset.y;
+    const maxScrollY = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
+
+    // 바운스 효과에 반응하지 않도록 스크롤 위치가 유효한 범위 내에 있는지 확인
+    if (currentScrollY >= 0 && currentScrollY <= maxScrollY) {
+      if (currentScrollY > prevScrollY) {
+        setScrollDirection('down');
+      } else {
+        setScrollDirection('up');
+      }
+      setPrevScrollY(currentScrollY);
+    }
+  };
+
+  useEffect(() => {
+    const showButton = Animated.parallel([
+      Animated.timing(buttonOpacity.current, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonTranslateY.current, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]);
+
+    const hideButton = Animated.parallel([
+      Animated.timing(buttonOpacity.current, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonTranslateY.current, {
+        toValue: 20,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]);
+
+    if (scrollDirection === 'down') {
+      showButton.start();
+    } else {
+      hideButton.start();
+    }
+  }, [scrollDirection]);
 
   // check if plan is downloaded
   useEffect(() => {
@@ -111,12 +167,18 @@ export default function PlanDetailPage() {
   return (
     // Background
     <ImageBackground
-      source={{ uri: banner || data?.plan.thumbnail }}
-      style={{ flex: 1 }}
       blurRadius={30}
+      style={{ flex: 1 }}
+      source={{ uri: banner || data?.plan.thumbnail }}
     >
       <View style={styles.backgroundFilter} />
-      <ScrollView style={{ paddingTop: insets.top }}>
+      <ScrollView
+        onScroll={handleScroll}
+        scrollEventThrottle={32}
+        style={{ paddingTop: insets.top }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: insets.bottom + moderateScale(40) }}
+      >
         {/* Header */}
         <Header
           style={styles.header}
@@ -297,6 +359,31 @@ export default function PlanDetailPage() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Continue Button */}
+      <Animated.View style={{
+        position: 'absolute',
+        width: '100%',
+        bottom: insets.bottom + Platform.OS === 'ios' ? 0 : moderateScale(24),
+        paddingHorizontal: moderateScale(24),
+        opacity: buttonOpacity.current,
+        transform: [{ translateY: buttonTranslateY.current }],
+      }}>
+        <PrimaryButton style={{
+          paddingVertical: moderateScale(14)
+        }}>
+          <MediumText
+            fontSize={14}
+          >
+            {
+              Object.keys(lectureHistoryDict).length > 0 &&
+                Object.keys(lectureHistoryDict).length < lectures.length
+                ? '이어서 기도하기'
+                : '기도 시작하기'
+            }
+          </MediumText>
+        </PrimaryButton>
+      </Animated.View>
     </ImageBackground >
   )
 }
