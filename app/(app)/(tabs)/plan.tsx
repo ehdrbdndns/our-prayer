@@ -305,11 +305,10 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     color: "#FFFFFF",
-
     fontFamily: "NotoSansKR_400Regular",
     fontSize: normalizeFontSize(16),
     padding: 0,
-    textAlignVertical: "center"
+    textAlignVertical: "center",
   },
   container: {
     paddingHorizontal: moderateScale(24),

@@ -211,7 +211,8 @@ export default function HistoryDetailPage() {
             lineHeight: moderateScale(28),
             maxHeight: '100%',
             color: '#FFF',
-            flex: 1
+            flex: 1,
+            textAlignVertical: 'top',
           }}
           onChange={e => onChangeNote(e.nativeEvent.text)}
         />

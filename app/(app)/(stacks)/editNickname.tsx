@@ -105,6 +105,7 @@ export default function EditNickname() {
               borderBottomWidth: 1,
               borderBottomColor: 'rgba(255, 255, 255, 0.1)',
               paddingBottom: moderateScale(8),
+              textAlignVertical: 'top'
             }}
             placeholder={name || '닉네임을 입력하세요'}
             placeholderTextColor={'#B3B3B3'}
