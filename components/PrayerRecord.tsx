@@ -1,7 +1,7 @@
 import { HistoryType } from '@/utils/dataType';
 import { moderateScale } from '@/utils/style';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import CustomText from "./text/CustomText";
 import { MediumText } from "./text/MediumText";
 interface PrayerRecordProps {
@@ -111,6 +111,7 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
 const styles = StyleSheet.create({
   record: {
     gap: moderateScale(8),
+    paddingLeft: Platform.OS === 'ios' ? 0 : moderateScale(6)
   },
   row: {
     flexDirection: "row",
