@@ -43,7 +43,17 @@ export default function PrayerRecord() {
     mutate({ lecture_id, duration, note });
   }
 
-  const onPressCancel = () => {
+  const onPressCancel = async () => {
+    if (isSaving) return;
+
+    setIsSaving(true);
+
+    // save lecture history in AsyncStorage
+    const lectureHistory = await AsyncStorage.getItem('lecture-history');
+    const lectureHistoryData = lectureHistory ? JSON.parse(lectureHistory) : {};
+    lectureHistoryData[lecture_id] = lectureHistoryData[lecture_id] ? lectureHistoryData[lecture_id] + 1 : 1;
+    await AsyncStorage.setItem('lecture-history', JSON.stringify(lectureHistoryData));
+
     mutate({ lecture_id, duration, note: '' });
   }
 
@@ -148,13 +158,15 @@ const styles = StyleSheet.create({
     fontSize: normalizeFontSize(16),
     lineHeight: normalizeFontSize(28),
     color: "#FFFFFF",
-    height: '80%'
+    height: '80%',
+    textAlignVertical: 'top'
   },
   buttonList: {
     position: 'absolute',
     flexDirection: 'row',
     paddingHorizontal: moderateScale(20),
     gap: moderateScale(8),
+    marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(24),
   },
   button: {
     flex: 1,

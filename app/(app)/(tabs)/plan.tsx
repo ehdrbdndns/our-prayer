@@ -16,7 +16,7 @@ import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { FlatList, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tabs = [
@@ -119,7 +119,7 @@ export default function PlanPage() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#FFFFFF"]}
+            colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
             tintColor={"#FFFFFF"}
             progressViewOffset={scaleHeight(50)}
           />
@@ -305,11 +305,10 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     color: "#FFFFFF",
-
     fontFamily: "NotoSansKR_400Regular",
     fontSize: normalizeFontSize(16),
     padding: 0,
-    textAlignVertical: "center"
+    textAlignVertical: "center",
   },
   container: {
     paddingHorizontal: moderateScale(24),

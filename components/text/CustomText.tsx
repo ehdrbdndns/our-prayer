@@ -1,6 +1,6 @@
 import { getLetterSpacing, normalizeFontSize } from "@/utils/style";
 import { PropsWithChildren } from "react";
-import { StyleSheet, Text } from "react-native";
+import { Platform, StyleSheet, Text } from "react-native";
 
 export type CustomTextProps = PropsWithChildren<{
   fontSize?: number;
@@ -49,6 +49,7 @@ export default function CustomText({
 
 const styles = StyleSheet.create({
   text: {
-    textAlignVertical: 'center', // 텍스트 정렬
+    textAlignVertical: Platform.OS === 'ios' ? 'center' : 'auto',
+    includeFontPadding: true, // 안드로이드에서 텍스트의 상단 여백 제거
   },
 });

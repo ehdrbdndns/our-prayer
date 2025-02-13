@@ -18,7 +18,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Platform, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
@@ -98,7 +98,7 @@ export default function Index() {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={["#FFFFFF"]}
+          colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
           tintColor={"#FFFFFF"}
           progressViewOffset={scaleHeight(50)}
         />
@@ -109,13 +109,6 @@ export default function Index() {
         <Header
           style={styles.header}
           prefix={
-            // <Link href="/login">
-            //   <Logo
-            //     style={{ marginLeft: moderateScale(4) }}
-            //     width={moderateScale(82)}
-            //     height={moderateScale(18)}
-            //   />
-            // </Link>
             <BoldText
               fontSize={18}
               color="rgba(255, 255, 255, 0.8)"
@@ -215,7 +208,9 @@ export default function Index() {
         }
 
         {/* 공유 카드 */}
-        <ShareCard />
+        <View style={styles.shareCard}>
+          <ShareCard />
+        </View>
       </SafeAreaView>
     </ScrollView>
   );
@@ -274,5 +269,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F141A',
     paddingVertical: moderateScale(12),
     paddingHorizontal: moderateScale(24)
+  },
+
+  // 공유 카드
+  shareCard: {
+    marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(40),
   }
 });

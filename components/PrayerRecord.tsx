@@ -1,7 +1,7 @@
 import { HistoryType } from '@/utils/dataType';
 import { moderateScale } from '@/utils/style';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import CustomText from "./text/CustomText";
 import { MediumText } from "./text/MediumText";
 interface PrayerRecordProps {
@@ -84,7 +84,11 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
             <CustomText
               color="#B3B3B3"
               fontSize={10}
+              textBreakStrategy="simple"
               letterSpacingPercent={-1}
+              style={Platform.OS === 'ios' ? {} : {
+                flex: 1,
+              }}
             >
               {weekData.week}
             </CustomText>
@@ -103,14 +107,16 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
             </View>
           </View>
         </View>
-      ))}
-    </View>
+      ))
+      }
+    </View >
   );
 }
 
 const styles = StyleSheet.create({
   record: {
     gap: moderateScale(8),
+    paddingLeft: Platform.OS === 'ios' ? 0 : moderateScale(6)
   },
   row: {
     flexDirection: "row",
