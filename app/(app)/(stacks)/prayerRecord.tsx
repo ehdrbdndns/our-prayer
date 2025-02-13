@@ -44,6 +44,9 @@ export default function PrayerRecord() {
   }
 
   const onPressCancel = async () => {
+    if (isSaving) return;
+
+    setIsSaving(true);
 
     // save lecture history in AsyncStorage
     const lectureHistory = await AsyncStorage.getItem('lecture-history');
