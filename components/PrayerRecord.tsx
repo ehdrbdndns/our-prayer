@@ -84,7 +84,11 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
             <CustomText
               color="#B3B3B3"
               fontSize={10}
+              textBreakStrategy="simple"
               letterSpacingPercent={-1}
+              style={Platform.OS === 'ios' ? {} : {
+                flex: 1,
+              }}
             >
               {weekData.week}
             </CustomText>
@@ -103,8 +107,9 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
             </View>
           </View>
         </View>
-      ))}
-    </View>
+      ))
+      }
+    </View >
   );
 }
 
