@@ -34,11 +34,13 @@ export default function PlanDetailPage() {
     backToLink?: string
   }>();
 
-  const [lectureHistoryDict, setLectureHistoryDict] = useState<{ [key: string]: number }>({});
   const { data, isSuccess: isPlanSuccess } = usePlanQuery({ plan_id });
 
+  // [lecture_id]: count
+  const [lectureHistoryDict, setLectureHistoryDict] = useState<{ [lecture_id: string]: number }>({});
+
   const plan = data?.plan;
-  const lectures = data?.lectures || [];
+  const lectures = (data?.lectures || []).sort((a, b) => a.created_date - b.created_date);
 
   const [prevScrollY, setPrevScrollY] = useState(0);
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
@@ -154,7 +156,7 @@ export default function PlanDetailPage() {
       pathname: '/lectureDetail/[lecture_id]',
       params: {
         plan_id: plan_id,
-        plan_title: title,
+        plan_title: title || data?.plan.title,
         lecture_id: lecture_id,
       }
     })
@@ -162,6 +164,54 @@ export default function PlanDetailPage() {
 
   const onPressAuthor = async (uri: string) => {
     await WebBrowser.openBrowserAsync(uri);
+  }
+
+  const onPressContinueBtn = () => {
+    const lectureIds = Object.keys(lectureHistoryDict);
+
+    const completedLectures = lectures
+      .filter(lecture => lectureIds.includes(lecture.lecture_id));
+
+    if (completedLectures.length > 0) {
+      const latestLecture = completedLectures
+        .sort((a, b) => b.created_date - a.created_date)
+      [0];
+
+      const nextLecture = lectures
+        .filter(lecture => !lectureIds.includes(lecture.lecture_id) && lecture.created_date > latestLecture.created_date)
+        .sort((a, b) => a.created_date - b.created_date)
+      [0];
+
+      if (!nextLecture) {
+        router.push({
+          pathname: '/lectureDetail/[lecture_id]',
+          params: {
+            plan_id: plan_id,
+            plan_title: title || data?.plan.title,
+            lecture_id: lectures[0].lecture_id,
+          }
+        })
+      } else {
+        router.push({
+          pathname: '/lectureDetail/[lecture_id]',
+          params: {
+            plan_id: plan_id,
+            plan_title: title || data?.plan.title,
+            lecture_id: nextLecture.lecture_id,
+          }
+        })
+      }
+
+    } else {
+      router.push({
+        pathname: '/lectureDetail/[lecture_id]',
+        params: {
+          plan_id: plan_id,
+          plan_title: title || data?.plan.title,
+          lecture_id: lectures[0].lecture_id,
+        }
+      })
+    }
   }
 
   return (
@@ -369,9 +419,11 @@ export default function PlanDetailPage() {
         opacity: buttonOpacity.current,
         transform: [{ translateY: buttonTranslateY.current }],
       }}>
-        <PrimaryButton style={{
-          paddingVertical: moderateScale(14)
-        }}>
+        <PrimaryButton
+          onPress={onPressContinueBtn}
+          style={{
+            paddingVertical: moderateScale(14)
+          }}>
           <MediumText
             fontSize={14}
           >
