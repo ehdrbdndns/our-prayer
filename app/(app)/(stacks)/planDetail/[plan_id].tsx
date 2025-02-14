@@ -11,7 +11,7 @@ import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import { useLikeMutation } from '@/utils/mutation';
 import { usePlanQuery } from '@/utils/queries';
-import { moderateScale } from "@/utils/style";
+import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import { Href, router, useLocalSearchParams } from "expo-router";
@@ -414,7 +414,7 @@ export default function PlanDetailPage() {
       <Animated.View style={{
         position: 'absolute',
         width: '100%',
-        bottom: insets.bottom + Platform.OS === 'ios' ? 0 : moderateScale(24),
+        bottom: insets.bottom + Platform.OS === 'ios' ? 0 : scaleHeight(48),
         paddingHorizontal: moderateScale(24),
         opacity: buttonOpacity.current,
         transform: [{ translateY: buttonTranslateY.current }],
