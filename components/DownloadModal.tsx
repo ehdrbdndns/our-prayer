@@ -47,8 +47,8 @@ export default function DownloadModal() {
         ...res.data
       };
     },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
+    staleTime: 0,
+    gcTime: 0,
     enabled: !!planId
   });
 

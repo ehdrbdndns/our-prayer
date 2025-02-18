@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
@@ -17,7 +17,8 @@
     },
     "android": {
       "package": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "userInterfaceStyle": "dark"
     },
     "web": {
       "bundler": "metro",
