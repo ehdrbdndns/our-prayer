@@ -203,6 +203,11 @@ export default function MyPage() {
     await WebBrowser.openBrowserAsync('https://docs.google.com/forms/d/e/1FAIpQLSeOyd4YtHlkRXYJtXDzgcLoLh6659zRi-mqiyrHjbwpQJAgRQ/viewform?usp=dialog');
   }
 
+  // 도움 주신 분들
+  const onPressSupporterList = () => {
+    router.push('/supportersList');
+  }
+
   if (isLoading) {
     return null; // TODO : Add skeleton
   }
@@ -439,6 +444,19 @@ export default function MyPage() {
               letterSpacingPercent={-1}
             >
               '우리의 기도'에 문의하기
+            </BoldText>
+          </CustomButton>
+          <CustomButton
+            onPress={onPressSupporterList}
+            style={styles.button}
+          >
+            <BoldText
+              color="#FFFFFF"
+              fontSize={14}
+              lineHeight={22}
+              letterSpacingPercent={-1}
+            >
+              도움 주신 분들
             </BoldText>
           </CustomButton>
           <CustomButton
