@@ -89,6 +89,7 @@ export default function HistoryDetailPage() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["history"] });
+      await queryClient.invalidateQueries({ queryKey: ["plan"] });
       router.back();
     },
     onError: (error, newUser, context) => {

@@ -29,9 +29,7 @@ export default function PrayerRecord() {
   const [boldTextOpacity, setBoldTextOpacity] = useState(1); // BoldText의 opacity 상태
   const textInputRef = useRef<TextInput>(null); // TextInput의 참조 생성
 
-  const { mutateAsync: insertPrayerHistory } = useHistoryMutation(() => {
-    setIsSaving(false);
-  })
+  const { mutateAsync: insertPrayerHistory } = useHistoryMutation()
 
   const submitPrayerRecord = async (noteContent: string) => {
     if (isSaving) return;
@@ -47,8 +45,6 @@ export default function PrayerRecord() {
     try {
       await insertPrayerHistory({ lecture_id, duration, note: noteContent });
       setIsSaving(false);
-      await queryClient.invalidateQueries({ queryKey: ["history"] });
-      await queryClient.invalidateQueries({ queryKey: ["plan"] });
       router.dismissTo({
         pathname: `/calendar`,
         params: {
@@ -56,7 +52,6 @@ export default function PrayerRecord() {
         }
       });
     } catch (e) {
-      console.error(e);
       Alert.alert('오류', '기록 저장에 실패했습니다.');
 
       setIsSaving(false);

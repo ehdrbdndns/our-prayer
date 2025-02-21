@@ -76,7 +76,7 @@ export const useLikeMutation = ({
   return { isLiked, mutateLike };
 };
 
-export const useHistoryMutation = (callback: () => void) => {
+export const useHistoryMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -103,7 +103,14 @@ export const useHistoryMutation = (callback: () => void) => {
       });
 
       return res.data;
-    }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["history"] });
+      await queryClient.invalidateQueries({ queryKey: ["plan"] });
+    },
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+    },
   })
 }
 
