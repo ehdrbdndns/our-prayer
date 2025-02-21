@@ -1,3 +1,4 @@
+import LeftArrow from '@/assets/images/icon/leftArrow.svg';
 import CustomButton from "@/components/button/CustomButton";
 import PrimaryButton from "@/components/button/PrimaryButton";
 import Header from "@/components/Header";
@@ -6,9 +7,9 @@ import { MediumText } from "@/components/text/MediumText";
 import { useHistoryMutation } from "@/utils/mutation";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PrayerRecord() {
@@ -27,9 +28,9 @@ export default function PrayerRecord() {
   const [boldTextOpacity, setBoldTextOpacity] = useState(1); // BoldText의 opacity 상태
   const textInputRef = useRef<TextInput>(null); // TextInput의 참조 생성
 
-  const { mutate } = useHistoryMutation(() => setIsSaving(false))
+  const { mutateAsync: insertPrayerHistory } = useHistoryMutation()
 
-  const onPressSave = async () => {
+  const submitPrayerRecord = async (noteContent: string) => {
     if (isSaving) return;
 
     setIsSaving(true);
@@ -40,21 +41,30 @@ export default function PrayerRecord() {
     lectureHistoryData[lecture_id] = lectureHistoryData[lecture_id] ? lectureHistoryData[lecture_id] + 1 : 1;
     await AsyncStorage.setItem('lecture-history', JSON.stringify(lectureHistoryData));
 
-    mutate({ lecture_id, duration, note });
+    try {
+      await insertPrayerHistory({ lecture_id, duration, note: noteContent });
+      setIsSaving(false);
+      router.dismissTo({
+        pathname: `/calendar`,
+        params: {
+          backToLink: '/',
+        }
+      });
+    } catch (e) {
+      Alert.alert('오류', '기록 저장에 실패했습니다.');
+
+      setIsSaving(false);
+
+      router.dismissTo('/');
+    }
+  }
+
+  const onPressSave = async () => {
+    await submitPrayerRecord(note);
   }
 
   const onPressCancel = async () => {
-    if (isSaving) return;
-
-    setIsSaving(true);
-
-    // save lecture history in AsyncStorage
-    const lectureHistory = await AsyncStorage.getItem('lecture-history');
-    const lectureHistoryData = lectureHistory ? JSON.parse(lectureHistory) : {};
-    lectureHistoryData[lecture_id] = lectureHistoryData[lecture_id] ? lectureHistoryData[lecture_id] + 1 : 1;
-    await AsyncStorage.setItem('lecture-history', JSON.stringify(lectureHistoryData));
-
-    mutate({ lecture_id, duration, note: '' });
+    await submitPrayerRecord("");
   }
 
   const onComplete = () => {
@@ -69,28 +79,14 @@ export default function PrayerRecord() {
         style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(15, 20, 26, 0.4)' }}
       />
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? insets.bottom : 0}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={{ flex: 1 }}>
           <Header
             style={styles.header}
             prefix={<View></View>}
-            suffix={
-              <TouchableOpacity
-                style={{ opacity: boldTextOpacity === 1 ? 0 : 1 }}
-                onPress={onComplete}
-                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-              >
-                <MediumText
-                  fontSize={16}
-                  color="#959FFF"
-                >
-                  완료하기
-                </MediumText>
-              </TouchableOpacity>
-            }
           />
           <BoldText
             style={[styles.title, { opacity: boldTextOpacity }]} // opacity 상태 적용
@@ -115,7 +111,6 @@ export default function PrayerRecord() {
               onBlur={() => setBoldTextOpacity(1)} // TextInput이 포커스를 잃을 때 opacity 복원
             />
           </View>
-
           <View style={[styles.buttonList, { bottom: insets.bottom, opacity: boldTextOpacity !== 1 ? 0 : 1 }]}>
             <CustomButton onPress={onPressCancel} style={[styles.button, styles.secondaryButton]}>
               <MediumText
@@ -133,6 +128,18 @@ export default function PrayerRecord() {
             </PrimaryButton>
           </View>
         </SafeAreaView>
+        <View style={styles.inputCompleteButtonLayout}>
+          <TouchableOpacity
+            style={[styles.inputCompleteButton, {
+              opacity: boldTextOpacity === 1 ? 0 : 1,
+              height: boldTextOpacity === 1 ? 0 : moderateScale(40),
+            }]}
+            onPress={onComplete}
+            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+          >
+            <LeftArrow style={{ transform: [{ rotate: '90deg' }] }} />
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     </>
   )
@@ -174,5 +181,20 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: 'rgba(15, 20, 26, 0.4)',
+  },
+  inputCompleteButtonLayout: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    width: '100%',
+    paddingHorizontal: moderateScale(20)
+  },
+  inputCompleteButton: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: 100,
+    marginBottom: moderateScale(12),
+    backgroundColor: '#4F5FFF',
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 })

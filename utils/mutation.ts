@@ -1,10 +1,8 @@
 import api from '@/utils/axios';
 import { PlanResponseType, PlanType, QuestionType } from '@/utils/dataType';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
-import { Alert } from 'react-native';
 
 export const useLikeMutation = ({
   plan_like_id, plan_id, is_liked
@@ -78,7 +76,7 @@ export const useLikeMutation = ({
   return { isLiked, mutateLike };
 };
 
-export const useHistoryMutation = (callback: () => void) => {
+export const useHistoryMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -107,27 +105,11 @@ export const useHistoryMutation = (callback: () => void) => {
       return res.data;
     },
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["history"] });
-
-      // wait for 300ms
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      callback();
-
-      router.dismissTo({
-        pathname: `/calendar`,
-        params: {
-          backToLink: '/',
-        }
-      });
+      await queryClient.invalidateQueries({ queryKey: ["history"] });
+      await queryClient.invalidateQueries({ queryKey: ["plan"] });
     },
     onError: (error, newUser, context) => {
       console.error('onError', error, newUser, context);
-      Alert.alert('오류', '기록 저장에 실패했습니다.');
-
-      callback();
-
-      router.dismissTo('/');
     },
   })
 }
