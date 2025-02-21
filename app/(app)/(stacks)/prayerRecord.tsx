@@ -6,14 +6,16 @@ import { MediumText } from "@/components/text/MediumText";
 import { useHistoryMutation } from "@/utils/mutation";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PrayerRecord() {
 
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
 
   const {
     lecture_id, duration
@@ -27,9 +29,11 @@ export default function PrayerRecord() {
   const [boldTextOpacity, setBoldTextOpacity] = useState(1); // BoldText의 opacity 상태
   const textInputRef = useRef<TextInput>(null); // TextInput의 참조 생성
 
-  const { mutate } = useHistoryMutation(() => setIsSaving(false))
+  const { mutateAsync: insertPrayerHistory } = useHistoryMutation(() => {
+    setIsSaving(false);
+  })
 
-  const onPressSave = async () => {
+  const submitPrayerRecord = async (noteContent: string) => {
     if (isSaving) return;
 
     setIsSaving(true);
@@ -40,21 +44,33 @@ export default function PrayerRecord() {
     lectureHistoryData[lecture_id] = lectureHistoryData[lecture_id] ? lectureHistoryData[lecture_id] + 1 : 1;
     await AsyncStorage.setItem('lecture-history', JSON.stringify(lectureHistoryData));
 
-    mutate({ lecture_id, duration, note });
+    try {
+      await insertPrayerHistory({ lecture_id, duration, note: noteContent });
+      setIsSaving(false);
+      await queryClient.invalidateQueries({ queryKey: ["history"] });
+      await queryClient.invalidateQueries({ queryKey: ["plan"] });
+      router.dismissTo({
+        pathname: `/calendar`,
+        params: {
+          backToLink: '/',
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      Alert.alert('오류', '기록 저장에 실패했습니다.');
+
+      setIsSaving(false);
+
+      router.dismissTo('/');
+    }
+  }
+
+  const onPressSave = async () => {
+    await submitPrayerRecord(note);
   }
 
   const onPressCancel = async () => {
-    if (isSaving) return;
-
-    setIsSaving(true);
-
-    // save lecture history in AsyncStorage
-    const lectureHistory = await AsyncStorage.getItem('lecture-history');
-    const lectureHistoryData = lectureHistory ? JSON.parse(lectureHistory) : {};
-    lectureHistoryData[lecture_id] = lectureHistoryData[lecture_id] ? lectureHistoryData[lecture_id] + 1 : 1;
-    await AsyncStorage.setItem('lecture-history', JSON.stringify(lectureHistoryData));
-
-    mutate({ lecture_id, duration, note: '' });
+    await submitPrayerRecord("");
   }
 
   const onComplete = () => {
