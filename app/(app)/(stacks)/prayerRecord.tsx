@@ -1,3 +1,4 @@
+import LeftArrow from '@/assets/images/icon/leftArrow.svg';
 import CustomButton from "@/components/button/CustomButton";
 import PrimaryButton from "@/components/button/PrimaryButton";
 import Header from "@/components/Header";
@@ -6,7 +7,6 @@ import { MediumText } from "@/components/text/MediumText";
 import { useHistoryMutation } from "@/utils/mutation";
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
@@ -15,7 +15,6 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 export default function PrayerRecord() {
 
   const insets = useSafeAreaInsets();
-  const queryClient = useQueryClient();
 
   const {
     lecture_id, duration
@@ -80,28 +79,14 @@ export default function PrayerRecord() {
         style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(15, 20, 26, 0.4)' }}
       />
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? insets.bottom : 0}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={{ flex: 1 }}>
           <Header
             style={styles.header}
             prefix={<View></View>}
-            suffix={
-              <TouchableOpacity
-                style={{ opacity: boldTextOpacity === 1 ? 0 : 1 }}
-                onPress={onComplete}
-                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-              >
-                <MediumText
-                  fontSize={16}
-                  color="#959FFF"
-                >
-                  완료하기
-                </MediumText>
-              </TouchableOpacity>
-            }
           />
           <BoldText
             style={[styles.title, { opacity: boldTextOpacity }]} // opacity 상태 적용
@@ -126,7 +111,6 @@ export default function PrayerRecord() {
               onBlur={() => setBoldTextOpacity(1)} // TextInput이 포커스를 잃을 때 opacity 복원
             />
           </View>
-
           <View style={[styles.buttonList, { bottom: insets.bottom, opacity: boldTextOpacity !== 1 ? 0 : 1 }]}>
             <CustomButton onPress={onPressCancel} style={[styles.button, styles.secondaryButton]}>
               <MediumText
@@ -144,6 +128,18 @@ export default function PrayerRecord() {
             </PrimaryButton>
           </View>
         </SafeAreaView>
+        <View style={styles.inputCompleteButtonLayout}>
+          <TouchableOpacity
+            style={[styles.inputCompleteButton, {
+              opacity: boldTextOpacity === 1 ? 0 : 1,
+              height: boldTextOpacity === 1 ? 0 : moderateScale(40),
+            }]}
+            onPress={onComplete}
+            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+          >
+            <LeftArrow style={{ transform: [{ rotate: '90deg' }] }} />
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     </>
   )
@@ -185,5 +181,20 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: 'rgba(15, 20, 26, 0.4)',
+  },
+  inputCompleteButtonLayout: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    width: '100%',
+    paddingHorizontal: moderateScale(20)
+  },
+  inputCompleteButton: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: 100,
+    marginBottom: moderateScale(12),
+    backgroundColor: '#4F5FFF',
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 })
