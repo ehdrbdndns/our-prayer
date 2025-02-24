@@ -106,12 +106,12 @@ export default function DownloadModal() {
         const _totalAudioCount = Object.values(audio).reduce((acc, { audios }) => acc + audios.length + 1 + 1, 0) // audios(length) + bgm(1) + mutation(1)
         setTotalAudioCount(_totalAudioCount);
 
-        for (const [lectureId, { audios, bgm }] of Object.entries(audio)) {
+        for (const [lectureId, { audios, bgm, bgmExtension }] of Object.entries(audio)) {
 
           if (signal.aborted) break;
 
           // download bgm
-          const bgmUri = await addAudio({ path: `${lectureId}/bgm`, audioUri: bgm });
+          const bgmUri = await addAudio({ path: `${lectureId}/bgm.${bgmExtension}`, audioUri: bgm });
           setCompletedDownloadCount(prevCount => {
             const newCount = prevCount + 1;
             setProgress(newCount / _totalAudioCount);
@@ -123,25 +123,29 @@ export default function DownloadModal() {
             audio: bgmUri
           })
 
-          await new Promise(resolve => setTimeout(resolve, 100)); // .1초 대기
-
           // download audios
-          for (const { lecture_audio_id, uri } of audios) {
+          const batchSize = 3;
+          for (let i = 0; i < audios.length; i += batchSize) {
             if (signal.aborted) break;
 
-            const audioUri = await addAudio({ path: `${lectureId}/audios/${lecture_audio_id}`, audioUri: uri });
-            setCompletedDownloadCount(prevCount => {
-              const newCount = prevCount + 1;
-              setProgress(newCount / _totalAudioCount);
-              return newCount;
+            const audioBatch = audios.slice(i, i + batchSize);
+            const audioPromises = audioBatch.map(async ({ lecture_audio_id, uri, extension }) => {
+              if (signal.aborted) return;
+
+              const audioUri = await addAudio({ path: `${lectureId}/audios/${lecture_audio_id}.${extension}`, audioUri: uri });
+              setCompletedDownloadCount(prevCount => {
+                const newCount = prevCount + 1;
+                setProgress(newCount / _totalAudioCount);
+                return newCount;
+              });
+
+              lectureData.push({
+                lecture_audio_id,
+                audio: audioUri
+              });
             });
 
-            await new Promise(resolve => setTimeout(resolve, 100)); // .1초 대기
-
-            lectureData.push({
-              lecture_audio_id,
-              audio: audioUri
-            })
+            await Promise.all(audioPromises);
           }
         }
 
@@ -168,7 +172,7 @@ export default function DownloadModal() {
 
   const onClickCancel = () => {
     if (downloadAbortController.current) {
-      downloadAbortController.current.abort();
+      downloadAbortController.current.abort(); // download 중단
     }
 
     initValue();
