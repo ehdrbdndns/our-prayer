@@ -57,7 +57,6 @@ export default function PrayerTime() {
   useEffect(() => {
     const fetchNotificationIds = async () => {
       const ids = await getNotificationIds();
-      console.log(ids);
       setNotificationIds(ids);
       Object.keys(ids).forEach((hour) => {
         setSelectedTimes((prev) => {
