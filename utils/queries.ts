@@ -74,7 +74,6 @@ export const usePlanQuery = ({ plan_id }: { plan_id: string }) => {
 };
 
 export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
-  const { isConnected } = useNetInfo();
   return useQuery<LectureResponseType | null>({
     queryKey: ["lecture", lecture_id],
     queryFn: async () => {
@@ -107,7 +106,7 @@ export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
 
       return data;
     },
-    enabled: !!isConnected
+    // enabled: !!isConnected, 다시 네트워크가 연결될 시 다시 요청되는 행위를 막기 위해 주석 처리
   });
 };
 
