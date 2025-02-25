@@ -131,7 +131,10 @@ export default function MyPage() {
       if (notificationIds) {
         const ids = JSON.parse(notificationIds);
         Object.keys(ids).forEach(async (hour) => {
-          const notificationId = await Notifications.scheduleNotificationAsync({
+          const notificationIds = [];
+
+          // 10분 전 알림
+          const id1 = await Notifications.scheduleNotificationAsync({
             content: {
               title: "곧 기도 시간입니다.",
               body: "기도 시간 10분 전입니다.",
@@ -143,8 +146,24 @@ export default function MyPage() {
               minute: 50
             },
           });
+          notificationIds.push(id1);
 
-          ids[hour] = notificationId;
+          // 본 시간 알림
+          const id2 = await Notifications.scheduleNotificationAsync({
+            content: {
+              title: "기도 시간입니다.",
+              body: "기도 시간입니다.",
+              sound: true,
+            },
+            trigger: {
+              type: Notifications.SchedulableTriggerInputTypes.DAILY,
+              hour: Number(hour),
+              minute: 0
+            },
+          });
+          notificationIds.push(id2);
+
+          ids[hour] = notificationIds;
         });
 
         await AsyncStorage.setItem('notificationIds', JSON.stringify(ids));

@@ -15,18 +15,14 @@ import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-nat
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TimeHashTable: { [key: number]: string } = {
-  1: '오전 1시', 2: '오전 1시 30분', 3: '오전 2시', 4: '오전 2시 30분', 5: '오전 3시', 6: '오전 3시 30분',
-  7: '오전 4시', 8: '오전 4시 30분', 9: '오전 5시', 10: '오전 5시 30분', 11: '오전 6시', 12: '오전 6시 30분',
-  13: '오전 7시', 14: '오전 7시 30분', 15: '오전 8시', 16: '오전 8시 30분', 17: '오전 9시', 18: '오전 9시 30분',
-  19: '오전 10시', 20: '오전 10시 30분', 21: '오전 11시', 22: '오전 11시 30분', 23: '오전 12시', 24: '오전 12시 30분',
-  25: '오후 1시', 26: '오후 1시 30분', 27: '오후 2시', 28: '오후 2시 30분', 29: '오후 3시', 30: '오후 3시 30분',
-  31: '오후 4시', 32: '오후 4시 30분', 33: '오후 5시', 34: '오후 5시 30분', 35: '오후 6시', 36: '오후 6시 30분',
-  37: '오후 7시', 38: '오후 7시 30분', 39: '오후 8시', 40: '오후 8시 30분', 41: '오후 9시', 42: '오후 9시 30분',
-  43: '오후 10시', 44: '오후 10시 30분', 45: '오후 11시', 46: '오후 11시 30분', 47: '오후 12시', 48: '오후 12시 30분'
+  1: '오전 1시', 2: '오전 2시', 3: '오전 3시', 4: '오전 4시', 5: '오전 5시', 6: '오전 6시',
+  7: '오전 7시', 8: '오전 8시', 9: '오전 9시', 10: '오전 10시', 11: '오전 11시', 12: '오전 12시',
+  13: '오후 1시', 14: '오후 2시', 15: '오후 3시', 16: '오후 4시', 17: '오후 5시', 18: '오후 6시',
+  19: '오후 7시', 20: '오후 8시', 21: '오후 9시', 22: '오후 10시', 23: '오후 11시', 24: '오후 12시'
 };
 
-// 1 ~ 48시간대 배열 생성 (30분 단위 포함)
-const times = Array.from({ length: 48 }, (_, i) => i + 1);
+// 1 ~ 24시간대 배열 생성
+const times = Array.from({ length: 24 }, (_, i) => i + 1);
 
 const saveNotificationIds = async (ids: { [hour: number]: string[] }) => {
   try {
@@ -49,11 +45,10 @@ const getNotificationIds = async () => {
 export default function PrayerTime() {
   const insets = useSafeAreaInsets();
 
-  const [selectedTimes, setSelectedTimes] = useState<boolean[]>(Array.from({ length: 48 }, () => false));
-  const [tempSelectedTimes, setTempSelectedTimes] = useState<boolean[]>(Array.from({ length: 48 }, () => false));
+  const [selectedTimes, setSelectedTimes] = useState<boolean[]>(Array.from({ length: 24 }, () => false));
   const [notificationIds, setNotificationIds] = useState<{ [hour: number]: string[] }>({});
 
-  // 기존에 설정된 알림 시간대 불러오기
+  // 기존에 설정된 알림 ID 불러오기
   useEffect(() => {
     const fetchNotificationIds = async () => {
       const ids = await getNotificationIds();
@@ -61,13 +56,7 @@ export default function PrayerTime() {
       Object.keys(ids).forEach((hour) => {
         setSelectedTimes((prev) => {
           const newTimes = [...prev];
-          newTimes[Number(hour) - 1] = true;
-          return newTimes;
-        });
-
-        setTempSelectedTimes((prev) => {
-          const newTimes = [...prev];
-          newTimes[Number(hour) - 1] = true;
+          newTimes[Number(hour)] = true;
           return newTimes;
         });
       });
@@ -76,78 +65,77 @@ export default function PrayerTime() {
     fetchNotificationIds();
   }, []);
 
-  const scheduleNotification = async (hour: number, minute: number, body: string) => {
-    const id = await Notifications.scheduleNotificationAsync({
+  const scheduleNotification = async (hour: number) => {
+    const ids: string[] = [];
+
+    // 10분 전 알림
+    const id1 = await Notifications.scheduleNotificationAsync({
       content: {
-        title: "기도 시간 알림",
-        body: body,
+        title: "곧 기도 시간입니다.",
+        body: "기도 시간 10분 전입니다.",
+        sound: true,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour: hour - 1,
+        minute: 50
+      },
+    });
+    ids.push(id1);
+
+    // 본 시간 알림
+    const id2 = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "기도 시간입니다.",
+        body: "기도를 시작하세요.",
         sound: true,
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
         hour: hour,
-        minute: minute
+        minute: 0
       },
     });
-
-    return id;
-  };
-
-  const scheduleNotifications = async (time: number) => {
-    const ids: string[] = [];
-
-    const hour = Math.floor((time - 1) / 2);
-    const minute = (time % 2) * 30;
-
-    // 10분 전 알림
-    const id1 = await scheduleNotification(hour, minute === 0 ? 50 : minute - 10, "기도 시간 10분 전입니다.");
-    ids.push(id1);
-
-    // 본 시간 알림
-    const id2 = await scheduleNotification(hour, minute, "기도 시간입니다.");
     ids.push(id2);
 
     setNotificationIds((prev) => {
-      const newIds = { ...prev, [time]: ids };
+      const newIds = { ...prev, [hour]: ids };
       saveNotificationIds(newIds);
       return newIds;
     });
   };
 
-  const cancelNotifications = async (time: number) => {
-    const ids = notificationIds[time];
+  const cancelNotification = async (hour: number) => {
+    const ids = notificationIds[hour];
     if (ids) {
       for (const id of ids) {
         await Notifications.cancelScheduledNotificationAsync(id);
       }
       setNotificationIds((prev) => {
         const newIds = { ...prev };
-        delete newIds[time];
+        delete newIds[hour];
         saveNotificationIds(newIds);
         return newIds;
       });
     }
-  };
+  }
 
-  const onTimeSelect = (time: number) => {
-    setTempSelectedTimes((prev) => {
+  const onTimeSelect = (hour: number) => {
+    setSelectedTimes((prev) => {
       const newTimes = [...prev];
-      newTimes[time - 1] = !tempSelectedTimes[time - 1];
+      newTimes[hour] = !prev[hour];
       return newTimes;
     });
-  };
+  }
 
-  const onPressSave = () => {
-    tempSelectedTimes.forEach(async (selected, index) => {
-      const time = index + 1;
-      if (selected && !selectedTimes[index]) {
-        await scheduleNotifications(time);
-      } else if (!selected && selectedTimes[index]) {
-        await cancelNotifications(time);
+  const onPressSave = async () => {
+    selectedTimes.forEach(async (selected, hour) => {
+      if (selected) {
+        await scheduleNotification(hour);
+      } else {
+        await cancelNotification(hour);
       }
     });
-
-    setSelectedTimes(tempSelectedTimes);
 
     Alert.alert('저장되었습니다.', '기도 시간이 저장되었습니다.',
       [
@@ -158,10 +146,10 @@ export default function PrayerTime() {
       ],
       { cancelable: false }
     );
-  };
+  }
 
   const onPressBack = () => {
-    const hasChanges = tempSelectedTimes.some((selected, index) => selected !== selectedTimes[index]);
+    const hasChanges = selectedTimes.some((selected, hour) => selected !== selectedTimes[hour]);
 
     if (!hasChanges) {
       router.back();
@@ -182,7 +170,7 @@ export default function PrayerTime() {
         { cancelable: false }
       );
     }
-  };
+  }
 
   return (
     <View style={[{ paddingTop: insets.top }]}>
@@ -250,7 +238,7 @@ export default function PrayerTime() {
               onPress={() => onTimeSelect(time)}
             >
               <View style={styles.buttonContent}>
-                {tempSelectedTimes[time - 1] ? <CheckedCircle /> : <UnCheckedCircle />}
+                {selectedTimes[time] ? <CheckedCircle /> : <UnCheckedCircle />}
                 <BoldText fontSize={12} lineHeight={22}>
                   {TimeHashTable[time]}
                 </BoldText>
