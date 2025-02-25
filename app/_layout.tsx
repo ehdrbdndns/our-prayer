@@ -6,6 +6,7 @@ import {
   NotoSansKR_700Bold,
   useFonts,
 } from '@expo-google-fonts/noto-sans-kr';
+import NetInfo from '@react-native-community/netinfo';
 import {
   QueryClient,
   QueryClientProvider
@@ -16,6 +17,7 @@ import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setStatusBarStyle } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { Alert } from 'react-native';
 import { SessionProvider } from '../ctx';
 
 const queryClient = new QueryClient()
@@ -34,6 +36,18 @@ Notifications.setNotificationHandler({
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),
+});
+
+// 중간에 데이터 끊길 시 사용자에게 알림
+NetInfo.addEventListener(state => {
+  if (!state.isConnected) {
+    Alert.alert('네트워크 연결이 끊겼습니다.', '네트워크 연결을 확인해주세요.', [
+      {
+        text: '확인',
+        onPress: () => { }
+      }
+    ])
+  }
 });
 
 export default function Root() {
