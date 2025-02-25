@@ -9,14 +9,11 @@ import ShareCard from "@/components/ShareCard";
 import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
 import { useSession } from "@/ctx";
-import api from "@/utils/axios";
-import { BibleType } from "@/utils/dataType";
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
-import { useHistoryQuery, usePlanListQuery } from "@/utils/queries";
+import { useBibleQuery, useHistoryQuery, usePlanListQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from "react";
 import { Platform, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -31,28 +28,7 @@ export default function Index() {
   const [refreshing, setRefreshing] = useState(false);
 
   // fetch Bible data
-  const { data: bible, isSuccess: isBibleSuccess } = useQuery<BibleType>({
-    queryKey: ["bible"],
-    queryFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api.get<BibleType>("/bible", {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        }
-      });
-
-      return res.data;
-    },
-    placeholderData: {
-      title: "마가복음 11:24",
-      content: "그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"
-    },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
-  });
+  const { data: bible, isSuccess: isBibleSuccess } = useBibleQuery();
 
   // fetch History data for 3 weeks
   const { data: history, isSuccess: isHistorySuccess, isFetched: isHistoryLoading } = useHistoryQuery();

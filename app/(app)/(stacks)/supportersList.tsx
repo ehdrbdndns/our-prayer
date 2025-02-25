@@ -86,22 +86,6 @@ export default function supportersList() {
                   <RightShortArrow />
                 </Pressable>
               </View>
-              {/* Content */}
-              <RegularText
-                style={styles.profileContent}
-                fontSize={12}
-                lineHeight={22}
-              >
-                기도 강의를 제공해 주신 ‘가슴으로 품는 교회’에 감사드립니다. 더 많은 정보를 확인하려면 카드를 클릭해주세요.
-              </RegularText>
-
-              <RegularText
-                fontSize={12}
-                lineHeight={22}
-                color="#B3B3B3"
-              >
-                출판자 소개
-              </RegularText>
             </View>
           </TouchableOpacity>
         </View>
@@ -135,29 +119,13 @@ export default function supportersList() {
                     fontSize={16}
                     lineHeight={22}
                   >
-                    주준모
+                    {"주준모 (기타리스트)"}
                   </RegularText>
                 </View>
                 <Pressable>
                   <RightShortArrow />
                 </Pressable>
               </View>
-              {/* Content */}
-              <RegularText
-                style={styles.profileContent}
-                fontSize={12}
-                lineHeight={22}
-              >
-                찬송가를 제공해 주신 ‘주준모’ 선생님께 감사드립니다. 더 많은 정보를 확인하려면 카드를 클릭해주세요.
-              </RegularText>
-
-              <RegularText
-                fontSize={12}
-                lineHeight={22}
-                color="#B3B3B3"
-              >
-                출판자 소개
-              </RegularText>
             </View>
           </TouchableOpacity>
         </View>

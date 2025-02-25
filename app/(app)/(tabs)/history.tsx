@@ -6,14 +6,12 @@ import HistoryNote from '@/components/HistoryNote';
 import PrayerState from '@/components/PrayerState';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
-import api from '@/utils/axios';
-import { HistoryType } from '@/utils/dataType';
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
+import { useHistoryDetailMutation } from '@/utils/mutation';
 import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Href, router, useLocalSearchParams } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
 import { useEffect, useRef, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from 'react-native-calendars';
@@ -62,26 +60,7 @@ export default function HistoryPage() {
   const selectedDayRef = useRef(selectedDay)
 
   const { data: history, isSuccess: isHistorySuccess, isFetching: isHistoryFetching } = useHistoryQuery();
-
-  const { mutate: retrieveHistoryNote } = useMutation({
-    mutationFn: async (prayer_history_id_list: string[]) => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api<HistoryType[]>({
-        method: "POST",
-        url: "/history/detail",
-        data: {
-          prayer_history_id_list
-        },
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        },
-      });
-
-      return res.data.sort((a, b) => b.created_date - a.created_date);
-    },
+  const { mutate: retrieveHistoryNote } = useHistoryDetailMutation({
     onSuccess: (data) => {
       if (data.length === 0) {
         setSelectedNoteList([<EmptyNote key="empty" />])
@@ -101,8 +80,7 @@ export default function HistoryPage() {
         )
       }
     },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
+    onError: () => {
       setSelectedNoteList([<EmptyNote key={'empty'} />]);
     },
   })

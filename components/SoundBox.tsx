@@ -9,7 +9,7 @@ import { Alert } from "react-native";
 
 type SoundBoxProps = {
   plan_id: string;
-  bgm: string;
+  lecture_id: string;
   elapsedTime: number;
   userAdjustedTime: number;
   audios: LectureAudioType[];
@@ -23,7 +23,7 @@ export default function SoundBox(props: SoundBoxProps) {
 
   const {
     plan_id,
-    bgm,
+    lecture_id,
     elapsedTime,
     audios,
     repeatCount,
@@ -42,11 +42,17 @@ export default function SoundBox(props: SoundBoxProps) {
     // Load sound
     const loadSound = async () => {
       try {
+        const bgm = await AsyncStorage.getItem(`audio-${lecture_id}`);
+
+        if (bgm === null) {
+          throw new Error('BGM file does not exist of async storage');
+        }
+
         const fileInfo = await FileSystem.getInfoAsync(bgm);
 
         if (!fileInfo.exists) {
           // TODO go to plan page and download audio
-          throw new Error('BGM file does not exist');
+          throw new Error('BGM file does not exist of FileSystem');
         }
 
         const { sound } = await Audio.Sound.createAsync(
@@ -74,25 +80,38 @@ export default function SoundBox(props: SoundBoxProps) {
       }
     }
 
-    if (!!bgm && bgm !== '') {
+    if (!!lecture_id && lecture_id !== '') {
       loadSound();
     }
 
     return () => {
       unloadSound();
     };
-  }, [bgm]);
+  }, [lecture_id]);
 
   // SET AUDIO
   useEffect(() => {
     const loadAudios = async () => {
       try {
-        for (const audio of audios) {
+        for (const { lecture_audio_id } of audios) {
+          const audioUri = await AsyncStorage.getItem(`audio-${lecture_audio_id}`);
+
+          if (audioUri === null) {
+            throw new Error('Audio file does not exist of async storage');
+          }
+
+          const fileInfo = await FileSystem.getInfoAsync(audioUri);
+
+          if (!fileInfo.exists) {
+            // TODO go to plan page and download audio
+            throw new Error('Audio file does not exist of FileSystem');
+          }
+
           const { sound } = await Audio.Sound.createAsync(
-            { uri: audio.audio },
+            { uri: audioUri },
             { shouldPlay: false, isLooping: false }
           );
-          audioRefs.current[audio.lecture_audio_id] = sound;
+          audioRefs.current[lecture_audio_id] = sound;
         }
       } catch (e) {
         console.log(e);
@@ -131,27 +150,25 @@ export default function SoundBox(props: SoundBoxProps) {
     }
   }, [isMute, isBgmMute]);
 
-  // Play audio when elapsedTime equals start_time
+  // Play audio when elapsedTime equals each audio's start_time
   useEffect(() => {
     const playAudio = async () => {
       for (const audio of audios) {
         if (audio.start_time === elapsedTime && repeatCount === 0) {
           const sound = audioRefs.current[audio.lecture_audio_id];
           if (sound) {
+            // 기존에 실행중이던 오디오 파일 정지
             if (currentAudioRef.current && currentAudioRef.current !== audio.lecture_audio_id) {
               const currentSound = audioRefs.current[currentAudioRef.current];
               if (currentSound) {
                 await currentSound.stopAsync();
               }
             }
+
+            // 앞으로 실행할 오디오 파일 설정
             currentAudioRef.current = audio.lecture_audio_id;
 
-            // Reduce BGM volume
-            if (bgmRef.current) {
-              await bgmRef.current.setVolumeAsync(0.1);
-            }
-
-            // Play sound and restore BGM volume when finished
+            // 실행할 오디오 완료시 배경 음악 볼륨 조절
             sound.setOnPlaybackStatusUpdate(async (status) => {
               if (status.isLoaded && status.didJustFinish) {
                 if (bgmRef.current) {
@@ -159,6 +176,11 @@ export default function SoundBox(props: SoundBoxProps) {
                 }
               }
             });
+
+            // 배경음악 볼륨 조절
+            if (bgmRef.current) {
+              await bgmRef.current.setVolumeAsync(0.2);
+            }
 
             await sound.playAsync();
           }
@@ -173,6 +195,7 @@ export default function SoundBox(props: SoundBoxProps) {
   useEffect(() => {
     async function playAudio() {
 
+      // 현재 진행중인 오디오 정지
       if (currentAudioRef.current) {
         const currentSound = audioRefs.current[currentAudioRef.current];
         if (currentSound) {
@@ -180,6 +203,8 @@ export default function SoundBox(props: SoundBoxProps) {
         }
       }
 
+      // 전체 오디오 파일을 확인하면서 사용자가 조정한 시간에 맞는 오디오를 찾아 재생
+      let hasAudio = false;
       for (const audio of audios) {
         const sound = audioRefs.current[audio.lecture_audio_id];
         const status = await sound.getStatusAsync();
@@ -190,12 +215,27 @@ export default function SoundBox(props: SoundBoxProps) {
           && audio.start_time + status.durationMillis / 1000 > elapsedTime
         ) {
           await sound.setPositionAsync((elapsedTime - audio.start_time) * 1000);
+
           if (isPlaying) {
             await sound.playAsync();
           } else {
             await sound.pauseAsync();
           }
+
+          hasAudio = true;
           currentAudioRef.current = audio.lecture_audio_id;
+        }
+      }
+
+      if (!hasAudio) {
+        // 실행중인 오디오가 없으면 배경음악 풀 볼륨으로 조절
+        if (bgmRef.current) {
+          await bgmRef.current.setVolumeAsync(1);
+        }
+      } else {
+        // 실행중인 오디오가 있으면 배경음악 0.2 볼륨으로 조절
+        if (bgmRef.current) {
+          await bgmRef.current.setVolumeAsync(0.2);
         }
       }
     }

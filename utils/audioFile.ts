@@ -1,13 +1,7 @@
 import * as FileSystem from 'expo-file-system';
-import { Platform } from 'react-native';
-import api from './axios';
 
 export const AUDIO_DIR = FileSystem.documentDirectory + 'audio/';
-const audioFileUri = ({
-  path
-}: {
-  path: string
-}) => AUDIO_DIR + `${path}`;
+const audioFileUri = (path: string) => AUDIO_DIR + `${path}`;
 
 async function ensureDirExists(path: string) {
   const dirInfo = await FileSystem.getInfoAsync(path);
@@ -58,24 +52,12 @@ export async function addAudio({
   path: string, audioUri: string
 }) {
   try {
-    const response = await api.get(audioUri, { responseType: 'blob' });
-    const mimeType = response.headers['content-type'];
-    const extension = getFileExtensionFromMimeType(mimeType || '');
-
-    const fileUri = audioFileUri({ path: `${path}.${extension}` });
+    const fileUri = audioFileUri(path);
 
     const directory = fileUri.substring(0, fileUri.lastIndexOf('/'));
     await ensureDirExists(directory);
 
-    if (Platform.OS === 'ios') {
-      // Todo: 서버로부터 확장자 정보를 가져와서 downloadAsync를 사용하도록 수정
-      const audioBlob = await response.data;
-      const base64Audio = await blobToBase64(audioBlob);
-
-      await FileSystem.writeAsStringAsync(fileUri, base64Audio, { encoding: FileSystem.EncodingType.Base64 });
-    } else {
-      await FileSystem.downloadAsync(audioUri, fileUri);
-    }
+    await FileSystem.downloadAsync(audioUri, fileUri);
 
     return fileUri;
   } catch (e) {
@@ -89,7 +71,7 @@ export async function getSingleAudio({
 }: {
   path: string, audio: string
 }) {
-  const fileUri = audioFileUri({ path });
+  const fileUri = audioFileUri(path);
   await ensureDirExists(fileUri);
 
   const fileInfo = await FileSystem.getInfoAsync(fileUri);
@@ -108,6 +90,6 @@ export async function deleteAudio({
   path: string
 }) {
   console.log('Deleting audio file…');
-  const fileUri = audioFileUri({ path });
+  const fileUri = audioFileUri(path);
   await FileSystem.deleteAsync(fileUri);
 }

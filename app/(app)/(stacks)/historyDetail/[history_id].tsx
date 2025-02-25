@@ -3,13 +3,12 @@ import CustomButton from '@/components/button/CustomButton';
 import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
 import { MediumText } from '@/components/text/MediumText';
-import api from '@/utils/axios';
-import { HistoryType } from '@/utils/dataType';
 import { formatDateToKorean, formatPrayerTime } from '@/utils/date';
+import { useDeleteHistoryMutation, useUpdateHistoryMutation } from '@/utils/mutation';
+import { useHistoryDetailQuery } from '@/utils/queries';
 import { moderateScale } from "@/utils/style";
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,44 +17,14 @@ export default function HistoryDetailPage() {
 
   const queryClient = useQueryClient();
   const { history_id } = useLocalSearchParams<{ history_id: string }>();
-  const { data: historyDetail, isSuccess: isHistorySuccess } = useQuery<HistoryType>({
-    queryKey: ["historyDetail", history_id],
-    queryFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+  const { data: historyDetail, isSuccess: isHistorySuccess } = useHistoryDetailQuery(history_id)
 
-      const res = await api.get<HistoryType>(
-        `/history/detail?prayer_history_id=${history_id}`,
-        {
-          headers: {
-            "Authorization": `Bearer ${accessToken}`,
-            "RefreshToken": refreshToken
-          }
-        });
+  const [note, setNote] = useState('');
 
-      return res.data;
-    }
-  });
-
-  const { mutate: updateHistoryMutate } = useMutation({
-    mutationFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api<HistoryType[]>({
-        method: "PUT",
-        url: "/history",
-        data: {
-          prayer_history_id: history_id,
-          note: note
-        },
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        },
-      });
-
-      return res.data;
+  const { mutate: updateHistoryMutate } = useUpdateHistoryMutation({
+    params: {
+      history_id: history_id,
+      note: note
     },
     onSuccess: async () => {
       // invalid history detail cache
@@ -63,40 +32,24 @@ export default function HistoryDetailPage() {
       await queryClient.invalidateQueries({ queryKey: ["historyDetail", history_id] });
       router.back();
     },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
-    },
-  });
+    onError: () => {
+      // Todo: error handling
+    }
+  })
 
-  const { mutate: deleteHistoryMutate } = useMutation({
-    mutationFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api<HistoryType[]>({
-        method: "DELETE",
-        url: "/history/detail",
-        data: {
-          prayer_history_id: history_id,
-        },
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        },
-      });
-
-      return res.data;
+  const { mutate: deleteHistoryMutate } = useDeleteHistoryMutation({
+    params: {
+      history_id: history_id
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["history"] });
+      await queryClient.invalidateQueries({ queryKey: ["plan"] });
       router.back();
     },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
-    },
+    onError: () => {
+      // Todo: error handling
+    }
   })
-
-  const [note, setNote] = useState('');
 
   useEffect(() => {
     if (isHistorySuccess) {

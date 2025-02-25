@@ -1,10 +1,8 @@
 import api from '@/utils/axios';
-import { PlanResponseType, PlanType, QuestionType } from '@/utils/dataType';
+import { HistoryType, PlanResponseType, PlanType, QuestionType } from '@/utils/dataType';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
-import { Alert } from 'react-native';
 
 export const useLikeMutation = ({
   plan_like_id, plan_id, is_liked
@@ -78,7 +76,7 @@ export const useLikeMutation = ({
   return { isLiked, mutateLike };
 };
 
-export const useHistoryMutation = (callback: () => void) => {
+export const useHistoryMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -107,27 +105,11 @@ export const useHistoryMutation = (callback: () => void) => {
       return res.data;
     },
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["history"] });
-
-      // wait for 300ms
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      callback();
-
-      router.dismissTo({
-        pathname: `/calendar`,
-        params: {
-          backToLink: '/',
-        }
-      });
+      await queryClient.invalidateQueries({ queryKey: ["history"] });
+      await queryClient.invalidateQueries({ queryKey: ["plan"] });
     },
     onError: (error, newUser, context) => {
       console.error('onError', error, newUser, context);
-      Alert.alert('오류', '기록 저장에 실패했습니다.');
-
-      callback();
-
-      router.dismissTo('/');
     },
   })
 }
@@ -209,6 +191,140 @@ export const useDeleteQuestionMutation = () => {
       if (context) {
         queryClient.setQueryData<QuestionType[]>(["question"], context.previousValue);
       }
+    },
+  })
+}
+
+export const useHistoryDetailMutation = ({ onSuccess, onError }: {
+  onSuccess: (data: HistoryType[]) => void,
+  onError: () => void
+}) => {
+  return useMutation({
+    mutationFn: async (prayer_history_id_list: string[]) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<HistoryType[]>({
+        method: "POST",
+        url: "/history/detail",
+        data: {
+          prayer_history_id_list
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data.sort((a, b) => b.created_date - a.created_date);
+    },
+    onSuccess,
+    onError,
+  })
+}
+
+export const useDeleteUserMutation = ({ onSuccess, onError }: {
+  onSuccess: () => void,
+  onError: () => void
+}) => {
+  return useMutation({
+    mutationFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<{ message: string }>({
+        method: "DELETE",
+        url: "/user",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess,
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+      onError();
+    },
+  })
+}
+
+export const useUpdateHistoryMutation = ({
+  params,
+  onSuccess,
+  onError
+}: {
+  params: {
+    history_id: string,
+    note: string
+  },
+  onSuccess: () => void,
+  onError: () => void
+}) => {
+  return useMutation({
+    mutationFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<HistoryType[]>({
+        method: "PUT",
+        url: "/history",
+        data: {
+          prayer_history_id: params.history_id,
+          note: params.note
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: onSuccess,
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+      onError();
+    },
+  });
+}
+
+export const useDeleteHistoryMutation = ({
+  params,
+  onSuccess,
+  onError
+}: {
+  params: {
+    history_id: string,
+  },
+  onSuccess: () => void,
+  onError: () => void
+}) => {
+  return useMutation({
+    mutationFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<HistoryType[]>({
+        method: "DELETE",
+        url: "/history/detail",
+        data: {
+          prayer_history_id: params.history_id,
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess,
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+      onError();
     },
   })
 }
