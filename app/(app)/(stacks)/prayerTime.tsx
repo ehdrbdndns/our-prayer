@@ -129,6 +129,9 @@ export default function PrayerTime() {
   }
 
   const onPressSave = async () => {
+    // 기존에 설정된 알림 취소
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
     selectedTimes.forEach(async (selected, hour) => {
       if (selected) {
         await scheduleNotification(hour);

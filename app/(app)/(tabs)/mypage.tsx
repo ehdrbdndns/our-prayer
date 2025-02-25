@@ -53,8 +53,8 @@ export default function MyPage() {
 
       return res.data;
     },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
+    staleTime: 2 * 60 * 60 * 1000, // 2시간
+    gcTime: 2 * 60 * 60 * 1000, // 2시간
   });
   const { mutate: userMutate } = useUserMutation();
   const { mutate: deleteUserMutate } = useMutation({
