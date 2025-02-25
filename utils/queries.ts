@@ -72,11 +72,16 @@ export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
 
-      const res = await api.get<LectureResponseType>(`/lecture?lecture_id=${lecture_id}`, {
+      const res = await api<LectureResponseType>({
+        method: "POST",
+        url: "/lecture",
+        data: {
+          lecture_id
+        },
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "RefreshToken": refreshToken
-        }
+        },
       });
 
       const data = {

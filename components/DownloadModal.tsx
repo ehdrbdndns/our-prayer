@@ -4,7 +4,7 @@ import api from '@/utils/axios';
 import { AudioFileSystemType } from '@/utils/dataType';
 import { moderateScale } from '@/utils/style';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useRef, useState } from 'react';
@@ -51,51 +51,6 @@ export default function DownloadModal() {
     gcTime: 0,
     enabled: !!planId
   });
-
-  const { mutate: insertUserAudioMutate } = useMutation({
-    mutationFn: async (req: InsertUserAudioRequestType) => {
-      if (!isModalVisible) return;
-
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api({
-        method: "POST",
-        url: "/lecture/userAudio",
-        data: { audios: req },
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        },
-      });
-
-      return res.data;
-    },
-    onSuccess: async () => {
-      await AsyncStorage.setItem(`planAudit-${planId}`, JSON.stringify({ audit_updated_date: auditDate }));
-      await queryClient.invalidateQueries({ queryKey: ["plan", planId] });
-      await queryClient.invalidateQueries({ queryKey: ["lecture"] });
-      setCompletedDownloadCount(prevCount => prevCount + 1);
-      setProgress((prevProgress) => prevProgress + 1 / totalAudioCount);
-
-      setTimeout(() => {
-        hideModal();
-        initValue();
-        router.push({
-          pathname: `/planDetail/[plan_id]`,
-          params: {
-            plan_id: planId,
-            title: title,
-            banner: thumbnail,
-            isLiked: String(isLiked),
-          },
-        });
-      }, 1000)
-    },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
-    },
-  })
 
   useEffect(() => {
     async function downloadAudios() {
@@ -151,7 +106,34 @@ export default function DownloadModal() {
 
         if (signal.aborted) return;
 
-        insertUserAudioMutate(lectureData);
+        // Save Audio Url to Async Storage
+        lectureData.forEach(async ({ lecture_audio_id, audio }) => {
+          await AsyncStorage.setItem(`audio-${lecture_audio_id}`, audio);
+        })
+
+        // Update plan audit
+        await AsyncStorage.setItem(`planAudit-${planId}`, JSON.stringify({ audit_updated_date: auditDate }));
+
+        await queryClient.invalidateQueries({ queryKey: ["plan", planId] });
+        await queryClient.invalidateQueries({ queryKey: ["lecture"] });
+
+        // End download
+        setCompletedDownloadCount(prevCount => prevCount + 1);
+        setProgress((prevProgress) => prevProgress + 1 / totalAudioCount);
+
+        setTimeout(() => {
+          hideModal();
+          initValue();
+          router.push({
+            pathname: `/planDetail/[plan_id]`,
+            params: {
+              plan_id: planId,
+              title: title,
+              banner: thumbnail,
+              isLiked: String(isLiked),
+            },
+          });
+        }, 1000)
       }
     }
 
