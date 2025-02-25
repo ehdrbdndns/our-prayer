@@ -28,12 +28,6 @@ const onError = async (error: any) => {
   try {
     const originalRequest = error.config;
 
-    // 네트워크 에러 처리
-    if (!error.response) {
-      Alert.alert('네트워크 오류', '네트워크 연결을 확인해주세요.');
-      return Promise.reject(new Error('네트워크 연결이 끊겼습니다.'));
-    }
-
     if (error.response.status === 401) {
       const { expiredType, accessToken, refreshToken } = error.response.data;
 

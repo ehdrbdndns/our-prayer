@@ -1,5 +1,5 @@
 import api from '@/utils/axios';
-import { PlanResponseType, PlanType, QuestionType } from '@/utils/dataType';
+import { HistoryType, PlanResponseType, PlanType, QuestionType } from '@/utils/dataType';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
@@ -191,6 +191,140 @@ export const useDeleteQuestionMutation = () => {
       if (context) {
         queryClient.setQueryData<QuestionType[]>(["question"], context.previousValue);
       }
+    },
+  })
+}
+
+export const useHistoryDetailMutation = ({ onSuccess, onError }: {
+  onSuccess: (data: HistoryType[]) => void,
+  onError: () => void
+}) => {
+  return useMutation({
+    mutationFn: async (prayer_history_id_list: string[]) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<HistoryType[]>({
+        method: "POST",
+        url: "/history/detail",
+        data: {
+          prayer_history_id_list
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data.sort((a, b) => b.created_date - a.created_date);
+    },
+    onSuccess,
+    onError,
+  })
+}
+
+export const useDeleteUserMutation = ({ onSuccess, onError }: {
+  onSuccess: () => void,
+  onError: () => void
+}) => {
+  return useMutation({
+    mutationFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<{ message: string }>({
+        method: "DELETE",
+        url: "/user",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess,
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+      onError();
+    },
+  })
+}
+
+export const useUpdateHistoryMutation = ({
+  params,
+  onSuccess,
+  onError
+}: {
+  params: {
+    history_id: string,
+    note: string
+  },
+  onSuccess: () => void,
+  onError: () => void
+}) => {
+  return useMutation({
+    mutationFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<HistoryType[]>({
+        method: "PUT",
+        url: "/history",
+        data: {
+          prayer_history_id: params.history_id,
+          note: params.note
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: onSuccess,
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+      onError();
+    },
+  });
+}
+
+export const useDeleteHistoryMutation = ({
+  params,
+  onSuccess,
+  onError
+}: {
+  params: {
+    history_id: string,
+  },
+  onSuccess: () => void,
+  onError: () => void
+}) => {
+  return useMutation({
+    mutationFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<HistoryType[]>({
+        method: "DELETE",
+        url: "/history/detail",
+        data: {
+          prayer_history_id: params.history_id,
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess,
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+      onError();
     },
   })
 }
