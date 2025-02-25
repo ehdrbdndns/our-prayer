@@ -1,9 +1,13 @@
 import api from '@/utils/axios';
 import { BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionType, UserType } from '@/utils/dataType';
+import { useNetInfo } from '@react-native-community/netinfo';
 import { useQuery } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 
+
 export const usePlanListQuery = () => {
+  const { isConnected } = useNetInfo();
+
   return useQuery<PlanResponseType>({
     queryKey: ["plan"],
     queryFn: async () => {
@@ -35,10 +39,13 @@ export const usePlanListQuery = () => {
     },
     staleTime: 2 * 60 * 60 * 1000, // 2시간
     gcTime: 2 * 60 * 60 * 1000, // 2시간
+    enabled: !!isConnected
   });
 };
 
 export const usePlanQuery = ({ plan_id }: { plan_id: string }) => {
+  const { isConnected } = useNetInfo();
+
   return useQuery<PlanDetailResponseType>({
     queryKey: ["plan", plan_id],
     queryFn: async () => {
@@ -62,10 +69,12 @@ export const usePlanQuery = ({ plan_id }: { plan_id: string }) => {
     },
     staleTime: 2 * 60 * 60 * 1000, // 2시간
     gcTime: 2 * 60 * 60 * 1000, // 2시간
+    enabled: !!isConnected
   });
 };
 
 export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
+  const { isConnected } = useNetInfo();
   return useQuery<LectureResponseType | null>({
     queryKey: ["lecture", lecture_id],
     queryFn: async () => {
@@ -97,11 +106,15 @@ export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
       }
 
       return data;
-    }
+    },
+    staleTime: 2 * 60 * 60 * 1000, // 2시간
+    gcTime: 2 * 60 * 60 * 1000, // 2시간
+    enabled: !!isConnected
   });
 };
 
 export const useHistoryQuery = (historyRange?: number) => {
+  const { isConnected } = useNetInfo();
   return useQuery<HistoryType[]>({
     queryKey: ["history"],
     queryFn: async () => {
@@ -120,10 +133,12 @@ export const useHistoryQuery = (historyRange?: number) => {
     placeholderData: [],
     staleTime: 2 * 60 * 60 * 1000, // 2시간
     gcTime: 2 * 60 * 60 * 1000, // 2시간
+    enabled: !!isConnected
   });
 }
 
 export const useHistoryDetailQuery = (history_id: string) => {
+  const { isConnected } = useNetInfo();
   return useQuery<HistoryType>({
     queryKey: ["historyDetail", history_id],
     queryFn: async () => {
@@ -140,11 +155,13 @@ export const useHistoryDetailQuery = (history_id: string) => {
         });
 
       return res.data;
-    }
+    },
+    enabled: !!isConnected
   })
 }
 
 export const useQuestionQuery = (question_id: string) => {
+  const { isConnected } = useNetInfo();
   return useQuery<QuestionType>({
     queryKey: ["question", question_id],
     queryFn: async () => {
@@ -166,6 +183,7 @@ export const useQuestionQuery = (question_id: string) => {
 }
 
 export const useBibleQuery = () => {
+  const { isConnected } = useNetInfo();
   return useQuery<BibleType>({
     queryKey: ["bible"],
     queryFn: async () => {
@@ -186,7 +204,8 @@ export const useBibleQuery = () => {
       content: "그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"
     },
     staleTime: 2 * 60 * 60 * 1000, // 2시간
-    gcTime: 2 * 60 * 60 * 1000, // 2시간
+    gcTime: 2 * 60 * 60 * 1000, // 2시간,
+    enabled: !!isConnected
   });
 }
 
@@ -195,6 +214,7 @@ export const useUserQuery = ({
 }: {
   onSuccess: (isAlarm: boolean) => void
 }) => {
+  const { isConnected } = useNetInfo();
   return useQuery<UserType>({
     queryKey: ["user"],
     queryFn: async () => {
@@ -213,6 +233,7 @@ export const useUserQuery = ({
       return res.data;
     },
     staleTime: 2 * 60 * 60 * 1000, // 2시간
-    gcTime: 2 * 60 * 60 * 1000, // 2시간
+    gcTime: 2 * 60 * 60 * 1000, // 2시간,
+    enabled: !!isConnected
   });
 }
