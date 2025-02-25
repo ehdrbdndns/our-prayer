@@ -104,9 +104,11 @@ export interface AudioFileSystemType {
       lecture_audio_id: string,
       uri: string,
       caption: string,
-      start_time: number
+      start_time: number,
+      extension: string,
     }[],
     bgm: string;
+    bgmExtension: string;
   }
 }
 

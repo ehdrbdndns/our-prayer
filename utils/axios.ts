@@ -27,6 +27,7 @@ const onSuccess = (response: AxiosResponse<any, any>) => response;
 const onError = async (error: any) => {
   try {
     const originalRequest = error.config;
+
     if (error.response.status === 401) {
       const { expiredType, accessToken, refreshToken } = error.response.data;
 
@@ -41,13 +42,13 @@ const onError = async (error: any) => {
           console.error(error);
           console.error(originalRequest);
           // await handleTokenDeletion();
-          return new Error('예기치 못한 오류가 발생했습니다. 다시 로그인해주세요.');
+          return new Error('예기치 못한 오류가 발생했습니다.');
         default:
           console.error(error);
           console.error(originalRequest);
           console.error(`Unexpected expiredType: ${expiredType}`);
           // await handleTokenDeletion();
-          return new Error('예기치 못한 오류가 발생했습니다. 다시 로그인해주세요.');
+          return new Error('예기치 못한 오류가 발생했습니다.');
       }
     }
 
@@ -57,8 +58,8 @@ const onError = async (error: any) => {
     return Promise.reject(error);
   } catch (error) {
     console.error(error);
-    Alert.alert('오류가 발생했습니다.', '예기치 못한 오류가 발생했습니다. 다시 로그인해주세요.');
-    return new Error('예기치 못한 오류가 발생했습니다. 다시 로그인해주세요.');
+    Alert.alert('오류가 발생했습니다.', '예기치 못한 오류가 발생했습니다.');
+    return new Error('예기치 못한 오류가 발생했습니다.');
   }
 }
 

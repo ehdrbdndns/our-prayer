@@ -214,7 +214,7 @@ export default function Lecture() {
     <View style={{ paddingTop: insets.top }}>
       <SoundBox
         plan_id={plan_id}
-        bgm={lecture.bgm}
+        lecture_id={lecture_id}
         audios={lectureAudios}
         isBgmMute={isBgmMute}
         isMute={isMute}

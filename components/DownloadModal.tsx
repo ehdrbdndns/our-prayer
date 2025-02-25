@@ -4,7 +4,7 @@ import api from '@/utils/axios';
 import { AudioFileSystemType } from '@/utils/dataType';
 import { moderateScale } from '@/utils/style';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useRef, useState } from 'react';
@@ -52,51 +52,6 @@ export default function DownloadModal() {
     enabled: !!planId
   });
 
-  const { mutate: insertUserAudioMutate } = useMutation({
-    mutationFn: async (req: InsertUserAudioRequestType) => {
-      if (!isModalVisible) return;
-
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api({
-        method: "POST",
-        url: "/lecture/userAudio",
-        data: { audios: req },
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        },
-      });
-
-      return res.data;
-    },
-    onSuccess: async () => {
-      await AsyncStorage.setItem(`planAudit-${planId}`, JSON.stringify({ audit_updated_date: auditDate }));
-      await queryClient.invalidateQueries({ queryKey: ["plan", planId] });
-      await queryClient.invalidateQueries({ queryKey: ["lecture"] });
-      setCompletedDownloadCount(prevCount => prevCount + 1);
-      setProgress((prevProgress) => prevProgress + 1 / totalAudioCount);
-
-      setTimeout(() => {
-        hideModal();
-        initValue();
-        router.push({
-          pathname: `/planDetail/[plan_id]`,
-          params: {
-            plan_id: planId,
-            title: title,
-            banner: thumbnail,
-            isLiked: String(isLiked),
-          },
-        });
-      }, 1000)
-    },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
-    },
-  })
-
   useEffect(() => {
     async function downloadAudios() {
       downloadAbortController.current = new AbortController();
@@ -106,12 +61,12 @@ export default function DownloadModal() {
         const _totalAudioCount = Object.values(audio).reduce((acc, { audios }) => acc + audios.length + 1 + 1, 0) // audios(length) + bgm(1) + mutation(1)
         setTotalAudioCount(_totalAudioCount);
 
-        for (const [lectureId, { audios, bgm }] of Object.entries(audio)) {
+        for (const [lectureId, { audios, bgm, bgmExtension }] of Object.entries(audio)) {
 
           if (signal.aborted) break;
 
           // download bgm
-          const bgmUri = await addAudio({ path: `${lectureId}/bgm`, audioUri: bgm });
+          const bgmUri = await addAudio({ path: `${lectureId}/bgm.${bgmExtension}`, audioUri: bgm });
           setCompletedDownloadCount(prevCount => {
             const newCount = prevCount + 1;
             setProgress(newCount / _totalAudioCount);
@@ -123,31 +78,62 @@ export default function DownloadModal() {
             audio: bgmUri
           })
 
-          await new Promise(resolve => setTimeout(resolve, 100)); // .1초 대기
-
           // download audios
-          for (const { lecture_audio_id, uri } of audios) {
+          const batchSize = 3;
+          for (let i = 0; i < audios.length; i += batchSize) {
             if (signal.aborted) break;
 
-            const audioUri = await addAudio({ path: `${lectureId}/audios/${lecture_audio_id}`, audioUri: uri });
-            setCompletedDownloadCount(prevCount => {
-              const newCount = prevCount + 1;
-              setProgress(newCount / _totalAudioCount);
-              return newCount;
+            const audioBatch = audios.slice(i, i + batchSize);
+            const audioPromises = audioBatch.map(async ({ lecture_audio_id, uri, extension }) => {
+              if (signal.aborted) return;
+
+              const audioUri = await addAudio({ path: `${lectureId}/audios/${lecture_audio_id}.${extension}`, audioUri: uri });
+              setCompletedDownloadCount(prevCount => {
+                const newCount = prevCount + 1;
+                setProgress(newCount / _totalAudioCount);
+                return newCount;
+              });
+
+              lectureData.push({
+                lecture_audio_id,
+                audio: audioUri
+              });
             });
 
-            await new Promise(resolve => setTimeout(resolve, 100)); // .1초 대기
-
-            lectureData.push({
-              lecture_audio_id,
-              audio: audioUri
-            })
+            await Promise.all(audioPromises);
           }
         }
 
         if (signal.aborted) return;
 
-        insertUserAudioMutate(lectureData);
+        // Save Audio Url to Async Storage
+        lectureData.forEach(async ({ lecture_audio_id, audio }) => {
+          await AsyncStorage.setItem(`audio-${lecture_audio_id}`, audio);
+        })
+
+        // Update plan audit
+        await AsyncStorage.setItem(`planAudit-${planId}`, JSON.stringify({ audit_updated_date: auditDate }));
+
+        await queryClient.invalidateQueries({ queryKey: ["plan", planId] });
+        await queryClient.invalidateQueries({ queryKey: ["lecture"] });
+
+        // End download
+        setCompletedDownloadCount(prevCount => prevCount + 1);
+        setProgress((prevProgress) => prevProgress + 1 / totalAudioCount);
+
+        setTimeout(() => {
+          hideModal();
+          initValue();
+          router.push({
+            pathname: `/planDetail/[plan_id]`,
+            params: {
+              plan_id: planId,
+              title: title,
+              banner: thumbnail,
+              isLiked: String(isLiked),
+            },
+          });
+        }, 1000)
       }
     }
 
@@ -168,7 +154,7 @@ export default function DownloadModal() {
 
   const onClickCancel = () => {
     if (downloadAbortController.current) {
-      downloadAbortController.current.abort();
+      downloadAbortController.current.abort(); // download 중단
     }
 
     initValue();

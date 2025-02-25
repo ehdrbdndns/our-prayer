@@ -7,17 +7,14 @@ import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
 import { useSession } from '@/ctx';
-import api from '@/utils/axios';
-import { UserType } from '@/utils/dataType';
 import { calculateContinuousPrayerDays, calculateDaysSinceSignup, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
-import { useUserMutation } from '@/utils/mutation';
-import { useHistoryQuery } from '@/utils/queries';
+import { useDeleteUserMutation, useUserMutation } from '@/utils/mutation';
+import { useHistoryQuery, useUserQuery } from '@/utils/queries';
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Platform, RefreshControl, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
@@ -36,51 +33,20 @@ export default function MyPage() {
   const [name, setName] = useState('');
 
   const { data: history, isSuccess: isHistorySuccess } = useHistoryQuery();
-  const { data: user, isSuccess: isUserSuccess } = useQuery<UserType>({
-    queryKey: ["user"],
-    queryFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api.get<UserType>(`/user`, {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        }
-      });
-
-      setEnableAlarm(Boolean(res.data.alarm));
-
-      return res.data;
-    },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
+  const { data: user, isSuccess: isUserSuccess } = useUserQuery({
+    onSuccess: (isAlarm) => setEnableAlarm(isAlarm)
   });
+
   const { mutate: userMutate } = useUserMutation();
-  const { mutate: deleteUserMutate } = useMutation({
-    mutationFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api<{ message: string }>({
-        method: "DELETE",
-        url: "/user",
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        },
-      });
-
-      return res.data;
-    },
+  const { mutate: deleteUserMutate } = useDeleteUserMutation({
     onSuccess: () => {
       queryClient.invalidateQueries();
       signOut();
     },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
+    onError: () => {
+      // Todo: error handling
     },
-  })
+  });
 
   useEffect(() => {
     if (!!session && !isLoading) {
@@ -131,7 +97,10 @@ export default function MyPage() {
       if (notificationIds) {
         const ids = JSON.parse(notificationIds);
         Object.keys(ids).forEach(async (hour) => {
-          const notificationId = await Notifications.scheduleNotificationAsync({
+          const notificationIds = [];
+
+          // 10분 전 알림
+          const id1 = await Notifications.scheduleNotificationAsync({
             content: {
               title: "곧 기도 시간입니다.",
               body: "기도 시간 10분 전입니다.",
@@ -143,8 +112,24 @@ export default function MyPage() {
               minute: 50
             },
           });
+          notificationIds.push(id1);
 
-          ids[hour] = notificationId;
+          // 본 시간 알림
+          const id2 = await Notifications.scheduleNotificationAsync({
+            content: {
+              title: "기도 시간입니다.",
+              body: "기도 시간입니다.",
+              sound: true,
+            },
+            trigger: {
+              type: Notifications.SchedulableTriggerInputTypes.DAILY,
+              hour: Number(hour),
+              minute: 0
+            },
+          });
+          notificationIds.push(id2);
+
+          ids[hour] = notificationIds;
         });
 
         await AsyncStorage.setItem('notificationIds', JSON.stringify(ids));
