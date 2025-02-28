@@ -129,19 +129,6 @@ export default function HistoryDetailPage() {
             </MediumText>
           </View>
         }
-        suffix={
-          <TouchableOpacity
-            onPress={onPressSave}
-            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-          >
-            <MediumText
-              fontSize={16}
-              color="#959FFF"
-            >
-              저장하기
-            </MediumText>
-          </TouchableOpacity>
-        }
       />
       <View style={styles.container}>
         <MediumText
@@ -172,6 +159,7 @@ export default function HistoryDetailPage() {
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? moderateScale(12) : 0}
         style={{
           paddingHorizontal: moderateScale(24),
           marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(24),
