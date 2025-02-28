@@ -23,7 +23,7 @@ export default function TabLayout() {
       <Tabs.Screen name="plan" />
       <Tabs.Screen name="currentPlan" />
       {/* <Tabs.Screen name="question" /> */}
-      <Tabs.Screen name="history" />
+      <Tabs.Screen name="question" />
       <Tabs.Screen name="mypage" />
     </Tabs>
   );

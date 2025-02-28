@@ -3,15 +3,12 @@ import CustomButton from '@/components/button/CustomButton';
 import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
 import { MediumText } from '@/components/text/MediumText';
-import api from '@/utils/axios';
-import { HistoryType } from '@/utils/dataType';
 import { formatDateToKorean } from '@/utils/date';
-import { useDeleteQuestionMutation } from '@/utils/mutation';
-import { useQuestionQuery } from '@/utils/queries';
+import { useDeleteQuestionMutation, useUpdateQuestionMutation } from '@/utils/mutation';
+import { useQuestionDetailQuery } from '@/utils/queries';
 import { moderateScale } from "@/utils/style";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,38 +17,17 @@ export default function EditQuestion() {
 
   const queryClient = useQueryClient();
   const { question_id } = useLocalSearchParams<{ question_id: string }>();
-  const { data: question, isSuccess: isQuestionSuccess } = useQuestionQuery(question_id);
-
-  const { mutate: updateQuestionMutate } = useMutation({
-    mutationFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api<HistoryType[]>({
-        method: "PUT",
-        url: "/question",
-        data: {
-          question_id,
-          content: note,
-        },
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        },
-      });
-
-      return res.data;
-    },
+  const { data: question, isSuccess: isQuestionSuccess } = useQuestionDetailQuery(question_id);
+  const { mutate: updateQuestionMutate } = useUpdateQuestionMutation({
     onSuccess: async () => {
-      // invalid history detail cache
       await queryClient.invalidateQueries({ queryKey: ["question"] });
       await queryClient.invalidateQueries({ queryKey: ["question", question_id] });
       router.back();
     },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
+    onError: async () => {
+      Alert.alert('전송에 실패했습니다. 다시 시도해주세요.');
     },
-  })
+  });
 
   const { mutate: deleteQuestionMutate } = useDeleteQuestionMutation();
 
@@ -83,7 +59,10 @@ export default function EditQuestion() {
         {
           text: '저장하기',
           onPress: () => {
-            updateQuestionMutate();
+            updateQuestionMutate({
+              question_id,
+              content: note,
+            });
           },
         },
       ],

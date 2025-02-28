@@ -13,9 +13,9 @@ import api from '@/utils/axios';
 import { QuestionReplyType } from '@/utils/dataType';
 import { formatDateToKorean } from '@/utils/date';
 import { useDeleteQuestionMutation } from '@/utils/mutation';
-import { useQuestionQuery } from '@/utils/queries';
+import { useQuestionDetailQuery, useReplyQuery } from '@/utils/queries';
 import { moderateScale } from '@/utils/style';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -35,26 +35,8 @@ export default function QuestionDetail() {
 
   const [name, setName] = useState<string>('');
 
-  const { data: question } = useQuestionQuery(question_id);
-  const { data: replys } = useQuery<QuestionReplyType[]>({
-    queryKey: ["reply", question_id],
-    queryFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api.get<QuestionReplyType[]>(`/question/reply?question_id=${question_id}`, {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        }
-      });
-      return res.data;
-    },
-    placeholderData: [],
-    staleTime: 60 * 1000, // 1분
-    gcTime: 60 * 1000, // 1분
-    enabled: !!question_id
-  });
+  const { data: question } = useQuestionDetailQuery(question_id);
+  const { data: replys } = useReplyQuery(question_id);
 
   const { mutate: deleteQuestion } = useDeleteQuestionMutation();
 
