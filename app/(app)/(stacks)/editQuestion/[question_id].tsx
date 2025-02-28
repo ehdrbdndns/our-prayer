@@ -2,6 +2,7 @@ import LeftArrow from '@/assets/images/icon/leftArrow.svg';
 import CustomButton from '@/components/button/CustomButton';
 import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
+import { QUESTION_CONTENT_MAX_LENGTH } from '@/components/InputButton';
 import { MediumText } from '@/components/text/MediumText';
 import { formatDateToKorean } from '@/utils/date';
 import { useDeleteQuestionMutation, useUpdateQuestionMutation } from '@/utils/mutation';
@@ -44,7 +45,16 @@ export default function EditQuestion() {
   }
 
   const onChangeNote = (text: string) => {
-    setNote(text);
+    if (text.length > QUESTION_CONTENT_MAX_LENGTH) {
+      Alert.alert('길이를 초과했습니다.', `최대 ${QUESTION_CONTENT_MAX_LENGTH}자까지 입력 가능합니다.`, [
+        {
+          text: '확인',
+          style: 'cancel'
+        }
+      ])
+    } else {
+      setNote(text);
+    }
   }
 
   const onPressSave = () => {
@@ -114,19 +124,6 @@ export default function EditQuestion() {
             </MediumText>
           </View>
         }
-        suffix={
-          <TouchableOpacity
-            onPress={onPressSave}
-            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-          >
-            <MediumText
-              fontSize={16}
-              color="#959FFF"
-            >
-              저장하기
-            </MediumText>
-          </TouchableOpacity>
-        }
       />
       <View style={styles.container}>
         <MediumText
@@ -156,6 +153,7 @@ export default function EditQuestion() {
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? moderateScale(12) : 0}
         style={{
           paddingHorizontal: moderateScale(24),
         }}
