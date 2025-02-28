@@ -158,7 +158,6 @@ export const useHistoryDetailQuery = (history_id: string) => {
 }
 
 export const useQuestionDetailQuery = (question_id: string) => {
-  const { isConnected } = useNetInfo();
   return useQuery<QuestionType>({
     queryKey: ["question", question_id],
     queryFn: async () => {
