@@ -87,8 +87,11 @@ export default function MyPage() {
       // 알람 활성화
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== 'granted') {
-        // TODO: 안드로이드일 경우 다른 처리 방식 필요.
-        Linking.openURL('app-settings:')
+        if (Platform.OS === 'ios') {
+          Linking.openURL('app-settings:')
+        } else {
+          Linking.openSettings();
+        }
         return;
       }
 
