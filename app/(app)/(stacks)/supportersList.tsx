@@ -20,10 +20,6 @@ export default function supportersList() {
   const onPressJesusMedicalCenter = async () => {
     await WebBrowser.openBrowserAsync("https://www.youtube.com/@TV-xe6vi");
   }
-
-  const onPressJuJunMo = async () => {
-    await WebBrowser.openBrowserAsync("https://www.instagram.com/junm0_sah");
-  }
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {/* Header */}
@@ -97,9 +93,7 @@ export default function supportersList() {
               찬송가 제공
             </BoldText>
           </View>
-          <TouchableOpacity
-            onPress={onPressJuJunMo}
-          >
+          <TouchableOpacity>
             <View style={[styles.card, styles.author]}>
               {/* Profile */}
               <View style={styles.profile}>

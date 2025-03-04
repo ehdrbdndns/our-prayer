@@ -1,5 +1,5 @@
 import api from '@/utils/axios';
-import { BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionType, UserType } from '@/utils/dataType';
+import { BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionReplyType, QuestionType, UserType } from '@/utils/dataType';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { useQuery } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
@@ -157,8 +157,7 @@ export const useHistoryDetailQuery = (history_id: string) => {
   })
 }
 
-export const useQuestionQuery = (question_id: string) => {
-  const { isConnected } = useNetInfo();
+export const useQuestionDetailQuery = (question_id: string) => {
   return useQuery<QuestionType>({
     queryKey: ["question", question_id],
     queryFn: async () => {
@@ -173,9 +172,30 @@ export const useQuestionQuery = (question_id: string) => {
       });
       return res.data;
     },
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
+    staleTime: 2 * 60 * 60 * 1000, // 2시간
+    gcTime: 2 * 60 * 60 * 1000, // 2시간
     enabled: !!question_id
+  });
+}
+
+export const useQuestionQuery = () => {
+  return useQuery<QuestionType[]>({
+    queryKey: ["question"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<QuestionType[]>(`/question`, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+      return res.data;
+    },
+    placeholderData: [],
+    staleTime: 2 * 60 * 60 * 1000, // 2시간
+    gcTime: 2 * 60 * 60 * 1000, // 2시간
   });
 }
 
@@ -232,5 +252,27 @@ export const useUserQuery = ({
     staleTime: 2 * 60 * 60 * 1000, // 2시간
     gcTime: 2 * 60 * 60 * 1000, // 2시간,
     enabled: !!isConnected
+  });
+}
+
+export const useReplyQuery = (question_id: string) => {
+  return useQuery<QuestionReplyType[]>({
+    queryKey: ["reply", question_id],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<QuestionReplyType[]>(`/question/reply?question_id=${question_id}`, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+      return res.data;
+    },
+    placeholderData: [],
+    staleTime: 60 * 60 * 1000, // 1시간
+    gcTime: 60 * 60 * 1000, // 1시간
+    enabled: !!question_id
   });
 }

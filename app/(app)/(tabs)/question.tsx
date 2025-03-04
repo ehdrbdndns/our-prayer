@@ -7,14 +7,13 @@ import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
-import api from '@/utils/axios';
 import { QuestionType } from '@/utils/dataType';
 import { formatDateToKorean } from '@/utils/date';
-import { useDeleteQuestionMutation } from '@/utils/mutation';
+import { useDeleteQuestionMutation, useInsertQuestionMutation } from '@/utils/mutation';
+import { useQuestionQuery } from '@/utils/queries';
 import { moderateScale } from "@/utils/style";
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
 import { Alert, Platform, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,39 +24,14 @@ export default function QuestionPage() {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const { data: questionList } = useQuery<QuestionType[]>({
-    queryKey: ["question"],
-    queryFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+  const { data: questionList } = useQuestionQuery();
 
-      const res = await api.get<QuestionType[]>(`/question`, {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        }
-      });
-      return res.data;
+  const { mutate: insertQuestion } = useInsertQuestionMutation({
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["question"] });
     },
-    placeholderData: [],
-    staleTime: 12 * 60 * 60 * 1000, // 12시간
-    gcTime: 12 * 60 * 60 * 1000, // 12시간
-  });
-
-  const { mutate: insertQuestion } = useMutation({
-    mutationFn: async (content: string) => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api.post<{ message: string }>(`/question`, {
-        content,
-      }, {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        }
-      });
-      return res.data;
+    onError: async (context) => {
+      await queryClient.setQueryData<QuestionType[]>(["question"], context.previousValue);
     },
     onMutate: async (content: string) => {
       await queryClient.cancelQueries({ queryKey: ["question"] });
@@ -78,18 +52,8 @@ export default function QuestionPage() {
       }
 
       return { previousValue };
-    },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["question"] });
-    },
-    onError: (error, newQuestion, context) => {
-      console.error('onError', error, newQuestion, context);
-
-      if (context) {
-        queryClient.setQueryData<QuestionType[]>(["question"], context.previousValue);
-      }
-    },
-  })
+    }
+  });
 
   const { mutate: deleteQuestion } = useDeleteQuestionMutation();
 
@@ -158,7 +122,7 @@ export default function QuestionPage() {
         fontSize={14}
         lineHeight={24}
       >
-        기도 방법, 삶의 고민 등 어떤 질문이든지 환영합니다
+        신앙생활을 하며 겪는 유혹, 죄의 문제, 영적 갈등이 있으신가요? 이곳에서 질문하고 답을 찾아가세요.
       </RegularText>
 
       {/* Link */}
@@ -172,7 +136,7 @@ export default function QuestionPage() {
           lineHeight={28}
           color="#959FFF"
         >
-          질문방법 및 답변자 프로필 보기
+          질문하는 방법 자세히 알아보기
         </MediumText>
       </TouchableOpacity>
 

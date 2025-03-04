@@ -2,7 +2,7 @@ import Delete from '@/assets/images/icon/delete.svg';
 import Send from "@/assets/images/icon/send.svg";
 import { moderateScale, normalizeFontSize, scaleHeight } from "@/utils/style";
 import React, { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import PrimaryButton from "./button/PrimaryButton";
 import { MediumText } from "./text/MediumText";
 import { RegularText } from './text/RegularText';
@@ -12,11 +12,35 @@ type inputButtonProps = {
   placeholder?: string;
 }
 
+export const QUESTION_CONTENT_MAX_LENGTH = 20000;
+
 export default function InputButton({ onSubmit, placeholder }: inputButtonProps) {
 
   const textInputRef = useRef<TextInput>(null);
   const [text, setText] = useState('');
   const [isInputVisible, setIsInputVisible] = useState(false);
+
+  useEffect(() => {
+    if (isInputVisible && textInputRef.current) {
+      setTimeout(() => {
+        textInputRef?.current?.focus();
+      }, 100)
+    }
+  }, [isInputVisible])
+
+  const onChangeNote = (text: string) => {
+    if (text.length > QUESTION_CONTENT_MAX_LENGTH) {
+      Alert.alert('길이를 초과했습니다.', `최대 ${QUESTION_CONTENT_MAX_LENGTH}자까지 입력 가능합니다.`, [
+        {
+          text: '확인',
+          style: 'cancel'
+        }
+      ])
+    } else {
+      setText(text);
+    }
+
+  }
 
   const onPressOpenInput = () => {
     setIsInputVisible(true);
@@ -32,13 +56,8 @@ export default function InputButton({ onSubmit, placeholder }: inputButtonProps)
     setText('');
   }
 
-  useEffect(() => {
-    if (isInputVisible && textInputRef.current) {
-      setTimeout(() => {
-        textInputRef?.current?.focus();
-      }, 100)
-    }
-  }, [isInputVisible])
+
+
 
   return (
     <>
@@ -87,7 +106,7 @@ export default function InputButton({ onSubmit, placeholder }: inputButtonProps)
                 value={text}
                 ref={textInputRef}
                 style={styles.input}
-                onChangeText={(v) => setText(v)}
+                onChangeText={onChangeNote}
                 placeholder="질문 내용을 입력해주세요."
                 placeholderTextColor={'#B3B3B3'}
                 multiline

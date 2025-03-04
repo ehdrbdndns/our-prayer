@@ -13,14 +13,14 @@ import api from '@/utils/axios';
 import { QuestionReplyType } from '@/utils/dataType';
 import { formatDateToKorean } from '@/utils/date';
 import { useDeleteQuestionMutation } from '@/utils/mutation';
-import { useQuestionQuery } from '@/utils/queries';
+import { useQuestionDetailQuery, useReplyQuery } from '@/utils/queries';
 import { moderateScale } from '@/utils/style';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { useEffect, useState } from 'react';
-import { Alert, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useState } from 'react';
+import { Alert, Dimensions, Platform, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const DefaultAuthor = require('@/assets/images/plan/default-author.png');
@@ -34,27 +34,10 @@ export default function QuestionDetail() {
   const { question_id } = useLocalSearchParams<{ question_id: string }>();
 
   const [name, setName] = useState<string>('');
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { data: question } = useQuestionQuery(question_id);
-  const { data: replys } = useQuery<QuestionReplyType[]>({
-    queryKey: ["reply", question_id],
-    queryFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api.get<QuestionReplyType[]>(`/question/reply?question_id=${question_id}`, {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        }
-      });
-      return res.data;
-    },
-    placeholderData: [],
-    staleTime: 60 * 1000, // 1분
-    gcTime: 60 * 1000, // 1분
-    enabled: !!question_id
-  });
+  const { data: question } = useQuestionDetailQuery(question_id);
+  const { data: replys } = useReplyQuery(question_id);
 
   const { mutate: deleteQuestion } = useDeleteQuestionMutation();
 
@@ -116,6 +99,10 @@ export default function QuestionDetail() {
     }
   }, [session, isLoading])
 
+  useFocusEffect(useCallback(() => {
+    queryClient.refetchQueries({ queryKey: ["reply", question_id] });
+  }, []))
+
   const onPressDelete = () => {
     Alert.alert('삭제', '삭제된 질문 내용은 되돌릴 수 없습니다.', [
       {
@@ -145,9 +132,30 @@ export default function QuestionDetail() {
     router.back();
   }
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    await queryClient.refetchQueries({ queryKey: ["question", question_id] });
+    await queryClient.refetchQueries({ queryKey: ["reply", question_id] });
+
+    setRefreshing(false);
+  }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView style={{ flex: 1 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
+            tintColor={'#FFFFFF'}
+            progressViewOffset={moderateScale(50)}
+          />
+        }
+        style={{ flex: 1 }}
+      >
         {/* Header */}
         <Header
           style={styles.header}
@@ -261,7 +269,7 @@ export default function QuestionDetail() {
                           fontSize={14}
                           color='#B3B3B3'
                         >
-                          {'목사님'}
+                          {'가슴으로 품는 교회'}
                         </MediumText>
                       </View>
                     ) : (
@@ -269,7 +277,6 @@ export default function QuestionDetail() {
                         flexDirection: 'row',
                         gap: moderateScale(10),
                         alignItems: 'center',
-                        justifyContent: 'flex-end',
                         marginBottom: moderateScale(10)
                       }}>
                         <MediumText
@@ -286,7 +293,6 @@ export default function QuestionDetail() {
                   <RegularText
                     style={{
                       marginBottom: moderateScale(10),
-                      textAlign: reply.user_id === 'admin' ? 'left' : 'right'
                     }}
                     fontSize={16}
                     lineHeight={28}
@@ -298,7 +304,6 @@ export default function QuestionDetail() {
                   <View
                     style={{
                       flexDirection: 'row',
-                      justifyContent: 'flex-end',
                     }}
                   >
                     <MediumText
