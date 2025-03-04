@@ -12,7 +12,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
       "infoPlist": {
-        "UIBackgroundModes": [ "audio" ]
+        "UIBackgroundModes": [ "audio" ],
+        "CFBundleLocalizations": ["ko"]
       }
     },
     "android": {

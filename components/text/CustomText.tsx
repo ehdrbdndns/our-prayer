@@ -50,6 +50,6 @@ export default function CustomText({
 const styles = StyleSheet.create({
   text: {
     textAlignVertical: Platform.OS === 'ios' ? 'center' : 'auto',
-    includeFontPadding: true, // 안드로이드에서 텍스트의 상단 여백 제거
+    includeFontPadding: false, // 안드로이드에서 텍스트의 상단 여백 제거
   },
 });
