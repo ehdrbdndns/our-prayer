@@ -73,6 +73,19 @@ export default function PrayerRecord() {
     }
   }
 
+  const onChangeNote = (text: string) => {
+    if (text.length > 1500) {
+      Alert.alert('길이를 초과했습니다.', `최대 1500자까지 입력 가능합니다.`, [
+        {
+          text: '확인',
+          style: 'cancel'
+        }
+      ])
+    } else {
+      setNote(text)
+    }
+  }
+
   return (
     <>
       <View
@@ -101,10 +114,9 @@ export default function PrayerRecord() {
               ref={textInputRef}
               value={note}
               multiline={true}
-              maxLength={1500}
               style={styles.text}
               scrollEnabled={true}
-              onChangeText={(v) => setNote(v)}
+              onChangeText={onChangeNote}
               placeholderTextColor={"#B3B3B3"}
               placeholder="여기를 탭하여 입력하세요(최대 1500자)"
               onFocus={() => setBoldTextOpacity(0.5)} // TextInput이 포커스될 때 opacity 변경

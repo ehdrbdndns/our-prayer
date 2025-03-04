@@ -328,3 +328,79 @@ export const useDeleteHistoryMutation = ({
     },
   })
 }
+
+export const useInsertQuestionMutation = ({
+  onSuccess,
+  onMutate,
+  onError
+}: {
+  onSuccess: () => Promise<void>,
+  onMutate: (content: string) => Promise<{ previousValue: QuestionType[] | undefined; }>,
+  onError: (context: { previousValue: QuestionType[] | undefined }) => Promise<void>
+}) => {
+  return useMutation({
+    mutationFn: async (content: string) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.post<{ message: string }>(`/question`, {
+        content,
+      }, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+      return res.data;
+    },
+    onMutate, onSuccess,
+    onError: (error, newQuestion, context) => {
+      console.error('onError', error, newQuestion, context);
+
+      if (context) {
+        onError(context);
+      }
+    },
+  })
+}
+
+export const useUpdateQuestionMutation = ({
+  onSuccess,
+  onError
+}: {
+  onSuccess: () => Promise<void>,
+  onError: () => Promise<void>
+}) => {
+  return useMutation({
+    mutationFn: async ({
+      question_id,
+      content
+    }: {
+      question_id: string;
+      content: string
+    }) => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api<HistoryType[]>({
+        method: "PUT",
+        url: "/question",
+        data: {
+          question_id,
+          content,
+        },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess,
+    onError: (error, newUser, context) => {
+      console.error('onError', error, newUser, context);
+      onError();
+    },
+  })
+}

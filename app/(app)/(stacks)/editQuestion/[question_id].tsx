@@ -2,16 +2,14 @@ import LeftArrow from '@/assets/images/icon/leftArrow.svg';
 import CustomButton from '@/components/button/CustomButton';
 import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
+import { QUESTION_CONTENT_MAX_LENGTH } from '@/components/InputButton';
 import { MediumText } from '@/components/text/MediumText';
-import api from '@/utils/axios';
-import { HistoryType } from '@/utils/dataType';
 import { formatDateToKorean } from '@/utils/date';
-import { useDeleteQuestionMutation } from '@/utils/mutation';
-import { useQuestionQuery } from '@/utils/queries';
+import { useDeleteQuestionMutation, useUpdateQuestionMutation } from '@/utils/mutation';
+import { useQuestionDetailQuery } from '@/utils/queries';
 import { moderateScale } from "@/utils/style";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,38 +18,17 @@ export default function EditQuestion() {
 
   const queryClient = useQueryClient();
   const { question_id } = useLocalSearchParams<{ question_id: string }>();
-  const { data: question, isSuccess: isQuestionSuccess } = useQuestionQuery(question_id);
-
-  const { mutate: updateQuestionMutate } = useMutation({
-    mutationFn: async () => {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-      const res = await api<HistoryType[]>({
-        method: "PUT",
-        url: "/question",
-        data: {
-          question_id,
-          content: note,
-        },
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "RefreshToken": refreshToken
-        },
-      });
-
-      return res.data;
-    },
+  const { data: question, isSuccess: isQuestionSuccess } = useQuestionDetailQuery(question_id);
+  const { mutate: updateQuestionMutate } = useUpdateQuestionMutation({
     onSuccess: async () => {
-      // invalid history detail cache
       await queryClient.invalidateQueries({ queryKey: ["question"] });
       await queryClient.invalidateQueries({ queryKey: ["question", question_id] });
       router.back();
     },
-    onError: (error, newUser, context) => {
-      console.error('onError', error, newUser, context);
+    onError: async () => {
+      Alert.alert('전송에 실패했습니다. 다시 시도해주세요.');
     },
-  })
+  });
 
   const { mutate: deleteQuestionMutate } = useDeleteQuestionMutation();
 
@@ -68,7 +45,16 @@ export default function EditQuestion() {
   }
 
   const onChangeNote = (text: string) => {
-    setNote(text);
+    if (text.length > QUESTION_CONTENT_MAX_LENGTH) {
+      Alert.alert('길이를 초과했습니다.', `최대 ${QUESTION_CONTENT_MAX_LENGTH}자까지 입력 가능합니다.`, [
+        {
+          text: '확인',
+          style: 'cancel'
+        }
+      ])
+    } else {
+      setNote(text);
+    }
   }
 
   const onPressSave = () => {
@@ -83,7 +69,10 @@ export default function EditQuestion() {
         {
           text: '저장하기',
           onPress: () => {
-            updateQuestionMutate();
+            updateQuestionMutate({
+              question_id,
+              content: note,
+            });
           },
         },
       ],
@@ -135,19 +124,6 @@ export default function EditQuestion() {
             </MediumText>
           </View>
         }
-        suffix={
-          <TouchableOpacity
-            onPress={onPressSave}
-            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-          >
-            <MediumText
-              fontSize={16}
-              color="#959FFF"
-            >
-              저장하기
-            </MediumText>
-          </TouchableOpacity>
-        }
       />
       <View style={styles.container}>
         <MediumText
@@ -177,6 +153,7 @@ export default function EditQuestion() {
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? moderateScale(12) : 0}
         style={{
           paddingHorizontal: moderateScale(24),
         }}
