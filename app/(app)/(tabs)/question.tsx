@@ -122,7 +122,7 @@ export default function QuestionPage() {
         fontSize={14}
         lineHeight={24}
       >
-        기도 방법, 삶의 고민 등 어떤 질문이든지 환영합니다
+        신앙생활을 하며 겪는 유혹, 죄의 문제, 영적 갈등이 있으신가요? 이곳에서 질문하고 답을 찾아가세요.
       </RegularText>
 
       {/* Link */}
@@ -136,7 +136,7 @@ export default function QuestionPage() {
           lineHeight={28}
           color="#959FFF"
         >
-          질문방법 및 답변자 프로필 보기
+          질문하는 방법 자세히 알아보기
         </MediumText>
       </TouchableOpacity>
 
