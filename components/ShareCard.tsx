@@ -1,3 +1,4 @@
+import { useAppInfoQuery } from "@/utils/queries";
 import { moderateScale } from "@/utils/style";
 import { Image } from "expo-image";
 import { Share, StyleSheet, View } from "react-native";
@@ -10,11 +11,18 @@ const ShareImage = require("@/assets/images/share.png");
 
 export default function ShareCard() {
 
+  const { data: appInfo } = useAppInfoQuery();
+
   const onPressBtn = () => {
     Share.share({
-      message: "'우리의 기도'앱을 통해 기도에 대해 배우고, 기도 습관을 형성해보세요!",
-      // To Do: add android link
-      url: "https://apps.apple.com/kr/app/%EC%9A%B0%EB%A6%AC%EC%9D%98-%EA%B8%B0%EB%8F%84/id6740837756"
+      message: `'우리의 기도'앱을 통해 기도 습관을 형성해보세요!
+      
+다운로드 경로
+
+겔럭시: ${appInfo?.android_app_link}
+
+아이폰: ${appInfo?.ios_app_link}
+      `,
     })
   }
 

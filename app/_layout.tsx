@@ -15,7 +15,7 @@ import * as Notifications from 'expo-notifications';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setStatusBarStyle } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { SessionProvider } from '../ctx';
 
 const queryClient = new QueryClient()
@@ -48,8 +48,6 @@ export default function Root() {
     IBMPlexMono_400Regular
   });
 
-  const [isAppReady, setAppReady] = useState(false);
-
   // Set the status bar style to light and set the audio mode
   useEffect(() => {
     const setAudioMode = async () => {
@@ -73,10 +71,15 @@ export default function Root() {
     if (fontsLoaded) {
       setTimeout(() => {
         SplashScreen.hideAsync();
-        setAppReady(true);
       }, 2000);
     }
-  }, [fontsLoaded, isAppReady])
+  }, [fontsLoaded])
+
+  // Reset badge count
+  useEffect(() => {
+    // TODO fix, when user show reply, badge count should be reset
+    Notifications.setBadgeCountAsync(0);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

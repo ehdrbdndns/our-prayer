@@ -1,5 +1,5 @@
 import api from '@/utils/axios';
-import { BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionReplyType, QuestionType, UserType } from '@/utils/dataType';
+import { AppInfoType, BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionReplyType, QuestionType, UserType } from '@/utils/dataType';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { useQuery } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
@@ -274,5 +274,25 @@ export const useReplyQuery = (question_id: string) => {
     staleTime: 60 * 60 * 1000, // 1시간
     gcTime: 60 * 60 * 1000, // 1시간
     enabled: !!question_id
+  });
+}
+
+export const useAppInfoQuery = () => {
+  return useQuery<AppInfoType>({
+    queryKey: ["appInfo"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<AppInfoType>(`/appInfo`, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+      return res.data;
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24시간
+    gcTime: 24 * 60 * 60 * 1000, // 24시간
   });
 }
