@@ -1,15 +1,14 @@
 import Chat from '@/assets/images/icon/chat.svg';
 import Edit from '@/assets/images/icon/edit.svg';
+import Send from "@/assets/images/icon/send.svg";
 import Star from '@/assets/images/icon/star.svg';
 import Trash from '@/assets/images/icon/trash.svg';
-import InputButton from '@/components/InputButton';
 import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
-import { QuestionType } from '@/utils/dataType';
 import { formatDateToKorean } from '@/utils/date';
-import { useDeleteQuestionMutation, useInsertQuestionMutation } from '@/utils/mutation';
+import { useDeleteQuestionMutation } from '@/utils/mutation';
 import { useQuestionQuery } from '@/utils/queries';
 import { moderateScale } from "@/utils/style";
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,35 +24,6 @@ export default function QuestionPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   const { data: questionList } = useQuestionQuery();
-
-  const { mutate: insertQuestion } = useInsertQuestionMutation({
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["question"] });
-    },
-    onError: async (context) => {
-      await queryClient.setQueryData<QuestionType[]>(["question"], context.previousValue);
-    },
-    onMutate: async (content: string) => {
-      await queryClient.cancelQueries({ queryKey: ["question"] });
-
-      const previousValue = queryClient.getQueryData<QuestionType[]>(["question"]);
-      if (previousValue) {
-        queryClient.setQueryData<QuestionType[]>(["question"], [{
-          question_id: '',
-          user_id: '',
-          content,
-          category: '',
-          is_answered: false,
-          is_active: true,
-          reply_count: 0,
-          created_date: Math.floor(new Date().getTime() / 1000),
-          updated_date: Math.floor(new Date().getTime() / 1000),
-        }, ...previousValue]);
-      }
-
-      return { previousValue };
-    }
-  });
 
   const { mutate: deleteQuestion } = useDeleteQuestionMutation();
 
@@ -104,6 +74,10 @@ export default function QuestionPage() {
     });
   }
 
+  const onPressRequestQuestion = () => {
+    router.push('/requestQuestion');
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Title */}
@@ -122,7 +96,7 @@ export default function QuestionPage() {
         fontSize={14}
         lineHeight={24}
       >
-        신앙생활을 하며 겪는 유혹, 죄의 문제, 영적 갈등이 있으신가요? 이곳에서 질문하고 답을 찾아가세요.
+        신앙생활을 하며 겪는 죄의 문제, 영적 갈등이 있으신가요? {'\n'}목사님과 상담하고 답을 찾아가세요.
       </RegularText>
 
       {/* Link */}
@@ -136,7 +110,7 @@ export default function QuestionPage() {
           lineHeight={28}
           color="#959FFF"
         >
-          질문하는 방법 자세히 알아보기
+          상담하는 방법 자세히 알아보기
         </MediumText>
       </TouchableOpacity>
 
@@ -147,7 +121,7 @@ export default function QuestionPage() {
           fontSize={16}
           lineHeight={24}
         >
-          질문 내역
+          상담 신청 내역
         </BoldText>
 
         {
@@ -159,7 +133,7 @@ export default function QuestionPage() {
                 fontSize={14}
                 lineHeight={24}
               >
-                아직 질문 내역이 없습니다!
+                아직 신청 내역이 없습니다!
               </RegularText>
             </View>
           ) : (
@@ -245,7 +219,25 @@ export default function QuestionPage() {
         }
       </View>
 
-      <InputButton onSubmit={insertQuestion} />
+      <View style={styles.inputTriggerContainer}>
+        <TouchableOpacity
+          onPress={onPressRequestQuestion}
+          style={styles.inputTriggerButton}
+        >
+          <RegularText
+            color="#B3B3B3"
+            fontSize={16}
+            lineHeight={24}
+          >
+            {
+              "상담 신청 내용을 입력해주세요."
+            }
+          </RegularText>
+          <Send />
+        </TouchableOpacity>
+      </View>
+
+      {/* <InputButton onSubmit={insertQuestion} /> */}
     </SafeAreaView >
   )
 }
@@ -294,5 +286,21 @@ const styles = StyleSheet.create({
   cardIconList: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  }
+  },
+  inputTriggerContainer: {
+    width: '100%',
+    position: 'absolute',
+    bottom: moderateScale(28),
+
+    paddingHorizontal: moderateScale(20),
+  },
+  inputTriggerButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: moderateScale(14),
+    paddingVertical: moderateScale(10),
+
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: moderateScale(12),
+  },
 })
