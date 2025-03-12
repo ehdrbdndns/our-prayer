@@ -21,7 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tabs = [
   { label: "전체보기", value: "" },
-  { label: "시간별 기도", value: "time" },
+  // { label: "시간별 기도", value: "time" },
   { label: "주제별 기도", value: "topic" },
   { label: "자유 기도", value: "free" },
 ];
@@ -168,8 +168,7 @@ export default function PlanPage() {
                   {/* Title */}
                   <BoldText
                     style={styles.title}
-                    fontSize={16}
-                    lineHeight={24}
+                    fontSize={18}
                   >
                     현재 진행 중인 기도
                   </BoldText>
@@ -226,8 +225,7 @@ export default function PlanPage() {
               {/* Title */}
               <BoldText
                 style={[styles.title, { paddingHorizontal: moderateScale(24) }]}
-                fontSize={16}
-                lineHeight={24}
+                fontSize={18}
               >
                 기도 플랜 찾기
               </BoldText>
@@ -338,7 +336,7 @@ const styles = StyleSheet.create({
   tabList: {
     marginLeft: moderateScale(24),
     marginBottom: moderateScale(12),
-    gap: moderateScale(8)
+    gap: moderateScale(4)
   },
   tab: {
     paddingVertical: moderateScale(12),
