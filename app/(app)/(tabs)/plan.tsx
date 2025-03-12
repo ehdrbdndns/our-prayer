@@ -168,8 +168,7 @@ export default function PlanPage() {
                   {/* Title */}
                   <BoldText
                     style={styles.title}
-                    fontSize={16}
-                    lineHeight={24}
+                    fontSize={18}
                   >
                     현재 진행 중인 기도
                   </BoldText>
@@ -226,8 +225,7 @@ export default function PlanPage() {
               {/* Title */}
               <BoldText
                 style={[styles.title, { paddingHorizontal: moderateScale(24) }]}
-                fontSize={16}
-                lineHeight={24}
+                fontSize={18}
               >
                 기도 플랜 찾기
               </BoldText>
