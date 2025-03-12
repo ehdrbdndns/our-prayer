@@ -93,8 +93,8 @@ export default function AppLayout() {
       if (!!currentVersion && isPastVersion(currentVersion, latestVersion)) {
 
         Alert.alert(
-          "업데이트가 있습니다.",
-          "앱을 업데이트 해주세요.",
+          `새로운 버전이 출시되었습니다. (${latestVersion})`,
+          `현재 버전(${currentVersion})을 사용 중입니다. 업데이트 하시겠습니까?`,
           [
             {
               text: "업데이트",
