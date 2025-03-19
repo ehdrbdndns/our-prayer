@@ -47,7 +47,7 @@ export default function Lecture() {
   }>();
 
   // Fetch lecture data
-  const { data, isSuccess: isLectureSuccess, isError: isLectureError } = useLectureQuery({ lecture_id });
+  const { data, isSuccess: isLectureSuccess } = useLectureQuery({ lecture_id });
 
   const lecture = data?.lecture || getDefaultLecture();
   const lectureAudios = data?.lectureAudios || [];
@@ -60,7 +60,6 @@ export default function Lecture() {
 
   const [timerKey, setTimerKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMute, setIsMute] = useState(false);
   const [isBgmMute, setIsBgmMute] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -159,13 +158,6 @@ export default function Lecture() {
       turnOffAmp();
     };
   }, [amp])
-
-  useEffect(() => {
-    if (isLectureError) {
-      Alert.alert('오류', '현재 서버가 응답하지 않습니다. 다시 시도해주세요.');
-      router.dismissTo('/plan');
-    }
-  }, [isLectureError])
 
   useEffect(() => {
     async function playVoice() {
