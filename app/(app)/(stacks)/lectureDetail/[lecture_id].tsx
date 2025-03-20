@@ -16,7 +16,7 @@ import { activateKeepAwakeAsync, deactivateKeepAwake, useKeepAwake } from 'expo-
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, AppState, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Intro duration in seconds
@@ -69,6 +69,55 @@ export default function Lecture() {
   const [amp, setAmp] = useState<Amp>();
 
   const [mode, setMode] = useState<"default" | "text">('default');
+
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
+  // subscription for forground and background and inactive
+  useEffect(() => {
+    async function changeToBackground() {
+      // 1. 타이머 정지
+      setIsPlaying(false);
+
+      // 2. Amp 모드 전환
+      if (amp) {
+        await amp.changeToBackgroundState(elapsedTime);
+      }
+    }
+
+    async function changeToForeground() {
+      // 1. 타이머 재개
+      setIsPlaying(true);
+
+      // 2. Amp 모드 전환
+      if (amp) {
+        amp.changeToForgroundState();
+      }
+    }
+
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        // come to forground
+        changeToForeground();
+      } else if (
+        appState.current === 'active'
+        && nextAppState.match(/inactive|background/)
+      ) {
+        // go to bacgkround
+        changeToBackground();
+      }
+
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   // Show intro when component is mounted and activate keep awake
   useEffect(() => {
@@ -169,6 +218,30 @@ export default function Lecture() {
     playVoice();
   }, [elapsedTime])
 
+  const adjustElapedTime = async (elapsedTime: number) => {
+    let newRepeatCount = Math.floor(elapsedTime / duration);
+    let newElapsedTime = Math.floor(elapsedTime % duration);
+
+    setRepeatCount(newRepeatCount);
+    setElapsedTime(newElapsedTime);
+    setInitialRemainingTime(duration - newElapsedTime);
+
+    // 타이머 렌더링을 위한 작업
+    setTimerKey(timerKey + 1);
+  }
+
+  const pauseAll = async () => {
+    if (!amp) return;
+    await amp.pause();
+    setIsPlaying(false);
+  }
+
+  const resumeAll = async () => {
+    if (!amp) return;
+    await amp.resumeAudio();
+    setIsPlaying(true);
+  }
+
   const onPressLeftArrow = () => {
     Alert.alert(
       '그만두시겠습니까?', // title
@@ -214,17 +287,13 @@ export default function Lecture() {
    * Timer의 Play or Pause 버튼을 누를 시 실행되는 함수
    */
   const onPressPlay = async () => {
-    if (!amp) return;
-
     if (isPlaying) {
       // stop audio
-      await amp.pause();
+      await pauseAll();
     } else {
       // play audio
-      await amp.resumeAudio();
+      await resumeAll();
     }
-
-    setIsPlaying(!isPlaying);
   }
 
   const onPressPrev = async (remainingTime: number) => {
@@ -269,17 +338,6 @@ export default function Lecture() {
 
   return (
     <View style={{ paddingTop: insets.top }}>
-      {/* <SoundBox
-        plan_id={plan_id}
-        lecture_id={lecture_id}
-        audios={lectureAudios}
-        isBgmMute={isBgmMute}
-        isMute={isMute}
-        isPlaying={isPlaying}
-        repeatCount={repeatCount}
-        elapsedTime={elapsedTime}
-        userAdjustedTime={userAdjustedTime}
-      /> */}
       {/* Intro */}
       {showIntro && (
         <Animated.View style={[styles.intro, { opacity: introOpacity }]}>
@@ -394,6 +452,8 @@ export default function Lecture() {
               duration={duration}
               initialRemainingTime={initialRemainingTime}
               isPlaying={isPlaying}
+              appState={appStateVisible}
+              adjustElapedTime={adjustElapedTime}
               setElapsedTime={setElapsedTime}
               onPressNext={onPressNext}
               onPressPlay={onPressPlay}
