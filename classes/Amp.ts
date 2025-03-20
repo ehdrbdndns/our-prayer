@@ -27,6 +27,8 @@ export default class Amp {
 
   private isPlaying: boolean;
 
+  private scheduleIdList: NodeJS.Timeout[] = [];
+
   constructor(lectureId: string, audios: LectureAudioType[], option: { isPlaying?: boolean }) {
     this.lectureId = lectureId;
     this.audios = audios;
@@ -240,5 +242,52 @@ export default class Amp {
         await this.bgmSound.setVolumeAsync(0.2);
       }
     }
+  }
+
+  /**
+     * 앱이 백그라운드로 전환되었을 때 다음 음성 파일을 자동으로 실행하도록 예약합니다.
+     * @param elapsedTime 현재 시간 (초 단위)
+     */
+  async changeToBackgroundState(elapsedTime: number) {
+    // 모든 오디오 파일을 확인하면서 사용자가 조정한 시간에 맞는 오디오를 찾아 재생 예약
+    for (const { lecture_audio_id, start_time } of this.audios) {
+      const sound = this.voiceSoundList[lecture_audio_id];
+      const status = await sound.getStatusAsync();
+
+      if (!status.isLoaded || !status.durationMillis) {
+        continue;
+      }
+
+      const delay = (start_time - elapsedTime) * 1000; // 밀리초 단위로 변환
+
+      if (delay > 0) {
+        const timeoutId = setTimeout(async () => {
+          // 새로운 음성 파일을 재생합니다.
+          this.currentVoiceSound = sound;
+          this.currentVoiceSound.playAsync();
+
+          // 배경음악 볼륨 조절
+          if (this.bgmSound) {
+            await this.bgmSound.setVolumeAsync(0.2);
+          }
+        }, delay);
+
+        // 타이머 ID 저장
+        this.scheduleIdList.push(timeoutId);
+      }
+    }
+  }
+
+  /**
+   * 앱이 포그라운드 모드로 전환되었을 때 예약된 타이머를 삭제합니다.
+   */
+  changeToForgroundState() {
+    // 저장된 모든 타이머 ID를 사용하여 타이머를 취소합니다.
+    for (const timeoutId of this.scheduleIdList) {
+      clearTimeout(timeoutId);
+    }
+
+    // 타이머 ID 배열을 초기화합니다.
+    this.scheduleIdList = [];
   }
 }
