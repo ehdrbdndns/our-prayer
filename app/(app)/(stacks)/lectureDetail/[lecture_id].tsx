@@ -16,7 +16,7 @@ import { activateKeepAwakeAsync, deactivateKeepAwake, useKeepAwake } from 'expo-
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, AppState, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, AppState, NativeEventSubscription, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Intro duration in seconds
@@ -65,6 +65,7 @@ export default function Lecture() {
   const [duration, setDuration] = useState(0);
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const elapsedTimeRef = useRef(0);
 
   const [amp, setAmp] = useState<Amp>();
 
@@ -73,51 +74,9 @@ export default function Lecture() {
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
-  // subscription for forground and background and inactive
   useEffect(() => {
-    async function changeToBackground() {
-      // 1. 타이머 정지
-      setIsPlaying(false);
-
-      // 2. Amp 모드 전환
-      if (amp) {
-        await amp.changeToBackgroundState(elapsedTime);
-      }
-    }
-
-    async function changeToForeground() {
-      // 1. 타이머 재개
-      setIsPlaying(true);
-
-      // 2. Amp 모드 전환
-      if (amp) {
-        amp.changeToForgroundState();
-      }
-    }
-
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === 'active'
-      ) {
-        // come to forground
-        changeToForeground();
-      } else if (
-        appState.current === 'active'
-        && nextAppState.match(/inactive|background/)
-      ) {
-        // go to bacgkround
-        changeToBackground();
-      }
-
-      appState.current = nextAppState;
-      setAppStateVisible(appState.current);
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
+    elapsedTimeRef.current = elapsedTime;
+  }, [elapsedTime])
 
   // Show intro when component is mounted and activate keep awake
   useEffect(() => {
@@ -190,6 +149,26 @@ export default function Lecture() {
 
   // Turn on amp
   useEffect(() => {
+    async function changeToBackground() {
+      // 1. 타이머 정지
+      setIsPlaying(false);
+
+      // 2. Amp 모드 전환
+      if (!!amp) {
+        await amp.changeToBackgroundState(elapsedTimeRef.current);
+      }
+    }
+
+    async function changeToForeground() {
+      // 1. 타이머 재개
+      setIsPlaying(true);
+
+      // 2. Amp 모드 전환
+      if (!!amp) {
+        amp.changeToForgroundState();
+      }
+    }
+
     async function turnOffAmp() {
       if (!amp) return;
       await amp.turnOff();
@@ -201,9 +180,33 @@ export default function Lecture() {
       await amp.playBgm();
     }
 
-    turnOnAmp();
+    let subscription: NativeEventSubscription | null = null;
+    if (!!amp) {
+      turnOnAmp();
+      subscription = AppState.addEventListener('change', nextAppState => {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === 'active'
+        ) {
+          // come to forground
+          changeToForeground();
+        } else if (
+          appState.current === 'active'
+          && nextAppState.match(/inactive|background/)
+        ) {
+          // go to bacgkround
+          changeToBackground();
+        }
+
+        appState.current = nextAppState;
+        setAppStateVisible(appState.current);
+      });
+    }
 
     return () => {
+      if (!!subscription) {
+        subscription.remove();
+      }
       turnOffAmp();
     };
   }, [amp])
