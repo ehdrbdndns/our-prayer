@@ -1,7 +1,7 @@
 import Delete from "@/assets/images/icon/delete.svg";
 import Music from "@/assets/images/icon/music.svg";
 import Mute from "@/assets/images/icon/mute.svg";
-import SoundBox from "@/components/\bSoundBox";
+import Amp from "@/classes/Amp";
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
@@ -16,7 +16,7 @@ import { activateKeepAwakeAsync, deactivateKeepAwake, useKeepAwake } from 'expo-
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, AppState, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Intro duration in seconds
@@ -47,7 +47,7 @@ export default function Lecture() {
   }>();
 
   // Fetch lecture data
-  const { data, isSuccess: isLectureSuccess, isError: isLectureError } = useLectureQuery({ lecture_id });
+  const { data, isSuccess: isLectureSuccess } = useLectureQuery({ lecture_id });
 
   const lecture = data?.lecture || getDefaultLecture();
   const lectureAudios = data?.lectureAudios || [];
@@ -60,15 +60,64 @@ export default function Lecture() {
 
   const [timerKey, setTimerKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMute, setIsMute] = useState(false);
   const [isBgmMute, setIsBgmMute] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
   const [duration, setDuration] = useState(0);
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [userAdjustedTime, setUserAdjustedTime] = useState(0);
+
+  const [amp, setAmp] = useState<Amp>();
 
   const [mode, setMode] = useState<"default" | "text">('default');
+
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
+  // subscription for forground and background and inactive
+  useEffect(() => {
+    async function changeToBackground() {
+      // 1. 타이머 정지
+      setIsPlaying(false);
+
+      // 2. Amp 모드 전환
+      if (amp) {
+        await amp.changeToBackgroundState(elapsedTime);
+      }
+    }
+
+    async function changeToForeground() {
+      // 1. 타이머 재개
+      setIsPlaying(true);
+
+      // 2. Amp 모드 전환
+      if (amp) {
+        amp.changeToForgroundState();
+      }
+    }
+
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        // come to forground
+        changeToForeground();
+      } else if (
+        appState.current === 'active'
+        && nextAppState.match(/inactive|background/)
+      ) {
+        // go to bacgkround
+        changeToBackground();
+      }
+
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   // Show intro when component is mounted and activate keep awake
   useEffect(() => {
@@ -132,22 +181,66 @@ export default function Lecture() {
     hideIntro();
   }, [isLectureSuccess, isShowedIntro]);
 
-  // router.replace('/plan') and re download the file when lecture occurs error
+  // Set Amp instance when lecture data is loaded
   useEffect(() => {
-    if (isLectureError) {
-      Alert.alert('오류', '파일을 다시 다운로드 해주세요.');
-      AsyncStorage.removeItem(`planAudit-${plan_id}`);
-      router.dismissTo('/plan');
+    if (isLectureSuccess && !!data?.lectureAudios) {
+      setAmp(new Amp(lecture_id, data.lectureAudios, { isPlaying: true }));
     }
-  }, [isLectureError])
+  }, [isLectureSuccess]);
+
+  // Turn on amp
+  useEffect(() => {
+    async function turnOffAmp() {
+      if (!amp) return;
+      await amp.turnOff();
+    }
+
+    async function turnOnAmp() {
+      if (!amp) return;
+      await amp.turnOn();
+      await amp.playBgm();
+    }
+
+    turnOnAmp();
+
+    return () => {
+      turnOffAmp();
+    };
+  }, [amp])
 
   useEffect(() => {
-    setUserAdjustedTime(initialRemainingTime);
-  }, [initialRemainingTime])
+    async function playVoice() {
+      if (repeatCount === 0 && amp) {
+        await amp.playVoiceBy(elapsedTime);
+      }
+    }
 
-  useEffect(() => {
-    setIsMute(!isPlaying);
-  }, [isPlaying])
+    playVoice();
+  }, [elapsedTime])
+
+  const adjustElapedTime = async (elapsedTime: number) => {
+    let newRepeatCount = Math.floor(elapsedTime / duration);
+    let newElapsedTime = Math.floor(elapsedTime % duration);
+
+    setRepeatCount(newRepeatCount);
+    setElapsedTime(newElapsedTime);
+    setInitialRemainingTime(duration - newElapsedTime);
+
+    // 타이머 렌더링을 위한 작업
+    setTimerKey(timerKey + 1);
+  }
+
+  const pauseAll = async () => {
+    if (!amp) return;
+    await amp.pause();
+    setIsPlaying(false);
+  }
+
+  const resumeAll = async () => {
+    if (!amp) return;
+    await amp.resumeAudio();
+    setIsPlaying(true);
+  }
 
   const onPressLeftArrow = () => {
     Alert.alert(
@@ -164,9 +257,18 @@ export default function Lecture() {
     Alert.alert(
       isBgmMute ? '배경음악을 키겠습니까?' : '배경음악을 끄겠습니까?', // title
       '', // message
-      [                     // buttons
+      [ // buttons
         { text: '취소', style: 'cancel' },
-        { text: '확인', onPress: () => setIsBgmMute(!isBgmMute) }
+        {
+          text: '확인', onPress: async () => {
+            if (isBgmMute) {
+              await amp?.playBgm();
+            } else {
+              await amp?.pauseBgm();
+            }
+            setIsBgmMute(!isBgmMute);
+          }
+        }
       ]
     )
   }
@@ -181,17 +283,42 @@ export default function Lecture() {
     return { shouldRepeat: true }
   }
 
-  const onPressPlay = () => {
-    setIsPlaying(!isPlaying);
+  /**
+   * Timer의 Play or Pause 버튼을 누를 시 실행되는 함수
+   */
+  const onPressPlay = async () => {
+    if (isPlaying) {
+      // stop audio
+      await pauseAll();
+    } else {
+      // play audio
+      await resumeAll();
+    }
   }
 
-  const onPressPrev = (remainingTime: number) => {
-    setInitialRemainingTime(Math.min(remainingTime + 10, duration)); // Subtract 10 seconds, but not below 0
+  const onPressPrev = async (remainingTime: number) => {
+    // 10초 더하기, 단 duration(총 타이머 수)을 넘지 않도록
+    const newInitialRemainingTime = Math.min(remainingTime + 10, duration)
+    setInitialRemainingTime(newInitialRemainingTime);
+
+    if (repeatCount === 0 && amp) {
+      await amp.adjustVoiceBy(Math.max(elapsedTime - 10, 0));
+    }
+
+    // 타이머 렌더링을 위한 작업
     setTimerKey(timerKey + 1);
   }
 
-  const onPressNext = (remainingTime: number) => {
-    setInitialRemainingTime(Math.max(remainingTime - 10, 0)); // Add 10 seconds
+  const onPressNext = async (remainingTime: number) => {
+    // 10초 빼기, 단 0보다 작아지지 않도록
+    const newInitialRemainingTime = Math.max(remainingTime - 10, 0);
+    setInitialRemainingTime(newInitialRemainingTime);
+
+    if (repeatCount === 0 && amp) {
+      await amp.adjustVoiceBy(Math.min(elapsedTime + 10, duration));
+    }
+
+    // 타이머 렌더링을 위한 작업
     setTimerKey(timerKey + 1);
   }
 
@@ -209,21 +336,8 @@ export default function Lecture() {
     return <Redirect href="/plan" />
   }
 
-
   return (
     <View style={{ paddingTop: insets.top }}>
-      <SoundBox
-        plan_id={plan_id}
-        lecture_id={lecture_id}
-        audios={lectureAudios}
-        isBgmMute={isBgmMute}
-        isMute={isMute}
-        isPlaying={isPlaying}
-        repeatCount={repeatCount}
-        elapsedTime={elapsedTime}
-        userAdjustedTime={userAdjustedTime}
-      />
-
       {/* Intro */}
       {showIntro && (
         <Animated.View style={[styles.intro, { opacity: introOpacity }]}>
@@ -338,6 +452,8 @@ export default function Lecture() {
               duration={duration}
               initialRemainingTime={initialRemainingTime}
               isPlaying={isPlaying}
+              appState={appStateVisible}
+              adjustElapedTime={adjustElapedTime}
               setElapsedTime={setElapsedTime}
               onPressNext={onPressNext}
               onPressPlay={onPressPlay}

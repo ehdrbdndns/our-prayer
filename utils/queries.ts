@@ -1,8 +1,11 @@
 import api from '@/utils/axios';
-import { BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionReplyType, QuestionType, UserType } from '@/utils/dataType';
+import { AppInfoType, BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionReplyType, QuestionType, UserType } from '@/utils/dataType';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { useQuery } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import { useEffect } from 'react';
+import { Alert } from 'react-native';
 
 
 export const usePlanListQuery = () => {
@@ -74,7 +77,7 @@ export const usePlanQuery = ({ plan_id }: { plan_id: string }) => {
 };
 
 export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
-  return useQuery<LectureResponseType | null>({
+  const result = useQuery<LectureResponseType | null>({
     queryKey: ["lecture", lecture_id],
     queryFn: async () => {
       const accessToken = await SecureStore.getItemAsync("accessToken");
@@ -108,6 +111,15 @@ export const useLectureQuery = ({ lecture_id }: { lecture_id: string }) => {
     },
     // enabled: !!isConnected, 다시 네트워크가 연결될 시 다시 요청되는 행위를 막기 위해 주석 처리
   });
+
+  useEffect(() => {
+    if (result.isError) {
+      Alert.alert('오류', '현재 서버가 응답하지 않습니다. 다시 시도해주세요.');
+      router.dismissTo('/plan');
+    }
+  }, [result.isError]);
+
+  return result;
 };
 
 export const useHistoryQuery = (historyRange?: number) => {
@@ -274,5 +286,25 @@ export const useReplyQuery = (question_id: string) => {
     staleTime: 60 * 60 * 1000, // 1시간
     gcTime: 60 * 60 * 1000, // 1시간
     enabled: !!question_id
+  });
+}
+
+export const useAppInfoQuery = () => {
+  return useQuery<AppInfoType>({
+    queryKey: ["appInfo"],
+    queryFn: async () => {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+      const res = await api.get<AppInfoType>(`/appInfo`, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "RefreshToken": refreshToken
+        }
+      });
+      return res.data;
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24시간
+    gcTime: 24 * 60 * 60 * 1000, // 24시간
   });
 }

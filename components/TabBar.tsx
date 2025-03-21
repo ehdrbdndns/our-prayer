@@ -30,7 +30,7 @@ const ImageSourceDict: {
   },
   question: {
     image: ({ color }) => <Question width={moderateScale(24)} height={moderateScale(24)} color={color} />,
-    text: '질문하기',
+    text: '상담하기',
   },
   history: {
     image: ({ color }) => <Calendar width={moderateScale(24)} height={moderateScale(24)} color={color} />,
