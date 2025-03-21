@@ -31,6 +31,7 @@ export default function StackLayout() {
       <Stack.Screen name="prayerRecord" />
       <Stack.Screen name="calendar" />
       <Stack.Screen name="requestQuestion" />
+      <Stack.Screen name="introducePastor" />
     </Stack>
   )
 }
