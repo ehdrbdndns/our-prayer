@@ -54,6 +54,10 @@ export default function QuestionPage() {
     router.push('/questionGuide')
   }
 
+  const onPressPastor = () => {
+    router.push('/introducePastor')
+  }
+
   const onPressQuestionCard = (question_id: string) => {
     if (!question_id) return;
 
@@ -98,6 +102,21 @@ export default function QuestionPage() {
       >
         신앙생활을 하며 겪는 죄의 문제, 영적 갈등이 있으신가요? {'\n'}목사님과 상담하고 답을 찾아가세요.
       </RegularText>
+
+      {/* Link */}
+      <TouchableOpacity
+        onPress={onPressPastor}
+        style={[styles.textButton, { marginBottom: moderateScale(0) }]}
+      >
+        <MediumText
+          style={{ textDecorationLine: 'underline' }}
+          fontSize={14}
+          lineHeight={28}
+          color="#959FFF"
+        >
+          목사님 소개
+        </MediumText>
+      </TouchableOpacity>
 
       {/* Link */}
       <TouchableOpacity

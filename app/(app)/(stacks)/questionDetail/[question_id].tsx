@@ -23,7 +23,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Dimensions, Platform, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const DefaultAuthor = require('@/assets/images/plan/default-author.png');
+const DefaultAuthor = require('@/assets/images/icon.png');
 const deviceHeight = Dimensions.get('window').height;
 
 export default function QuestionDetail() {
@@ -261,7 +261,8 @@ export default function QuestionDetail() {
                         <Image
                           style={{
                             width: moderateScale(28),
-                            height: moderateScale(28)
+                            height: moderateScale(28),
+                            borderRadius: moderateScale(14),
                           }}
                           source={DefaultAuthor}
                         />
@@ -269,7 +270,7 @@ export default function QuestionDetail() {
                           fontSize={14}
                           color='#B3B3B3'
                         >
-                          {'가슴으로 품는 교회'}
+                          {'우리의 기도'}
                         </MediumText>
                       </View>
                     ) : (

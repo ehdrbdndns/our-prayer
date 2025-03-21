@@ -2,9 +2,11 @@ import Play from "@/assets/images/icon/audio-play.svg";
 import Next from "@/assets/images/icon/next.svg";
 import Pause from "@/assets/images/icon/pause.svg";
 import Prev from "@/assets/images/icon/prev.svg";
+import { ASYNC_TIMER_KEY } from "@/storage/asyncStorageKeys";
 import { moderateScale } from "@/utils/style";
-import { useEffect } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useRef } from "react";
+import { AppStateStatus, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useCountdown } from "react-native-countdown-circle-timer";
 import PrimaryButton from "../button/PrimaryButton";
 import { BoldText } from "../text/BoldText";
@@ -20,6 +22,8 @@ type TimerProps = {
   initialRemainingTime: number;
   isPlaying: boolean;
   repeatCount: number;
+  appState: AppStateStatus;
+  adjustElapedTime: (elapsedTime: number) => Promise<void>;
   onPressNext: (remainingTime: number) => void;
   onPressPrev: (remainingTime: number) => void;
   onPressPlay: () => void;
@@ -36,6 +40,8 @@ export default function Timer(props: TimerProps) {
     initialRemainingTime,
     isPlaying,
     repeatCount,
+    appState,
+    adjustElapedTime,
     onPressNext,
     onPressPrev,
     onPressPlay,
@@ -43,6 +49,8 @@ export default function Timer(props: TimerProps) {
     onPressCompleteBtn,
     setElapsedTime
   } = props as TimerProps;
+
+  const prevAppState = useRef<AppStateStatus>(appState);
 
   let countdown = useCountdown({
     duration,
@@ -59,6 +67,35 @@ export default function Timer(props: TimerProps) {
   useEffect(() => {
     setElapsedTime(countdown.elapsedTime);
   }, [countdown.elapsedTime]);
+
+  useEffect(() => {
+    async function saveCurTime() {
+      // get cur time of UTC
+      const curTime = new Date().getTime() / 1000;
+
+      // store cur time to async storage by timer key
+      await AsyncStorage.setItem(ASYNC_TIMER_KEY, JSON.stringify(curTime));
+    }
+
+    async function updateTimerByStoredTime() {
+      const storedTime = await AsyncStorage.getItem(ASYNC_TIMER_KEY);
+
+      if (storedTime === null) return;
+
+      const curTime = new Date().getTime() / 1000;
+      const diffTime = curTime - Number(storedTime);
+
+      await adjustElapedTime((countdown.elapsedTime + (repeatCount * duration)) + diffTime);
+    }
+
+    if (prevAppState.current === 'background' && appState === 'active') {
+      updateTimerByStoredTime();
+    } else if (appState === 'background') {
+      saveCurTime();
+    }
+
+    prevAppState.current = appState;
+  }, [appState]);
 
   const showRemainingTime = (remainingTime: number) => {
     const time = repeatCount > 0
@@ -160,7 +197,6 @@ export default function Timer(props: TimerProps) {
             </View>
           )
       }
-
     </View>
   )
 }

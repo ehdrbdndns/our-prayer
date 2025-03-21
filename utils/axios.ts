@@ -41,7 +41,6 @@ const onError = async (error: any) => {
         case "wrong":
           console.error(error);
           console.error(originalRequest);
-          // await handleTokenDeletion();
           return new Error('예기치 못한 오류가 발생했습니다.');
         default:
           console.error(error);

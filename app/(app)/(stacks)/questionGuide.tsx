@@ -41,6 +41,7 @@ export default function QuestionGuide() {
       />
       <ScrollView
         style={styles.container}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: moderateScale(40),
         }}
@@ -168,7 +169,7 @@ export default function QuestionGuide() {
             color="rgba(255, 255, 255, 0.8)"
             fontSize={14}
           >
-            1️⃣  아래 항목을 빠짐없이 작성해 주세요:
+            1️⃣  아래 항목을 작성해 주세요:
           </RegularText>
           <RegularText
             style={{
@@ -178,7 +179,7 @@ export default function QuestionGuide() {
             color="rgba(255, 255, 255, 0.8)"
             fontSize={14}
           >
-            - 이름 (가명 가능),  성별,  나이
+            - 이름 (가명 가능),  성별,  나이,  전화번호
           </RegularText>
           <RegularText
             style={{
@@ -188,17 +189,7 @@ export default function QuestionGuide() {
             color="rgba(255, 255, 255, 0.8)"
             fontSize={14}
           >
-            - 선호 상담 방식 (대면/비대면)
-          </RegularText>
-          <RegularText
-            style={{
-              marginLeft: moderateScale(8),
-              marginBottom: moderateScale(4),
-            }}
-            color="rgba(255, 255, 255, 0.8)"
-            fontSize={14}
-          >
-            - 선호하는 요일과 시간
+            - 선호하는 요일과 시간,  상담 방식 (대면/비대면)
           </RegularText>
           <RegularText
             style={{
@@ -226,7 +217,7 @@ export default function QuestionGuide() {
             color="rgba(255, 255, 255, 0.8)"
             fontSize={14}
           >
-            3️⃣ 신청서 작성 후 일정을 조율하기 위해 담당자가 개별 회신을 드릴 예정입니다. 꼭 알림을 켜 주세요.
+            3️⃣ 신청서 작성 후 일정을 조율하기 위해 담당자가 개별 회신을 드릴 예정입니다. 알림을 키면 더 빠르게 확인할 수 있습니다.
           </RegularText>
         </View>
       </ScrollView>
