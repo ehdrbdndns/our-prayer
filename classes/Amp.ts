@@ -51,14 +51,15 @@ export default class Amp {
         throw new Error(JSON.stringify({ code: 404, message: 'Audio file does not exist of async storage' }));
       }
 
-      const fileInfo = await FileSystem.getInfoAsync(audioUri);
+      const fullFileUri = FileSystem.documentDirectory + audioUri;
+      const fileInfo = await FileSystem.getInfoAsync(fullFileUri);
 
       if (!fileInfo.exists) {
         // TODO go to plan page and download audio
         throw new Error(JSON.stringify({ code: 404, message: 'Audio file does not exist of FileSystem' }));
       }
 
-      const { sound } = await Audio.Sound.createAsync({ uri: audioUri }, option);
+      const { sound } = await Audio.Sound.createAsync({ uri: fullFileUri }, option);
 
       return sound;
     } catch (e) {
