@@ -13,39 +13,6 @@ async function ensureDirExists(path: string) {
   }
 }
 
-const getFileExtensionFromMimeType = (mimeType: string) => {
-  let extension = '';
-
-  switch (mimeType) {
-    case 'audio/mpeg':
-      extension = 'mp3';
-      break;
-    case 'audio/mp4':
-    case 'audio/x-m4a':
-      extension = 'm4a';
-      break;
-    case 'audio/x-wav':
-      extension = 'wav';
-      break;
-    // 필요한 경우 다른 MIME 타입을 추가
-    default:
-      throw new Error('Unsupported MIME type: ' + mimeType);
-  }
-
-  return extension;
-};
-
-const blobToBase64 = async (blob: Blob): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      resolve(reader.result as string);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-};
-
 export async function addAudio({
   path, audioUri
 }: {
