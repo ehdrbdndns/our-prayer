@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system';
 
-export const AUDIO_DIR = FileSystem.documentDirectory + 'audio/';
+export const AUDIO_DIR = 'audio/';
 const audioFileUri = (path: string) => AUDIO_DIR + `${path}`;
 
 async function ensureDirExists(path: string) {
@@ -13,39 +13,6 @@ async function ensureDirExists(path: string) {
   }
 }
 
-const getFileExtensionFromMimeType = (mimeType: string) => {
-  let extension = '';
-
-  switch (mimeType) {
-    case 'audio/mpeg':
-      extension = 'mp3';
-      break;
-    case 'audio/mp4':
-    case 'audio/x-m4a':
-      extension = 'm4a';
-      break;
-    case 'audio/x-wav':
-      extension = 'wav';
-      break;
-    // 필요한 경우 다른 MIME 타입을 추가
-    default:
-      throw new Error('Unsupported MIME type: ' + mimeType);
-  }
-
-  return extension;
-};
-
-const blobToBase64 = async (blob: Blob): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      resolve(reader.result as string);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-};
-
 export async function addAudio({
   path, audioUri
 }: {
@@ -53,11 +20,12 @@ export async function addAudio({
 }) {
   try {
     const fileUri = audioFileUri(path);
+    const fullFileUri = FileSystem.documentDirectory + fileUri;
 
-    const directory = fileUri.substring(0, fileUri.lastIndexOf('/'));
+    const directory = fullFileUri.substring(0, fullFileUri.lastIndexOf('/'));
     await ensureDirExists(directory);
 
-    await FileSystem.downloadAsync(audioUri, fileUri);
+    await FileSystem.downloadAsync(audioUri, fullFileUri);
 
     return fileUri;
   } catch (e) {
@@ -72,13 +40,15 @@ export async function getSingleAudio({
   path: string, audio: string
 }) {
   const fileUri = audioFileUri(path);
-  await ensureDirExists(fileUri);
+  const fullFileUri = FileSystem.documentDirectory + fileUri;
 
-  const fileInfo = await FileSystem.getInfoAsync(fileUri);
+  await ensureDirExists(fullFileUri);
+
+  const fileInfo = await FileSystem.getInfoAsync(fullFileUri);
 
   if (!fileInfo.exists) {
     console.log("Gif isn't cached locally. Downloading…");
-    await FileSystem.downloadAsync(audio, fileUri);
+    await FileSystem.downloadAsync(audio, fullFileUri);
   }
 
   return fileUri;
@@ -91,5 +61,7 @@ export async function deleteAudio({
 }) {
   console.log('Deleting audio file…');
   const fileUri = audioFileUri(path);
-  await FileSystem.deleteAsync(fileUri);
+  const fullFileUri = FileSystem.documentDirectory + fileUri;
+
+  await FileSystem.deleteAsync(fullFileUri);
 }
