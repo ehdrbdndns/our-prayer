@@ -12,14 +12,22 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
       "infoPlist": {
-        "UIBackgroundModes": [ "audio" ],
-        "CFBundleLocalizations": ["ko"]
+        "UIBackgroundModes": [
+          "audio"
+        ],
+        "CFBundleLocalizations": [
+          "ko"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
       "googleServicesFile": "./google-services.json",
-      "userInterfaceStyle": "dark"
+      "userInterfaceStyle": "dark",
+      "permissions": [
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "bundler": "metro",
