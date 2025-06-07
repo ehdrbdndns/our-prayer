@@ -174,7 +174,7 @@ export default function QuestionDetail() {
                 color='#FFF'
                 fontSize={16}
               >
-                나의 질문
+                상담하기
               </MediumText>
             </View>
           }

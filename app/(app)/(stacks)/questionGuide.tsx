@@ -34,7 +34,7 @@ export default function QuestionGuide() {
               color="#FFF"
               fontSize={16}
             >
-              상담 신청하는 방법 알아보기
+              상담하기
             </MediumText>
           </View>
         }

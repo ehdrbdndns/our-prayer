@@ -266,7 +266,7 @@ export default function PlanDetailPage() {
             fontSize={24}
             lineHeight={29}
           >
-            {title || data?.plan.title}
+            {data?.plan.title}
           </BoldText>
 
           {/* Desc Plan */}

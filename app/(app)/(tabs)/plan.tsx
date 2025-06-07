@@ -93,7 +93,7 @@ export default function PlanPage() {
       pathname: `/planDetail/[plan_id]`,
       params: {
         plan_id: id,
-        title,
+        title: "기도 플랜",
         banner,
         isLiked: String(isLiked),
       },

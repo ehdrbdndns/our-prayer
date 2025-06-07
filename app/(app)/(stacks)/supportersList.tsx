@@ -40,7 +40,7 @@ export default function supportersList() {
               color="#FFF"
               fontSize={16}
             >
-              도움 주신 분들
+              마이페이지
             </MediumText>
           </View>
         }

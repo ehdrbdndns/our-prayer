@@ -185,7 +185,7 @@ export default function CalendarPage() {
                 color="#FFF"
                 fontSize={16}
               >
-                나의 기도 기록
+                홈으로 돌아가기
               </MediumText>
             </View>
           }

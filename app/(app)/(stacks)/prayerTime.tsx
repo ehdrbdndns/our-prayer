@@ -194,7 +194,7 @@ export default function PrayerTime() {
               color="#FFF"
               fontSize={16}
             >
-              기도 시간 설정하기
+              마이페이지
             </MediumText>
           </View>
         }

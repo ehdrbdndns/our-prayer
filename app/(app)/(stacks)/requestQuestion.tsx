@@ -258,7 +258,7 @@ export default function RequestQuestion() {
                   color="#FFF"
                   fontSize={16}
                 >
-                  상담 신청하기
+                  상담하기
                 </MediumText>
               </View>
             }

@@ -53,7 +53,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
         pathname: `/planDetail/[plan_id]`,
         params: {
           plan_id: plan.plan_id,
-          title: plan.title,
+          title: "기도 플랜",
           banner: plan.thumbnail,
           isLiked: String(isLiked),
           backToLink: '/plan'
