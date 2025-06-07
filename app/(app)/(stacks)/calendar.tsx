@@ -191,6 +191,38 @@ export default function CalendarPage() {
           }
         />
 
+        {/* Prayer Data */}
+        <View
+          style={{
+            flexDirection: 'row',
+            paddingHorizontal: moderateScale(24),
+            gap: moderateScale(10),
+            marginBottom: moderateScale(24)
+          }}
+        >
+          <PrayerState
+            // style={styles.prayerState}
+            title={"연속 기도일 수"}
+            icon={<Fire width={moderateScale(24)} height={moderateScale(24)} />}
+            data={continuousPrayerDays}
+            unit={"일"}
+          />
+          <PrayerState
+            // style={styles.prayerState}
+            title={"오늘 기도 시간"}
+            icon={<OneStar width={moderateScale(24)} height={moderateScale(24)} />}
+            data={todayPrayerTime}
+            unit={"분"}
+          />
+          <PrayerState
+            // style={styles.prayerState}
+            title={"전체 기도 시간"}
+            icon={<Stars width={moderateScale(24)} height={moderateScale(24)} />}
+            data={totalPrayerTime.time}
+            unit={totalPrayerTime.unit}
+          />
+        </View>
+
         {/* Calendar */}
         <View style={styles.container}>
           <Calendar
@@ -232,38 +264,6 @@ export default function CalendarPage() {
               },
             }}
             style={styles.calendar}
-          />
-        </View>
-
-        {/* Prayer Data */}
-        <View
-          style={{
-            flexDirection: 'row',
-            paddingHorizontal: moderateScale(24),
-            gap: moderateScale(10),
-            marginBottom: moderateScale(24)
-          }}
-        >
-          <PrayerState
-            // style={styles.prayerState}
-            title={"연속 기도일 수"}
-            icon={<Fire width={moderateScale(24)} height={moderateScale(24)} />}
-            data={continuousPrayerDays}
-            unit={"일"}
-          />
-          <PrayerState
-            // style={styles.prayerState}
-            title={"오늘 기도 시간"}
-            icon={<OneStar width={moderateScale(24)} height={moderateScale(24)} />}
-            data={todayPrayerTime}
-            unit={"분"}
-          />
-          <PrayerState
-            // style={styles.prayerState}
-            title={"전체 기도 시간"}
-            icon={<Stars width={moderateScale(24)} height={moderateScale(24)} />}
-            data={totalPrayerTime.time}
-            unit={totalPrayerTime.unit}
           />
         </View>
 
