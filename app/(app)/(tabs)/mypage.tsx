@@ -1,7 +1,6 @@
 import Edit from '@/assets/images/icon/edit.svg';
 import Star from '@/assets/images/icon/star.svg';
 import CustomButton from '@/components/button/CustomButton';
-import PrayerRecord from '@/components/PrayerRecord';
 import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
@@ -253,8 +252,7 @@ export default function MyPage() {
             backgroundColor: 'rgba(31, 31, 31, 0.5)',
             borderRadius: moderateScale(10),
             gap: scaleHeight(12),
-            padding: moderateScale(12),
-            marginBottom: scaleHeight(12),
+            padding: moderateScale(12)
           }}
         >
           {/* Title */}
@@ -358,17 +356,6 @@ export default function MyPage() {
               </View>
             </View>
           </View>
-        </View>
-
-        {/* mini calendar */}
-        <View
-          style={{
-            padding: moderateScale(10),
-            backgroundColor: 'rgba(31, 31, 31, 0.5)',
-            borderRadius: moderateScale(10),
-          }}
-        >
-          <PrayerRecord history={history || []} />
         </View>
 
         {/* 알림 */}
