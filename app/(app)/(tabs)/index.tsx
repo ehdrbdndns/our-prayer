@@ -4,6 +4,7 @@ import Star from "@/assets/images/icon/star.svg";
 import Header from "@/components/Header";
 import PrayerRecord from "@/components/PrayerRecord";
 import PrayerState from "@/components/PrayerState";
+import ShareCard from "@/components/ShareCard";
 import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
 import { useSession } from "@/ctx";
@@ -156,6 +157,11 @@ export default function Index() {
             <PrayerRecord history={history || []} />
           </View>
         </TouchableOpacity>
+
+        {/* 공유 카드 */}
+        <View style={styles.shareCard}>
+          <ShareCard />
+        </View>
       </SafeAreaView>
     </ScrollView>
   );
