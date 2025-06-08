@@ -188,7 +188,7 @@ export default function PlanDetailPage() {
           params: {
             plan_id: plan_id,
             plan_title: title || data?.plan.title,
-            lecture_id: lectures[0].lecture_id,
+            lecture_id: latestLecture.lecture_id,
           }
         })
       } else {
