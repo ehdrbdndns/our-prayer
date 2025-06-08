@@ -164,8 +164,12 @@ export default function MyPage() {
 
   const onPressDeleteAccount = () => {
     Alert.alert(
-      '계정을 삭제하시겠습니까?', // title
-      '삭제된 계정은 되돌릴 수 없습니다.', // message
+      '지금까지 함께해주셔서 감사합니다.', // title
+      `우리의 기도는 당신의 신앙 여정을 늘 응원합니다.
+
+“너는 마음을 다하고 뜻을 다하고 힘을 다하여
+네 하나님 여호와를 사랑하라.”
+– 신명기 6장 5절`, // message
       [                     // buttons
         { text: '취소', style: 'cancel' },
         {
