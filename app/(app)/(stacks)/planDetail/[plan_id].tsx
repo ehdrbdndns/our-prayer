@@ -167,51 +167,43 @@ export default function PlanDetailPage() {
   }
 
   const onPressContinueBtn = () => {
-    const lectureIds = Object.keys(lectureHistoryDict);
-
-    const completedLectures = lectures
-      .filter(lecture => lectureIds.includes(lecture.lecture_id));
-
-    if (completedLectures.length > 0) {
-      const latestLecture = completedLectures
-        .sort((a, b) => b.created_date - a.created_date)
-      [0];
-
-      const nextLecture = lectures
-        .filter(lecture => !lectureIds.includes(lecture.lecture_id) && lecture.created_date > latestLecture.created_date)
-        .sort((a, b) => a.created_date - b.created_date)
-      [0];
-
-      if (!nextLecture) {
-        router.push({
-          pathname: '/lectureDetail/[lecture_id]',
-          params: {
-            plan_id: plan_id,
-            plan_title: title || data?.plan.title,
-            lecture_id: latestLecture.lecture_id,
-          }
-        })
-      } else {
-        router.push({
-          pathname: '/lectureDetail/[lecture_id]',
-          params: {
-            plan_id: plan_id,
-            plan_title: title || data?.plan.title,
-            lecture_id: nextLecture.lecture_id,
-          }
-        })
+    // 수강할 강의 ID
+    let nextLectureId = getNextLectureId();
+    router.push({
+      pathname: '/lectureDetail/[lecture_id]',
+      params: {
+        plan_id: plan_id,
+        plan_title: title || data?.plan.title,
+        lecture_id: nextLectureId,
       }
+    })
+  }
 
-    } else {
-      router.push({
-        pathname: '/lectureDetail/[lecture_id]',
-        params: {
-          plan_id: plan_id,
-          plan_title: title || data?.plan.title,
-          lecture_id: lectures[0].lecture_id,
-        }
-      })
+  /*
+    다음 강의 ID를 가져오는 함수
+    수강한 강의가 없으면 첫 번째 강의 ID를 반환
+    수강한 강의가 있으면 가장 최근 강의 이후의 강의 ID를 반환
+  */
+  const getNextLectureId = () => {
+    const completedLectureIds = Object.keys(lectureHistoryDict);
+    const completedLectures = lectures
+      .filter(lecture => completedLectureIds.includes(lecture.lecture_id));
+
+    if (completedLectures.length === 0) {
+      return lectures[0].lecture_id;
     }
+
+    const latestLecture = completedLectures
+      .sort((a, b) => b.created_date - a.created_date)[0];
+
+    const nextLecture = lectures
+      .filter(lecture =>
+        !completedLectureIds.includes(lecture.lecture_id)
+        && lecture.created_date > latestLecture.created_date
+      )
+      .sort((a, b) => a.created_date - b.created_date)[0];
+
+    return nextLecture ? nextLecture.lecture_id : latestLecture.lecture_id;
   }
 
   return (
@@ -408,7 +400,7 @@ export default function PlanDetailPage() {
             </View>
           </View>
         </View>
-      </ScrollView>
+      </ScrollView >
 
       {/* Continue Button */}
       <Animated.View style={{
