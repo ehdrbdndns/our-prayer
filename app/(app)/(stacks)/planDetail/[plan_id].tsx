@@ -156,7 +156,7 @@ export default function PlanDetailPage() {
       pathname: '/lectureDetail/[lecture_id]',
       params: {
         plan_id: plan_id,
-        plan_title: title || data?.plan.title,
+        plan_title: data?.plan.title,
         lecture_id: lecture_id,
       }
     })
@@ -173,7 +173,7 @@ export default function PlanDetailPage() {
       pathname: '/lectureDetail/[lecture_id]',
       params: {
         plan_id: plan_id,
-        plan_title: title || data?.plan.title,
+        plan_title: data?.plan.title,
         lecture_id: nextLectureId,
       }
     })
@@ -229,7 +229,7 @@ export default function PlanDetailPage() {
               <Pressable onPress={onPressLeftArrow} hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}>
                 <LeftArrow />
               </Pressable>
-              <MediumText>{title || data?.plan.title}</MediumText>
+              <MediumText>{title}</MediumText>
             </View>
           }
           suffix={
