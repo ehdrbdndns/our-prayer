@@ -40,7 +40,7 @@ export default function IntroducePastor() {
               color="#FFF"
               fontSize={16}
             >
-              상담하기
+              상담신청
             </MediumText>
           </View>
         }
