@@ -1,7 +1,6 @@
 import Edit from '@/assets/images/icon/edit.svg';
 import Star from '@/assets/images/icon/star.svg';
 import CustomButton from '@/components/button/CustomButton';
-import PrayerRecord from '@/components/PrayerRecord';
 import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
@@ -165,8 +164,12 @@ export default function MyPage() {
 
   const onPressDeleteAccount = () => {
     Alert.alert(
-      '계정을 삭제하시겠습니까?', // title
-      '삭제된 계정은 되돌릴 수 없습니다.', // message
+      '지금까지 함께해주셔서 감사합니다.', // title
+      `우리의 기도는 당신의 신앙 여정을 늘 응원합니다.
+
+“너는 마음을 다하고 뜻을 다하고 힘을 다하여
+네 하나님 여호와를 사랑하라.”
+– 신명기 6장 5절`, // message
       [                     // buttons
         { text: '취소', style: 'cancel' },
         {
@@ -253,8 +256,7 @@ export default function MyPage() {
             backgroundColor: 'rgba(31, 31, 31, 0.5)',
             borderRadius: moderateScale(10),
             gap: scaleHeight(12),
-            padding: moderateScale(12),
-            marginBottom: scaleHeight(12),
+            padding: moderateScale(12)
           }}
         >
           {/* Title */}
@@ -358,17 +360,6 @@ export default function MyPage() {
               </View>
             </View>
           </View>
-        </View>
-
-        {/* mini calendar */}
-        <View
-          style={{
-            padding: moderateScale(10),
-            backgroundColor: 'rgba(31, 31, 31, 0.5)',
-            borderRadius: moderateScale(10),
-          }}
-        >
-          <PrayerRecord history={history || []} />
         </View>
 
         {/* 알림 */}

@@ -120,7 +120,7 @@ export default function EditQuestion() {
               color="#FFF"
               fontSize={16}
             >
-              나의 질문 편집
+              상담신청
             </MediumText>
           </View>
         }

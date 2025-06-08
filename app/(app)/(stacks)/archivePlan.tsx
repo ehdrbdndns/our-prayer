@@ -39,7 +39,7 @@ export default function ArchivePlan() {
                   fontSize={16}
                   lineHeight={24}
                 >
-                  보관함
+                  기도 플랜
                 </MediumText>
               </View>
             }

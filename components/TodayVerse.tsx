@@ -1,6 +1,7 @@
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
+import { usePlanListQuery } from "@/utils/queries";
 import { moderateScale } from "@/utils/style";
 import { router } from "expo-router";
 import React from 'react';
@@ -13,9 +14,26 @@ interface TodayVerseProps {
 }
 
 export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
+  const { data: plan, isLoading: isPlanLoading, isSuccess: isPlanSuccess } = usePlanListQuery();
+
+  const currentPlan = plan?.currentPlan
+    ? plan.plans.filter((row) => row.plan_id === plan.currentPlan?.plan_id)[0]
+    : null;
 
   const onPress = () => {
-    router.push("/plan")
+    if (!!currentPlan) {
+      router.push({
+        pathname: `/planDetail/[plan_id]`,
+        params: {
+          plan_id: currentPlan.plan_id,
+          title: "홈으로 돌아가기",
+          banner: currentPlan.thumbnail,
+          isLiked: String(currentPlan.is_liked),
+        },
+      });
+    } else {
+      router.push("/plan");
+    }
   }
 
   return (
@@ -28,7 +46,7 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
         lineHeight={24}
         letterSpacingPercent={-1}
       >
-        오늘의 말씀
+        오늘의 기도 말씀
       </BoldText>
 
       {/* Card */}
@@ -65,7 +83,9 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
             lineHeight={21}
             letterSpacingPercent={-1}
           >
-            기도 시작하기
+            {
+              "기도 시작하기"
+            }
           </MediumText>
         </CustomButton>
       </View>

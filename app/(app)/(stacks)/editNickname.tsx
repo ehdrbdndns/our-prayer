@@ -69,7 +69,7 @@ export default function EditNickname() {
               color="#FFF"
               fontSize={16}
             >
-              닉네임 변경하기
+              마이페이지
             </MediumText>
           </View>
         }

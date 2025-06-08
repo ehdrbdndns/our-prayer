@@ -100,7 +100,7 @@ export default function QuestionPage() {
         fontSize={14}
         lineHeight={24}
       >
-        신앙생활을 하며 겪는 죄의 문제, 영적 갈등이 있으신가요? {'\n'}목사님과 상담하고 답을 찾아가세요.
+        신앙생활을 하며 겪는 죄의 문제가 있으신가요? {'\n'}목사님과 상담하고 답을 찾아가세요.
       </RegularText>
 
       {/* Link */}

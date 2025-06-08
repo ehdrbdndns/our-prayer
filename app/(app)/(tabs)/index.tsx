@@ -1,8 +1,7 @@
 import Fire from "@/assets/images/icon/fire.svg";
+import RightShortArrow from '@/assets/images/icon/rightShortArrow.svg';
 import Star from "@/assets/images/icon/star.svg";
-import CustomButton from "@/components/button/CustomButton";
 import Header from "@/components/Header";
-import MyPrayerPlan from "@/components/MyPrayerPlan";
 import PrayerRecord from "@/components/PrayerRecord";
 import PrayerState from "@/components/PrayerState";
 import ShareCard from "@/components/ShareCard";
@@ -10,12 +9,12 @@ import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
 import { useSession } from "@/ctx";
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
-import { useBibleQuery, useHistoryQuery, usePlanListQuery } from "@/utils/queries";
+import { useBibleQuery, useHistoryQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Platform, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Platform, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
@@ -33,10 +32,6 @@ export default function Index() {
   // fetch History data for 3 weeks
   const { data: history, isSuccess: isHistorySuccess, isFetched: isHistoryLoading } = useHistoryQuery();
 
-  // fetch Plan data
-  const { data: plan, isSuccess: isPlanSuccess, isFetched: isPlanLoading } = usePlanListQuery();
-  const likedPlans = plan?.plans.filter((plan) => plan.is_liked);
-
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
   const todayPrayerTime = calculateTodayPrayerTime(history || []);
 
@@ -53,7 +48,7 @@ export default function Index() {
     }
   }, [session, isLoading]);
 
-  if (!isHistorySuccess || !isPlanSuccess || !isBibleSuccess || isLoading) {
+  if (!isHistorySuccess || !isBibleSuccess || isLoading) {
     return null; // TODO : Add skeleton
   }
 
@@ -82,17 +77,7 @@ export default function Index() {
     >
       <SafeAreaView style={styles.container}>
         {/* Header */}
-        <Header
-          style={styles.header}
-          prefix={
-            <BoldText
-              fontSize={18}
-              color="rgba(255, 255, 255, 0.8)"
-            >
-              우리의 기도
-            </BoldText>
-          }
-        />
+        <Header style={styles.header} />
 
         {/* Content */}
         <View style={styles.content}>
@@ -137,51 +122,41 @@ export default function Index() {
 
         </View>
         {/* 기도 일자 데이터 */}
-        <View style={[styles.content, { marginBottom: moderateScale(40) }]}>
+        <TouchableOpacity
+          style={[styles.content, { marginBottom: moderateScale(40) }]}
+          onPress={onPressHistory}
+        >
           {/* Title */}
-          <BoldText
-            style={{ marginBottom: moderateScale(16) }}
-            color="#FFFFFF"
-            fontSize={16}
-            lineHeight={24}
-            letterSpacingPercent={-1}
-          >
-            나의 기도 기록
-          </BoldText>
-
-          <PrayerRecord history={history || []} />
-
-          {/* Button */}
-          <CustomButton
-            onPress={onPressHistory}
+          <View
             style={{
               flexDirection: "row",
-              justifyContent: "flex-start",
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-              paddingVertical: moderateScale(12),
-              paddingHorizontal: moderateScale(24),
-              marginTop: moderateScale(16),
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: moderateScale(16)
             }}
           >
             <BoldText
               color="#FFFFFF"
-              fontSize={14}
-              lineHeight={22}
+              fontSize={16}
+              lineHeight={24}
               letterSpacingPercent={-1}
             >
-              기도 기록 전체보기
+              나의 기도 기록
             </BoldText>
-          </CustomButton>
-        </View>
+            <RightShortArrow />
+          </View>
 
-        {/* 기도 플랜 */}
-        {
-          (likedPlans && likedPlans.length > 0) ? (
-            <View style={[styles.content, { paddingRight: 0 }]}>
-              <MyPrayerPlan plans={likedPlans} />
-            </View>
-          ) : null // TODO : Add skeleton loader
-        }
+          <View
+            style={{
+              paddingVertical: moderateScale(18),
+              paddingHorizontal: moderateScale(16),
+              borderRadius: moderateScale(10),
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+            }}
+          >
+            <PrayerRecord history={history || []} />
+          </View>
+        </TouchableOpacity>
 
         {/* 공유 카드 */}
         <View style={styles.shareCard}>
@@ -194,7 +169,7 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   header: {
-    marginBottom: moderateScale(42),
+    marginBottom: moderateScale(12),
   },
   container: {
     flex: 1,
@@ -246,7 +221,14 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(12),
     paddingHorizontal: moderateScale(24)
   },
-
+  button: {
+    width: 'auto',
+    alignSelf: 'flex-start',
+    backgroundColor: '#0F141A',
+    paddingVertical: moderateScale(12),
+    paddingHorizontal: moderateScale(24),
+    marginTop: moderateScale(16),
+  },
   // 공유 카드
   shareCard: {
     marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(40),

@@ -2,7 +2,7 @@
   "expo": {
     "name": "우리의 기도",
     "slug": "our-prayer-wesdlmg8pomqcxfrwnqcj",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -12,14 +12,22 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
       "infoPlist": {
-        "UIBackgroundModes": [ "audio" ],
-        "CFBundleLocalizations": ["ko"]
+        "UIBackgroundModes": [
+          "audio"
+        ],
+        "CFBundleLocalizations": [
+          "ko"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj",
       "googleServicesFile": "./google-services.json",
-      "userInterfaceStyle": "dark"
+      "userInterfaceStyle": "dark",
+      "permissions": [
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "bundler": "metro",
