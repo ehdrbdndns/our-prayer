@@ -43,7 +43,6 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
     const records: RecordType[] = [];
 
     const startOfCurrentWeek = getStartDateOfThisWeek();
-    console.log("startOfCurrentWeek", startOfCurrentWeek);
 
     for (let week = 4; week >= 1; week--) {
       const startOfWeek = new Date(startOfCurrentWeek);
