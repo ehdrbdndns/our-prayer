@@ -26,7 +26,7 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
         pathname: `/planDetail/[plan_id]`,
         params: {
           plan_id: currentPlan.plan_id,
-          title: "홈으로 돌아가기",
+          title: "홈",
           banner: currentPlan.thumbnail,
           isLiked: String(currentPlan.is_liked),
         },
