@@ -26,21 +26,23 @@ const DataEnums: { [key: number]: string } = {
 };
 
 export default function PrayerRecord({ history }: PrayerRecordProps) {
+
+  // get monday from date week
+  const getMondayFrom = (date: Date) => {
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    const monday = new Date(date.setDate(diff));
+
+    monday.setHours(0, 0, 0, 0);
+    monday.setMinutes(monday.getMinutes() + (-1 * monday.getTimezoneOffset()))
+    return monday;
+  };
+
   const generateRecord = (history: HistoryType[]): RecordType[] => {
     const records: RecordType[] = [];
     const today = new Date();
 
-    const getMonday = (date: Date) => {
-      const day = date.getDay();
-      const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
-      const monday = new Date(date.setDate(diff));
-
-      monday.setHours(0, 0, 0, 0);
-      monday.setMinutes(monday.getMinutes() + (-1 * monday.getTimezoneOffset()))
-      return monday;
-    };
-
-    const startOfCurrentWeek = getMonday(today);
+    const startOfCurrentWeek = getMondayFrom(today);
 
     for (let week = 4; week >= 1; week--) {
       const startOfWeek = new Date(startOfCurrentWeek);
@@ -67,7 +69,7 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
         days.push({ index: day + 1, isActive });
       }
 
-      records.push({ week: `${(5 - week)} Week`, days });
+      records.push({ week: `${(5 - week)} W`, days });
     }
 
     return records;
