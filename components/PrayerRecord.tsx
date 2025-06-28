@@ -16,33 +16,34 @@ interface RecordType {
 }
 
 const DataEnums: { [key: number]: string } = {
-  1: "월",
-  2: "화",
-  3: "수",
-  4: "목",
-  5: "금",
-  6: "토",
-  7: "일"
+  1: "일",
+  2: "월",
+  3: "화",
+  4: "수",
+  5: "목",
+  6: "금",
+  7: "토"
 };
 
 export default function PrayerRecord({ history }: PrayerRecordProps) {
 
   // get monday from date week
-  const getMondayFrom = (date: Date) => {
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
-    const monday = new Date(date.setDate(diff));
+  const getStartDateOfThisWeek = () => {
+    const today = new Date();
 
-    monday.setHours(0, 0, 0, 0);
-    monday.setMinutes(monday.getMinutes() + (-1 * monday.getTimezoneOffset()))
-    return monday;
+    // Set the time to the start of the day
+    const startDate = new Date(today.setDate(today.getDate() - today.getDay()));
+
+    startDate.setHours(0, 0, 0, 0);
+    startDate.setMinutes(startDate.getMinutes() + (-1 * startDate.getTimezoneOffset()))
+    return startDate;
   };
 
   const generateRecord = (history: HistoryType[]): RecordType[] => {
     const records: RecordType[] = [];
-    const today = new Date();
 
-    const startOfCurrentWeek = getMondayFrom(today);
+    const startOfCurrentWeek = getStartDateOfThisWeek();
+    console.log("startOfCurrentWeek", startOfCurrentWeek);
 
     for (let week = 4; week >= 1; week--) {
       const startOfWeek = new Date(startOfCurrentWeek);
