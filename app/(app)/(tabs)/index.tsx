@@ -10,11 +10,11 @@ import TodayVerse from "@/components/TodayVerse";
 import { useSession } from "@/ctx";
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
 import { useBibleQuery, useHistoryQuery } from "@/utils/queries";
-import { moderateScale, scaleHeight } from "@/utils/style";
+import { moderateScale } from "@/utils/style";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Platform, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
@@ -52,28 +52,10 @@ export default function Index() {
     return null; // TODO : Add skeleton
   }
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-
-    await queryClient.refetchQueries({ queryKey: ["history"] });
-    await queryClient.refetchQueries({ queryKey: ["plan"] });
-
-    setRefreshing(false);
-  }
-
   return (
     <ScrollView
       style={[styles.scrollViewContent]}
       showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
-          tintColor={"#FFFFFF"}
-          progressViewOffset={scaleHeight(50)}
-        />
-      }
     >
       <SafeAreaView style={styles.container}>
         {/* Header */}
