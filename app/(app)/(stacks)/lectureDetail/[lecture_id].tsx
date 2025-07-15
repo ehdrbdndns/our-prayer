@@ -235,7 +235,7 @@ export default function Lecture() {
     playVoice();
   }, [elapsedTime])
 
-  const adjustElapedTime = async (elapsedTime: number) => {
+  const onAdjustElapedTime = async (elapsedTime: number) => {
     let newRepeatCount = Math.floor(elapsedTime / duration);
     let newElapsedTime = Math.floor(elapsedTime % duration);
 
@@ -470,7 +470,7 @@ export default function Lecture() {
               initialRemainingTime={initialRemainingTime}
               isPlaying={isPlaying}
               appState={appStateVisible}
-              adjustElapedTime={adjustElapedTime}
+              onAdjustElapedTime={onAdjustElapedTime}
               setElapsedTime={setElapsedTime}
               onPressNext={onPressNext}
               onPressPlay={onPressPlay}
