@@ -8,11 +8,12 @@ import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
 import { LectureType } from "@/utils/dataType";
+import { useScreenTransition } from "@/utils/hooks/useScreenTransition";
 import { KEEP_AWAKE_TAG } from "@/utils/keepAwake";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { activateKeepAwakeAsync, deactivateKeepAwake, useKeepAwake } from 'expo-keep-awake';
+import { useKeepAwake } from 'expo-keep-awake';
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
@@ -52,11 +53,9 @@ export default function Lecture() {
   const lecture = data?.lecture || getDefaultLecture();
   const lectureAudios = data?.lectureAudios || [];
 
-  const [isShowedIntro, setIsShowedIntro] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
-  const [showContent, setShowContent] = useState(false);
-  const introOpacity = useRef(new Animated.Value(0)).current;
-  const contentOpacity = useRef(new Animated.Value(1)).current;
+  const { isIntroVisible, isContentVisible, introOpacity, contentOpacity } = useScreenTransition({
+    isDataLoaded: isLectureSuccess,
+  });
 
   const [timerKey, setTimerKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -78,38 +77,10 @@ export default function Lecture() {
     elapsedTimeRef.current = elapsedTime;
   }, [elapsedTime])
 
-  // Show intro when component is mounted and activate keep awake
-  useEffect(() => {
-
-    async function activateKeepAwake() {
-      await activateKeepAwakeAsync(KEEP_AWAKE_TAG);
-    }
-
-    async function deactivateKeepAwakeAsync() {
-      await deactivateKeepAwake(KEEP_AWAKE_TAG);
-      await deactivateKeepAwake();
-    }
-
-    setTimeout(async () => {
-      setShowIntro(true);
-      Animated.timing(introOpacity, {
-        toValue: 1,
-        duration: 3000,
-        useNativeDriver: true,
-      }).start(() => setIsShowedIntro(true));
-    }, 500);
-
-    activateKeepAwake();
-
-    return () => {
-      deactivateKeepAwakeAsync();
-    }
-  }, []);
-
   // Hide intro and show content after lecture data is loaded
   useEffect(() => {
-    async function hideIntro() {
-      if (isLectureSuccess && isShowedIntro) {
+    async function startLecture() {
+      if (isLectureSuccess && isContentVisible) {
 
         if (lecture.bgm === '') {
           Alert.alert('알림!', '새로운 오디오 파일이 추가되었습니다. 파일을 다시 다운로드 해주세요.');
@@ -117,28 +88,15 @@ export default function Lecture() {
           router.dismissTo('/plan');
         }
 
-        Animated.timing(introOpacity, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: true,
-        }).start(() => {
-          const time = lecture.time === 0 ? 1 : (lecture.time * 60);
-          setShowIntro(false);
-          setShowContent(true);
-          setIsPlaying(true);
-          setDuration(time);
-          setInitialRemainingTime(time);
-          Animated.timing(contentOpacity, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }).start();
-        });
+        const time = lecture.time === 0 ? 1 : (lecture.time * 60);
+        setIsPlaying(true);
+        setDuration(time);
+        setInitialRemainingTime(time);
       }
     }
 
-    hideIntro();
-  }, [isLectureSuccess, isShowedIntro]);
+    startLecture();
+  }, [isLectureSuccess, isContentVisible]);
 
   // Set Amp instance when lecture data is loaded
   useEffect(() => {
@@ -356,7 +314,7 @@ export default function Lecture() {
   return (
     <View style={{ paddingTop: insets.top }}>
       {/* Intro */}
-      {showIntro && (
+      {isIntroVisible && (
         <Animated.View style={[styles.intro, { opacity: introOpacity }]}>
           <RegularText
             style={styles.introText}
@@ -378,7 +336,7 @@ export default function Lecture() {
       )}
 
       {/* Content */}
-      {showContent && (
+      {isContentVisible && (
         <Animated.View style={{ opacity: contentOpacity }}>
           <Header
             style={styles.header}
