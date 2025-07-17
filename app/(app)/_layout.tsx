@@ -118,6 +118,7 @@ export default function AppLayout() {
     }
   }, [isAppInfoSuccess, appInfo, isVersionChecked])
 
+  // 앱이 준비되었는지 확인
   useEffect(() => {
     setAppReady(isTokenRefetched && isVersionChecked);
   }, [isTokenRefetched, isVersionChecked])

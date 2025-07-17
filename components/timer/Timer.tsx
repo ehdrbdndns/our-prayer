@@ -23,7 +23,7 @@ type TimerProps = {
   isPlaying: boolean;
   repeatCount: number;
   appState: AppStateStatus;
-  adjustElapedTime: (elapsedTime: number) => Promise<void>;
+  onAdjustElapedTime: (elapsedTime: number) => Promise<void>;
   onPressNext: (remainingTime: number) => void;
   onPressPrev: (remainingTime: number) => void;
   onPressPlay: () => void;
@@ -41,7 +41,7 @@ export default function Timer(props: TimerProps) {
     isPlaying,
     repeatCount,
     appState,
-    adjustElapedTime,
+    onAdjustElapedTime,
     onPressNext,
     onPressPrev,
     onPressPlay,
@@ -85,7 +85,7 @@ export default function Timer(props: TimerProps) {
       const curTime = new Date().getTime() / 1000;
       const diffTime = curTime - Number(storedTime);
 
-      await adjustElapedTime((countdown.elapsedTime + (repeatCount * duration)) + diffTime);
+      await onAdjustElapedTime((countdown.elapsedTime + (repeatCount * duration)) + diffTime);
     }
 
     if (prevAppState.current === 'background' && appState === 'active') {

@@ -1,1 +1,0 @@
-export const KEEP_AWAKE_TAG = 'LECTURE';
