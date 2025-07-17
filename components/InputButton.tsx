@@ -56,9 +56,6 @@ export default function InputButton({ onSubmit, placeholder }: inputButtonProps)
     setText('');
   }
 
-
-
-
   return (
     <>
       {/* InputTriggerButton */}
