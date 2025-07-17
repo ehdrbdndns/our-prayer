@@ -11,20 +11,17 @@ import { useSession } from "@/ctx";
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
 import { useBibleQuery, useHistoryQuery } from "@/utils/queries";
 import { moderateScale } from "@/utils/style";
-import { useQueryClient } from "@tanstack/react-query";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
 
-  const queryClient = useQueryClient();
-
   const { session, isLoading } = useSession();
 
   const [name, setName] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
 
   // fetch Bible data
   const { data: bible, isSuccess: isBibleSuccess } = useBibleQuery();
@@ -39,12 +36,58 @@ export default function Index() {
     router.push("/calendar");
   }
 
+  // 앱이 준비 되었을 때 기도 중이였는지 확인하고 
+  // 기도 중이었다면 Alert로 기도 페이지로 이동 여부 확인
+
   useEffect(() => {
+    async function checkIsPraying() {
+      const isPraying = await AsyncStorage.getItem('isPraying');
+
+      if (!isPraying) { return }
+
+      const {
+        plan_id
+        , plan_title
+        , lecture_id
+      } = JSON.parse(isPraying);
+
+      Alert.alert(
+        `혹시 기도 중이셨나요?`,
+        `기도 중이셨다면 기도 페이지로 이동하시겠습니까?`,
+        [
+          {
+            text: "아니오",
+            style: "cancel",
+            onPress: async () => {
+              // 기도 중 상태 초기화
+              await AsyncStorage.removeItem('isPraying');
+            }
+          },
+          {
+            text: "이어서 기도하기",
+            onPress: () => {
+              // 기도 페이지로 이동
+              router.push({
+                pathname: '/lectureDetail/[lecture_id]',
+                params: {
+                  plan_id: plan_id,
+                  plan_title: plan_title,
+                  lecture_id: lecture_id,
+                  isReconnect: 'true',
+                }
+              })
+            }
+          }
+        ]
+      )
+    }
+
     if (!isLoading && !session) {
       router.push("/login");
     } else if (!isLoading && !!session) {
       const { name } = JSON.parse(session);
       setName(name);
+      checkIsPraying();
     }
   }, [session, isLoading]);
 

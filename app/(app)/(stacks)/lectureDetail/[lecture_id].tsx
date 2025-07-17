@@ -9,7 +9,6 @@ import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
 import { LectureType } from "@/utils/dataType";
 import { useScreenTransition } from "@/utils/hooks/useScreenTransition";
-import { KEEP_AWAKE_TAG } from "@/utils/keepAwake";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -36,15 +35,20 @@ const getDefaultLecture = (): LectureType => ({
 })
 
 export default function Lecture() {
-  // Keep screen awake while the component is mounted
-  useKeepAwake(KEEP_AWAKE_TAG);
+  useKeepAwake();
 
   const insets = useSafeAreaInsets();
 
-  const { plan_id, lecture_id, plan_title } = useLocalSearchParams<{
+  const {
+    plan_id
+    , lecture_id
+    , plan_title
+    , isReconnect
+  } = useLocalSearchParams<{
     plan_id: string,
     lecture_id: string,
-    plan_title: string
+    plan_title: string,
+    isReconnect?: string
   }>();
 
   // Fetch lecture data
@@ -53,7 +57,12 @@ export default function Lecture() {
   const lecture = data?.lecture || getDefaultLecture();
   const lectureAudios = data?.lectureAudios || [];
 
-  const { isIntroVisible, isContentVisible, introOpacity, contentOpacity } = useScreenTransition({
+  const {
+    isIntroVisible
+    , isContentVisible
+    , introOpacity
+    , contentOpacity
+  } = useScreenTransition({
     isDataLoaded: isLectureSuccess,
   });
 
@@ -77,7 +86,7 @@ export default function Lecture() {
     elapsedTimeRef.current = elapsedTime;
   }, [elapsedTime])
 
-  // Hide intro and show content after lecture data is loaded
+  // Set initial duration and remaining time
   useEffect(() => {
     async function startLecture() {
       if (isLectureSuccess && isContentVisible) {
@@ -88,10 +97,28 @@ export default function Lecture() {
           router.dismissTo('/plan');
         }
 
-        const time = lecture.time === 0 ? 1 : (lecture.time * 60);
+        const isPraying = await AsyncStorage.getItem('isPraying');
+        const duration = lecture.time === 0 ? 1 : (lecture.time * 60);
+
         setIsPlaying(true);
-        setDuration(time);
-        setInitialRemainingTime(time);
+        setDuration(duration);
+        setInitialRemainingTime(duration);
+
+        if (!!isReconnect && !!isPraying) {
+          // If already praying, set the elapsed time and repeat count
+          const {
+            repeatCount: savedRepeatCount
+            , elapsedTime: savedElapsedTime
+            , pauseTime: savedPauseTime
+          } = JSON.parse(isPraying);
+
+          let curTime = new Date().getTime() / 1000;
+          let diffTime = curTime - Number(savedPauseTime);
+          let totalElapsedTime = savedElapsedTime + diffTime + (savedRepeatCount * duration);
+
+          await amp?.adjustVoiceBy(totalElapsedTime);
+          onAdjustElapedTime(totalElapsedTime, duration);
+        }
       }
     }
 
@@ -115,6 +142,18 @@ export default function Lecture() {
       if (!!amp) {
         await amp.changeToBackgroundState(elapsedTimeRef.current);
       }
+
+      // 3. 기도중이라는 상태를 AsyncStorage에 저장
+      //    나중에 메인 화면에서 기도중인지 확인하기 위함
+      await AsyncStorage.setItem('isPraying', JSON.stringify({
+        plan_id: plan_id,
+        plan_title: plan_title,
+        lecture_id: lecture_id,
+        lecture_title: lecture.title,
+        repeatCount: repeatCount,
+        elapsedTime: elapsedTime,
+        pauseTime: new Date().getTime() / 1000,
+      }))
     }
 
     async function changeToForeground() {
@@ -193,13 +232,19 @@ export default function Lecture() {
     playVoice();
   }, [elapsedTime])
 
-  const onAdjustElapedTime = async (elapsedTime: number) => {
-    let newRepeatCount = Math.floor(elapsedTime / duration);
-    let newElapsedTime = Math.floor(elapsedTime % duration);
+  const onAdjustElapedTime = async (elapsedTime: number, newDuration?: number) => {
+    const currentDuration = newDuration ?? duration;
+
+    if (currentDuration === 0) {
+      return; // 0으로 나누는 오류 방지
+    }
+
+    let newRepeatCount = Math.floor(elapsedTime / currentDuration);
+    let newElapsedTime = Math.floor(elapsedTime % currentDuration);
 
     setRepeatCount(newRepeatCount);
     setElapsedTime(newElapsedTime);
-    setInitialRemainingTime(duration - newElapsedTime);
+    setInitialRemainingTime(currentDuration - newElapsedTime);
 
     // 타이머 렌더링을 위한 작업
     setTimerKey(timerKey + 1);
@@ -298,6 +343,7 @@ export default function Lecture() {
   }
 
   const onPressCompleteBtn = async (elapsedTime: number) => {
+    await AsyncStorage.removeItem('isPraying');
     router.replace({
       pathname: '/prayerRecord',
       params: {
