@@ -296,13 +296,13 @@ export default function RequestQuestion() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <LabeledInput label="이름 *" value={form.name} onChangeText={(text) => handleFormChange('name', text)} placeholder="이름을 입력하세요" onFocus={handleInputFocus} />
-            <LabeledInput label="성별 *" value={form.gender} onChangeText={(text) => handleFormChange('gender', text)} placeholder="예: 남성, 여성" onFocus={handleInputFocus} />
-            <LabeledInput label="나이 *" value={form.age} onChangeText={(text) => handleFormChange('age', text)} placeholder="예: 30" keyboardType="numeric" onFocus={handleInputFocus} />
-            <LabeledInput label="전화 번호 *" value={form.phoneNumber} onChangeText={(text) => handleFormChange('phoneNumber', text)} placeholder="'-\' 없이 입력" keyboardType="phone-pad" onFocus={handleInputFocus} />
+            <LabeledInput label="이름" value={form.name} onChangeText={(text) => handleFormChange('name', text)} placeholder="이름을 입력하세요" onFocus={handleInputFocus} />
+            <LabeledInput label="성별" value={form.gender} onChangeText={(text) => handleFormChange('gender', text)} placeholder="예: 남성, 여성" onFocus={handleInputFocus} />
+            <LabeledInput label="나이" value={form.age} onChangeText={(text) => handleFormChange('age', text)} placeholder="예: 30" keyboardType="numeric" onFocus={handleInputFocus} />
+            <LabeledInput label="전화 번호" value={form.phoneNumber} onChangeText={(text) => handleFormChange('phoneNumber', text)} placeholder="'-\' 없이 입력" keyboardType="phone-pad" onFocus={handleInputFocus} />
             <LabeledInput label="섬기는 교회(선택사항)" value={form.church} onChangeText={(text) => handleFormChange('church', text)} placeholder="교회 이름을 입력하세요" onFocus={handleInputFocus} />
-            <LabeledInput label="선호 상담 방식 *" value={form.counselingMethod} onChangeText={(text) => handleFormChange('counselingMethod', text)} placeholder="예: 대면, 비대면" onFocus={handleInputFocus} />
-            <LabeledInput label="호소 내용 *" value={form.content} onChangeText={(text) => handleFormChange('content', text)} placeholder="상담 받고 싶은 구체적인 내용을 입력하세요." multiline={true} onFocus={handleInputFocus} />
+            <LabeledInput label="선호 상담 방식" value={form.counselingMethod} onChangeText={(text) => handleFormChange('counselingMethod', text)} placeholder="예: 대면, 비대면" onFocus={handleInputFocus} />
+            <LabeledInput label="호소 내용" value={form.content} onChangeText={(text) => handleFormChange('content', text)} placeholder="상담 받고 싶은 구체적인 내용을 입력하세요." multiline={true} onFocus={handleInputFocus} />
           </ScrollView>
 
           {/* Enter Button */}
