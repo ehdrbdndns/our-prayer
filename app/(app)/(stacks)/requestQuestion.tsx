@@ -54,6 +54,42 @@ const LabeledInput = ({
   );
 };
 
+// Helper component for option selection buttons
+const OptionSelector = ({
+  label,
+  options,
+  selectedValue,
+  onSelect,
+}: {
+  label: string;
+  options: string[];
+  selectedValue: string;
+  onSelect: (value: string) => void;
+}) => {
+  return (
+    <View style={styles.inputGroup}>
+      <MediumText style={styles.label}>{label}</MediumText>
+      <View style={styles.optionsContainer}>
+        {options.map((option) => (
+          <TouchableOpacity
+            key={option}
+            style={[
+              styles.optionButton,
+              selectedValue === option && styles.selectedOption,
+            ]}
+            onPress={() => onSelect(option)}
+          >
+            <MediumText
+              style={styles.optionText}
+            >
+              {option}
+            </MediumText>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+};
 
 export default function RequestQuestion() {
   const { session } = useSession();
@@ -297,11 +333,21 @@ export default function RequestQuestion() {
             keyboardShouldPersistTaps="handled"
           >
             <LabeledInput label="이름" value={form.name} onChangeText={(text) => handleFormChange('name', text)} placeholder="이름을 입력하세요" onFocus={handleInputFocus} />
-            <LabeledInput label="성별" value={form.gender} onChangeText={(text) => handleFormChange('gender', text)} placeholder="예: 남성, 여성" onFocus={handleInputFocus} />
+            <OptionSelector
+              label="성별"
+              options={['남성', '여성']}
+              selectedValue={form.gender}
+              onSelect={(value) => handleFormChange('gender', value)}
+            />
             <LabeledInput label="나이" value={form.age} onChangeText={(text) => handleFormChange('age', text)} placeholder="예: 30" keyboardType="numeric" onFocus={handleInputFocus} />
             <LabeledInput label="전화 번호" value={form.phoneNumber} onChangeText={(text) => handleFormChange('phoneNumber', text)} placeholder="'-\' 없이 입력" keyboardType="phone-pad" onFocus={handleInputFocus} />
             <LabeledInput label="섬기는 교회(선택사항)" value={form.church} onChangeText={(text) => handleFormChange('church', text)} placeholder="교회 이름을 입력하세요" onFocus={handleInputFocus} />
-            <LabeledInput label="선호 상담 방식" value={form.counselingMethod} onChangeText={(text) => handleFormChange('counselingMethod', text)} placeholder="예: 대면, 비대면" onFocus={handleInputFocus} />
+            <OptionSelector
+              label="선호 상담 방식"
+              options={['대면', '비대면']}
+              selectedValue={form.counselingMethod}
+              onSelect={(value) => handleFormChange('counselingMethod', value)}
+            />
             <LabeledInput label="호소 내용" value={form.content} onChangeText={(text) => handleFormChange('content', text)} placeholder="상담 받고 싶은 구체적인 내용을 입력하세요." multiline={true} onFocus={handleInputFocus} />
           </ScrollView>
 
@@ -378,6 +424,26 @@ const styles = StyleSheet.create({
   },
   multilineInput: {
     height: moderateScale(150),
+  },
+  optionsContainer: {
+    flexDirection: 'row',
+    gap: moderateScale(8),
+  },
+  optionButton: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: moderateScale(8),
+    paddingVertical: moderateScale(12),
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: moderateScale(48),
+  },
+  selectedOption: {
+    backgroundColor: '#4F5FFF',
+  },
+  optionText: {
+    fontSize: normalizeFontSize(14),
+    fontFamily: 'NotoSansKR_500Medium',
   },
   buttonList: {
     flexDirection: 'row',
