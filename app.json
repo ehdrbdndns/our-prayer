@@ -2,7 +2,7 @@
   "expo": {
     "name": "우리의 기도",
     "slug": "our-prayer-wesdlmg8pomqcxfrwnqcj",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",

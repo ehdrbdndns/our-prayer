@@ -185,7 +185,7 @@ export default function CalendarPage() {
                 color="#FFF"
                 fontSize={16}
               >
-                홈으로 돌아가기
+                홈
               </MediumText>
             </View>
           }

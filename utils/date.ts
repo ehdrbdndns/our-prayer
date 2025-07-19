@@ -99,7 +99,8 @@ export const calculateDaysSinceSignup = (signupDateUnix: number): number => {
  * @returns 형식화된 문자열
  */
 export const formatPrayerTime = (created_date: number, duration: number): string => {
-  const date = new Date(created_date * 1000); // 초 단위를 밀리초 단위로 변환
+  const startTimestamp = created_date - duration;
+  const date = new Date(startTimestamp * 1000); // 초 단위를 밀리초 단위로 변환
   const hours = date.getHours();
   const minutes = date.getMinutes();
   const period = hours >= 12 ? '오후' : '오전';

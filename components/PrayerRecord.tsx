@@ -16,39 +16,56 @@ interface RecordType {
 }
 
 const DataEnums: { [key: number]: string } = {
-  1: "월",
-  2: "화",
-  3: "수",
-  4: "목",
-  5: "금",
-  6: "토",
-  7: "일"
+  1: "일",
+  2: "월",
+  3: "화",
+  4: "수",
+  5: "목",
+  6: "금",
+  7: "토"
 };
 
 export default function PrayerRecord({ history }: PrayerRecordProps) {
-  const generateRecord = (history: HistoryType[]): RecordType[] => {
-    const records: RecordType[] = [];
+
+  // get monday from date week
+  const getStartDateOfThisWeek = () => {
     const today = new Date();
 
-    const getMonday = (date: Date) => {
-      const day = date.getDay();
-      const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
-      const monday = new Date(date.setDate(diff));
+    // Set the time to the start of the day
+    const startDate = new Date(today.setDate(today.getDate() - today.getDay()));
 
-      monday.setHours(0, 0, 0, 0);
-      monday.setMinutes(monday.getMinutes() + (-1 * monday.getTimezoneOffset()))
-      return monday;
-    };
+    startDate.setHours(0, 0, 0, 0);
+    startDate.setMinutes(startDate.getMinutes() + (-1 * startDate.getTimezoneOffset()))
+    return startDate;
+  };
 
-    const startOfCurrentWeek = getMonday(today);
+  const getStartDateOfWeekByDate = (date: Date, weekOffset: number): Date => {
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - (4 - weekOffset) * 7);
 
+    return startOfWeek
+  }
+
+  const RegenerateRecord = (history: HistoryType[]): RecordType[] => {
+    const records: RecordType[] = [];
+
+    const startOfCurrentWeek = getStartDateOfThisWeek();
+    const startOfWeeks: { date: Date, week: number }[] = []
+
+    // Generate start dates for the last 4 weeks
     for (let week = 4; week >= 1; week--) {
-      const startOfWeek = new Date(startOfCurrentWeek);
-      startOfWeek.setDate(startOfCurrentWeek.getDate() - (4 - week) * 7);
+      startOfWeeks.push({
+        date: getStartDateOfWeekByDate(startOfCurrentWeek, week),
+        week: week
+      });
+    }
 
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6)
-
+    // 각 주의 시작 날짜(startOfWeek)를 기준으로 7일(일~월) 동안의 날짜 배열을 생성하고,
+    // 각 날짜(dateString)에 대해 history에 해당 날짜의 기록이 있는지(isActive) 판별하여 days 배열에 추가한다.
+    // days 배열은 { index: 요일(1~7), isActive: 기록 여부 } 형태로 구성된다.
+    // 마지막으로 해당 주차의 week 정보와 days 배열을 records에 추가한다.
+    startOfWeeks.forEach((date) => {
+      const { date: startOfWeek, week } = date;
       const days = [];
       for (let day = 0; day < 7; day++) {
         const date = new Date(startOfWeek);
@@ -67,13 +84,13 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
         days.push({ index: day + 1, isActive });
       }
 
-      records.push({ week: `${(5 - week)} Week`, days });
-    }
+      records.push({ week: `${(5 - week)} W`, days });
+    })
 
     return records;
   };
 
-  const records = generateRecord(history);
+  const records = RegenerateRecord(history);
 
   return (
     <View style={styles.record}>

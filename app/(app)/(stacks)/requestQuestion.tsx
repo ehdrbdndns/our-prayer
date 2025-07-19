@@ -12,37 +12,106 @@ import { moderateScale, normalizeFontSize } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const QUESTION_TEMPLATE = (name: string) => `이름(가명 가능): ${name}
+// Helper component for labeled inputs
+const LabeledInput = ({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  multiline = false,
+  keyboardType = 'default',
+  onFocus
+}: {
+  label: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder: string;
+  multiline?: boolean;
+  keyboardType?: 'default' | 'numeric' | 'email-address' | 'phone-pad';
+  onFocus?: (ref: React.RefObject<View>) => void;
+}) => {
+  const containerRef = useRef<View>(null);
 
-성별: 
+  return (
+    <View ref={containerRef} style={styles.inputGroup}>
+      <MediumText style={styles.label}>{label}</MediumText>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        style={[styles.input, multiline && styles.multilineInput]}
+        placeholder={placeholder}
+        placeholderTextColor="#888"
+        multiline={multiline}
+        keyboardType={keyboardType}
+        textAlignVertical={multiline ? 'top' : 'center'}
+        onFocus={() => onFocus?.(containerRef)}
+      />
+    </View>
+  );
+};
 
-나이: 
-
-전화 번호(선택사항): 
-
-섬기는 교회(선택사항): 
-
-선호 상담 방식(대면/비대면): 
-
-호소 내용(상담 받고 싶은 구체적인 내용): 
-
-`
+// Helper component for option selection buttons
+const OptionSelector = ({
+  label,
+  options,
+  selectedValue,
+  onSelect,
+}: {
+  label: string;
+  options: string[];
+  selectedValue: string;
+  onSelect: (value: string) => void;
+}) => {
+  return (
+    <View style={styles.inputGroup}>
+      <MediumText style={styles.label}>{label}</MediumText>
+      <View style={styles.optionsContainer}>
+        {options.map((option) => (
+          <TouchableOpacity
+            key={option}
+            style={[
+              styles.optionButton,
+              selectedValue === option && styles.selectedOption,
+            ]}
+            onPress={() => onSelect(option)}
+          >
+            <MediumText
+              style={styles.optionText}
+            >
+              {option}
+            </MediumText>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+};
 
 export default function RequestQuestion() {
-
-  const insets = useSafeAreaInsets();
   const { session } = useSession();
-
   const queryClient = useQueryClient();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-  const [note, setNote] = useState(QUESTION_TEMPLATE(''));
+  const [form, setForm] = useState({
+    name: '',
+    gender: '',
+    age: '',
+    phoneNumber: '',
+    church: '',
+    counselingMethod: '',
+    content: '',
+  });
   const [isSaving, setIsSaving] = useState(false);
-  const [boldTextOpacity, setBoldTextOpacity] = useState(1); // BoldText의 opacity 상태
-  const textInputRef = useRef<TextInput>(null); // TextInput의 참조 생성
+
+  const isFormValid = useMemo(() => {
+    const { name, gender, age, phoneNumber, counselingMethod, content } = form;
+    return name.trim() !== '' && gender.trim() !== '' && age.trim() !== '' && phoneNumber.trim() !== '' && counselingMethod.trim() !== '' && content.trim() !== '';
+  }, [form]);
 
   const { mutate: insertQuestion } = useInsertQuestionMutation({
     onSuccess: async () => {
@@ -54,7 +123,6 @@ export default function RequestQuestion() {
     },
     onMutate: async (content: string) => {
       await queryClient.cancelQueries({ queryKey: ["question"] });
-
       const previousValue = queryClient.getQueryData<QuestionType[]>(["question"]);
       if (previousValue) {
         queryClient.setQueryData<QuestionType[]>(["question"], [{
@@ -69,256 +137,247 @@ export default function RequestQuestion() {
           updated_date: Math.floor(new Date().getTime() / 1000),
         }, ...previousValue]);
       }
-
       return { previousValue };
     }
   });
 
   useEffect(() => {
-    async function setNoteByDraft(name: string) {
-      const draft = await AsyncStorage.getItem(ASYNC_TEMP_DRAFT);
+    async function loadInitialData() {
+      let userName = '';
+      if (session) {
+        const { name } = JSON.parse(session);
+        userName = name;
+      }
 
-      if (!!draft) {
-        setNote(draft);
+      const draft = await AsyncStorage.getItem(ASYNC_TEMP_DRAFT);
+      if (draft) {
+        try {
+          const parsedDraft = JSON.parse(draft);
+          setForm(parsedDraft);
+        } catch {
+          setForm(prev => ({ ...prev, name: userName }));
+        }
       } else {
-        setNote(QUESTION_TEMPLATE(name));
+        setForm(prev => ({ ...prev, name: userName }));
       }
     }
+    loadInitialData();
+  }, [session]);
 
-    if (!!session) {
-      const { name } = JSON.parse(session);
-      setNoteByDraft(name);
+  // 키보드가 올라오면 스크롤뷰를 해당 위치로 이동
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true); // 키보드가 올라옴
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false); // 키보드가 내려감
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  const handleFormChange = (field: keyof typeof form, value: string) => {
+    if (field === 'content' && value.length > QUESTION_CONTENT_MAX_LENGTH) {
+      Alert.alert('길이를 초과했습니다.', `호소 내용은 최대 ${QUESTION_CONTENT_MAX_LENGTH}자까지 입력 가능합니다.`);
+      return;
     }
-  }, [session])
+    setForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleInputFocus = (inputRef: React.RefObject<View>) => {
+    // A short delay is often needed to allow the keyboard to start its animation
+    setTimeout(() => {
+      inputRef.current?.measure((_x, y) => {
+        scrollViewRef.current?.scrollTo({ y: y, animated: true });
+      });
+    }, 100);
+  };
+
+  const buildNoteString = () => {
+    return `이름(가명 가능): ${form.name}\n성별: ${form.gender}\n나이: ${form.age}\n전화 번호: ${form.phoneNumber}\n섬기는 교회(선택사항): ${form.church}\n선호 상담 방식(대면/비대면): ${form.counselingMethod}\n호소 내용(상담 받고 싶은 구체적인 내용): ${form.content}\n`;
+  };
 
   const submitPrayerRecord = async () => {
-    if (isSaving) return;
-
+    if (isSaving || !isFormValid) return;
     setIsSaving(true);
 
-    // 만약 상담 신청에 실패했을 시 원본 유지하기 위해 미리 저장하는 것이 필요.
-    await AsyncStorage.setItem(ASYNC_TEMP_DRAFT, note);
+    const note = buildNoteString();
+    await AsyncStorage.setItem(ASYNC_TEMP_DRAFT, JSON.stringify(form));
 
     try {
       insertQuestion(note);
+      Alert.alert('상담 신청이 완료되었습니다.', '담당자가 확인 후 연락드리겠습니다.', [
+        { text: '확인', onPress: () => router.back() }
+      ]);
     } catch (e) {
       console.error(e);
       Alert.alert('상담신청에 실패했습니다.', '잠시 후 다시 시도해주세요.', [
-        {
-          text: '확인',
-          style: 'cancel',
-          onPress: () => {
-            router.back();
-          }
-        }
+        { text: '확인', style: 'cancel' }
       ]);
     } finally {
       setIsSaving(false);
     }
-
-    Alert.alert('상담 신청이 완료되었습니다.', '담당자가 확인 후 연락드리겠습니다.', [
-      {
-        text: '확인',
-        onPress: () => {
-          router.back();
-        }
-      }
-    ])
-  }
+  };
 
   const onPressReset = () => {
     Alert.alert('초기화', '상담신청 내용을 초기화하시겠습니까?', [
-      {
-        text: '취소',
-        style: 'cancel'
-      },
+      { text: '취소', style: 'cancel' },
       {
         text: '확인',
         onPress: () => {
           let name = "";
-          if (!!session) {
+          if (session) {
             const { name: sessionName } = JSON.parse(session);
             name = sessionName;
           }
-          setNote(QUESTION_TEMPLATE(name));
+          setForm({
+            name,
+            gender: '',
+            age: '',
+            phoneNumber: '',
+            church: '',
+            counselingMethod: '',
+            content: '',
+          });
         }
       }
-    ])
-  }
+    ]);
+  };
 
-  const onPressSave = async () => {
+  const onPressSave = () => {
     if (isSaving) {
-      Alert.alert('상담신청 중입니다.', '잠시만 기다려주세요.', [
-        {
-          text: '확인',
-          style: 'cancel'
-        }
-      ])
-
+      Alert.alert('상담신청 중입니다.');
       return;
     }
-
+    if (!isFormValid) {
+      Alert.alert('입력 필요', '섬기는 교회를 제외한 모든 항목을 입력해주세요.');
+      return;
+    }
     Alert.alert('상담신청', '작성된 내용을 바탕으로 상담신청을 하시겠습니까?', [
-      {
-        text: '취소',
-        style: 'cancel'
-      },
-      {
-        text: '확인',
-        onPress: async () => {
-          await submitPrayerRecord();
-        }
-      }
-    ])
-  }
+      { text: '취소', style: 'cancel' },
+      { text: '확인', onPress: submitPrayerRecord }
+    ]);
+  };
 
-  const onPressSaveDraft = async () => {
+  const onPressSaveDraft = () => {
     Alert.alert('임시저장', '임시저장하시겠습니까?', [
-      {
-        text: '취소',
-        style: 'cancel'
-      },
+      { text: '취소', style: 'cancel' },
       {
         text: '확인',
         onPress: async () => {
-          await AsyncStorage.setItem(ASYNC_TEMP_DRAFT, note);
-          Alert.alert('저장되었습니다.', "", [
-            {
-              text: '확인'
-            }
-          ]);
+          await AsyncStorage.setItem(ASYNC_TEMP_DRAFT, JSON.stringify(form));
+          Alert.alert('저장되었습니다.');
         }
       }
-    ]
-    )
-  }
-
-  const onComplete = () => {
-    if (textInputRef.current) {
-      textInputRef.current.blur(); // TextInput에 포커스 잃게 하기
-    }
-  }
-
-  const onChangeNote = (text: string) => {
-    if (text.length > QUESTION_CONTENT_MAX_LENGTH) {
-      Alert.alert('길이를 초과했습니다.', `최대 ${QUESTION_CONTENT_MAX_LENGTH}자까지 입력 가능합니다.`, [
-        {
-          text: '확인',
-          style: 'cancel'
-        }
-      ])
-    } else {
-      setNote(text)
-    }
-  }
+    ]);
+  };
 
   const onPressBack = () => {
-    Alert.alert('잠깐만요!', '저장하지 않은 내용이 있습니다. 저장하시겠습니까?', [
+    Alert.alert('잠깐만요!', '페이지를 나가시겠습니까? 임시저장된 내용은 사라집니다.', [
+      { text: '취소', style: 'cancel' },
       {
-        text: '아니요',
+        text: '임시저장 후 나가기',
+        onPress: async () => {
+          await AsyncStorage.setItem(ASYNC_TEMP_DRAFT, JSON.stringify(form));
+          router.back();
+        }
+      },
+      {
+        text: '저장하지 않고 나가기',
         style: 'destructive',
         onPress: () => {
           router.back();
         }
       },
-      {
-        text: '네',
-        onPress: async () => {
-          await AsyncStorage.setItem(ASYNC_TEMP_DRAFT, note);
-          router.back();
-        }
-      }
-    ])
-  }
+    ]);
+  };
 
   return (
     <>
-      <View
-        style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(15, 20, 26, 0.4)' }}
-      />
-      <KeyboardAvoidingView
-        style={styles.container}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={[styles.safeArea, styles.container]}>
+        <KeyboardAvoidingView
+          style={{
+            flex: 1
+          }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
           <Header
             style={styles.header}
             prefix={
               <View style={styles.headerPrefix}>
-                <TouchableOpacity
-                  onPress={onPressBack}
-                >
-                  <LeftArrow
-                    width={moderateScale(24)}
-                    height={moderateScale(24)}
-                  />
+                <TouchableOpacity onPress={onPressBack}>
+                  <LeftArrow width={moderateScale(24)} height={moderateScale(24)} />
                 </TouchableOpacity>
-                <MediumText
-                  color="#FFF"
-                  fontSize={16}
-                >
-                  상담신청
-                </MediumText>
+                <MediumText color="#FFF" fontSize={16}>상담신청</MediumText>
               </View>
             }
             suffix={
-              <TouchableOpacity
-                onPress={onPressReset}
-              >
-                <MediumText
-                  fontSize={16}
-                  color="#959FFF"
-                >
-                  초기화
-                </MediumText>
+              <TouchableOpacity onPress={onPressReset}>
+                <MediumText fontSize={16} color="#959FFF">초기화</MediumText>
               </TouchableOpacity>
             }
           />
-          <View style={styles.textInput}>
-            <TextInput
-              ref={textInputRef}
-              value={note}
-              multiline={true}
-              style={styles.text}
-              scrollEnabled={true}
-              onChangeText={onChangeNote}
-              placeholderTextColor={"#B3B3B3"}
-              placeholder="여기를 탭하여 입력하세요(최대 1500자)"
-              onFocus={() => setBoldTextOpacity(0.5)} // TextInput이 포커스될 때 opacity 변경
-              onBlur={() => setBoldTextOpacity(1)} // TextInput이 포커스를 잃을 때 opacity 복원
-            />
-          </View>
-          <View style={[styles.buttonList, { bottom: insets.bottom, opacity: boldTextOpacity !== 1 ? 0 : 1 }]}>
-            <CustomButton onPress={onPressSaveDraft} style={[styles.button, styles.secondaryButton]}>
-              <MediumText
-                fontSize={14}
-              >
-                임시저장
-              </MediumText>
-            </CustomButton>
-            <PrimaryButton onPress={onPressSave} style={styles.button}>
-              <MediumText
-                fontSize={14}
-              >
-                상담신청
-              </MediumText>
-            </PrimaryButton>
-          </View>
-        </SafeAreaView>
-        <View style={styles.inputCompleteButtonLayout}>
-          <TouchableOpacity
-            style={[styles.inputCompleteButton, {
-              opacity: boldTextOpacity === 1 ? 0 : 1,
-              height: boldTextOpacity === 1 ? 0 : moderateScale(40),
-            }]}
-            onPress={onComplete}
-            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.formContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
-            <LeftArrow style={{ transform: [{ rotate: '90deg' }] }} />
-          </TouchableOpacity>
+            <LabeledInput label="이름" value={form.name} onChangeText={(text) => handleFormChange('name', text)} placeholder="이름을 입력하세요" onFocus={handleInputFocus} />
+            <OptionSelector
+              label="성별"
+              options={['남성', '여성']}
+              selectedValue={form.gender}
+              onSelect={(value) => handleFormChange('gender', value)}
+            />
+            <LabeledInput label="나이" value={form.age} onChangeText={(text) => handleFormChange('age', text)} placeholder="예: 30" keyboardType="numeric" onFocus={handleInputFocus} />
+            <LabeledInput label="전화 번호" value={form.phoneNumber} onChangeText={(text) => handleFormChange('phoneNumber', text)} placeholder="'-\' 없이 입력" keyboardType="phone-pad" onFocus={handleInputFocus} />
+            <LabeledInput label="섬기는 교회(선택사항)" value={form.church} onChangeText={(text) => handleFormChange('church', text)} placeholder="교회 이름을 입력하세요" onFocus={handleInputFocus} />
+            <OptionSelector
+              label="선호 상담 방식"
+              options={['대면', '비대면']}
+              selectedValue={form.counselingMethod}
+              onSelect={(value) => handleFormChange('counselingMethod', value)}
+            />
+            <LabeledInput label="호소 내용" value={form.content} onChangeText={(text) => handleFormChange('content', text)} placeholder="상담 받고 싶은 구체적인 내용을 입력하세요." multiline={true} onFocus={handleInputFocus} />
+          </ScrollView>
+
+          {/* Enter Button */}
+          <View style={[styles.enterButtonLayout,
+          {
+            display: keyboardVisible ? 'flex' : 'none',
+          }
+          ]}>
+            <TouchableOpacity
+              style={styles.enterButton}
+              onPress={() => Keyboard.dismiss()}
+              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+            >
+              <LeftArrow style={{ transform: [{ rotate: '90deg' }] }} />
+            </TouchableOpacity>
+          </View>
+
+        </KeyboardAvoidingView>
+        <View style={[
+          styles.buttonList
+        ]}>
+          <CustomButton onPress={onPressSaveDraft} style={[styles.button, styles.secondaryButton]}>
+            <MediumText fontSize={14}>임시저장</MediumText>
+          </CustomButton>
+          <PrimaryButton onPress={onPressSave} style={[styles.button, !isFormValid && styles.disabledButton]}>
+            <MediumText fontSize={14}>상담신청</MediumText>
+          </PrimaryButton>
         </View>
-      </KeyboardAvoidingView>
+      </SafeAreaView >
     </>
   )
 }
@@ -327,56 +386,97 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
+    backgroundColor: 'rgba(15, 20, 26, 0.4)',
+  },
+  safeArea: {
+    flex: 1,
   },
   header: {
     marginBottom: moderateScale(20)
   },
-  title: {
-    paddingHorizontal: moderateScale(24),
-    marginBottom: moderateScale(44)
+  headerPrefix: {
+    gap: moderateScale(16),
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  textInput: {
+  formContainer: {
+    flex: 1,
     paddingHorizontal: moderateScale(24),
   },
-  text: {
+  inputGroup: {
+    marginBottom: moderateScale(16),
+  },
+  label: {
+    color: '#FFF',
+    fontSize: normalizeFontSize(14),
+    marginBottom: moderateScale(8),
+    fontFamily: 'NotoSansKR_500Medium',
+  },
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: moderateScale(8),
+    paddingHorizontal: moderateScale(14),
+    paddingVertical: moderateScale(12),
+    color: '#FFF',
     fontFamily: 'NotoSansKR_400Regular',
-    fontSize: normalizeFontSize(16),
-    lineHeight: normalizeFontSize(28),
-    color: "#FFFFFF",
-    height: '80%',
-    textAlignVertical: 'top'
+    fontSize: normalizeFontSize(14),
+    minHeight: moderateScale(48),
+  },
+  multilineInput: {
+    height: moderateScale(150),
+  },
+  optionsContainer: {
+    flexDirection: 'row',
+    gap: moderateScale(8),
+  },
+  optionButton: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: moderateScale(8),
+    paddingVertical: moderateScale(12),
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: moderateScale(48),
+  },
+  selectedOption: {
+    backgroundColor: '#4F5FFF',
+  },
+  optionText: {
+    fontSize: normalizeFontSize(14),
+    fontFamily: 'NotoSansKR_500Medium',
   },
   buttonList: {
-    position: 'absolute',
     flexDirection: 'row',
     paddingHorizontal: moderateScale(20),
     gap: moderateScale(8),
-    marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(24),
+    paddingBottom: moderateScale(24),
   },
   button: {
     flex: 1,
     paddingVertical: moderateScale(12),
   },
   secondaryButton: {
-    backgroundColor: 'rgba(15, 20, 26, 0.4)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
-  inputCompleteButtonLayout: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+  disabledButton: {
+    backgroundColor: '#555',
+    opacity: 0.7,
+  },
+  enterButtonLayout: {
+    display: 'flex',
     width: '100%',
-    paddingHorizontal: moderateScale(20)
+    justifyContent: 'space-between',
+    marginBottom: moderateScale(20),
   },
-  inputCompleteButton: {
+  enterButton: {
     width: moderateScale(40),
     height: moderateScale(40),
     borderRadius: 100,
-    marginBottom: moderateScale(12),
     backgroundColor: '#4F5FFF',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  headerPrefix: {
-    gap: moderateScale(16),
-    flexDirection: 'row',
+
+    marginLeft: 'auto',
+    marginRight: moderateScale(20)
   },
 })

@@ -208,16 +208,7 @@ export default function QuestionGuide() {
             color="rgba(255, 255, 255, 0.8)"
             fontSize={14}
           >
-            2️⃣ 전화번호는 선택사항이며, 비대면 상담을 원하시는 경우 연락을 위해 적어주시면 좋습니다.
-          </RegularText>
-          <RegularText
-            style={{
-              marginBottom: moderateScale(4),
-            }}
-            color="rgba(255, 255, 255, 0.8)"
-            fontSize={14}
-          >
-            3️⃣ 신청서 작성 후 일정을 조율하기 위해 담당자가 개별 회신을 드릴 예정입니다. 알림을 키면 더 빠르게 확인할 수 있습니다.
+            2️⃣ 신청서 작성 후 일정을 조율하기 위해 담당자가 개별 회신을 드릴 예정입니다. 알림을 키면 더 빠르게 확인할 수 있습니다.
           </RegularText>
         </View>
       </ScrollView>

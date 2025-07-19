@@ -8,11 +8,11 @@ import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
 import { LectureType } from "@/utils/dataType";
-import { KEEP_AWAKE_TAG } from "@/utils/keepAwake";
+import { useScreenTransition } from "@/utils/hooks/useScreenTransition";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { activateKeepAwakeAsync, deactivateKeepAwake, useKeepAwake } from 'expo-keep-awake';
+import { useKeepAwake } from 'expo-keep-awake';
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
@@ -35,15 +35,20 @@ const getDefaultLecture = (): LectureType => ({
 })
 
 export default function Lecture() {
-  // Keep screen awake while the component is mounted
-  useKeepAwake(KEEP_AWAKE_TAG);
+  useKeepAwake();
 
   const insets = useSafeAreaInsets();
 
-  const { plan_id, lecture_id, plan_title } = useLocalSearchParams<{
+  const {
+    plan_id
+    , lecture_id
+    , plan_title
+    , isReconnect
+  } = useLocalSearchParams<{
     plan_id: string,
     lecture_id: string,
-    plan_title: string
+    plan_title: string,
+    isReconnect?: string
   }>();
 
   // Fetch lecture data
@@ -52,11 +57,14 @@ export default function Lecture() {
   const lecture = data?.lecture || getDefaultLecture();
   const lectureAudios = data?.lectureAudios || [];
 
-  const [isShowedIntro, setIsShowedIntro] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
-  const [showContent, setShowContent] = useState(false);
-  const introOpacity = useRef(new Animated.Value(0)).current;
-  const contentOpacity = useRef(new Animated.Value(1)).current;
+  const {
+    isIntroVisible
+    , isContentVisible
+    , introOpacity
+    , contentOpacity
+  } = useScreenTransition({
+    isDataLoaded: isLectureSuccess,
+  });
 
   const [timerKey, setTimerKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -78,38 +86,10 @@ export default function Lecture() {
     elapsedTimeRef.current = elapsedTime;
   }, [elapsedTime])
 
-  // Show intro when component is mounted and activate keep awake
+  // Set initial duration and remaining time
   useEffect(() => {
-
-    async function activateKeepAwake() {
-      await activateKeepAwakeAsync(KEEP_AWAKE_TAG);
-    }
-
-    async function deactivateKeepAwakeAsync() {
-      await deactivateKeepAwake(KEEP_AWAKE_TAG);
-      await deactivateKeepAwake();
-    }
-
-    setTimeout(async () => {
-      setShowIntro(true);
-      Animated.timing(introOpacity, {
-        toValue: 1,
-        duration: 3000,
-        useNativeDriver: true,
-      }).start(() => setIsShowedIntro(true));
-    }, 500);
-
-    activateKeepAwake();
-
-    return () => {
-      deactivateKeepAwakeAsync();
-    }
-  }, []);
-
-  // Hide intro and show content after lecture data is loaded
-  useEffect(() => {
-    async function hideIntro() {
-      if (isLectureSuccess && isShowedIntro) {
+    async function startLecture() {
+      if (isLectureSuccess && isContentVisible) {
 
         if (lecture.bgm === '') {
           Alert.alert('알림!', '새로운 오디오 파일이 추가되었습니다. 파일을 다시 다운로드 해주세요.');
@@ -117,28 +97,33 @@ export default function Lecture() {
           router.dismissTo('/plan');
         }
 
-        Animated.timing(introOpacity, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: true,
-        }).start(() => {
-          const time = lecture.time === 0 ? 1 : (lecture.time * 60);
-          setShowIntro(false);
-          setShowContent(true);
-          setIsPlaying(true);
-          setDuration(time);
-          setInitialRemainingTime(time);
-          Animated.timing(contentOpacity, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }).start();
-        });
+        const isPraying = await AsyncStorage.getItem('isPraying');
+        const duration = lecture.time === 0 ? 1 : (lecture.time * 60);
+
+        setIsPlaying(true);
+        setDuration(duration);
+        setInitialRemainingTime(duration);
+
+        if (!!isReconnect && !!isPraying) {
+          // If already praying, set the elapsed time and repeat count
+          const {
+            repeatCount: savedRepeatCount
+            , elapsedTime: savedElapsedTime
+            , pauseTime: savedPauseTime
+          } = JSON.parse(isPraying);
+
+          let curTime = new Date().getTime() / 1000;
+          let diffTime = curTime - Number(savedPauseTime);
+          let totalElapsedTime = savedElapsedTime + diffTime + (savedRepeatCount * duration);
+
+          await amp?.adjustVoiceBy(totalElapsedTime);
+          onAdjustElapedTime(totalElapsedTime, duration);
+        }
       }
     }
 
-    hideIntro();
-  }, [isLectureSuccess, isShowedIntro]);
+    startLecture();
+  }, [isLectureSuccess, isContentVisible]);
 
   // Set Amp instance when lecture data is loaded
   useEffect(() => {
@@ -157,6 +142,18 @@ export default function Lecture() {
       if (!!amp) {
         await amp.changeToBackgroundState(elapsedTimeRef.current);
       }
+
+      // 3. 기도중이라는 상태를 AsyncStorage에 저장
+      //    나중에 메인 화면에서 기도중인지 확인하기 위함
+      await AsyncStorage.setItem('isPraying', JSON.stringify({
+        plan_id: plan_id,
+        plan_title: plan_title,
+        lecture_id: lecture_id,
+        lecture_title: lecture.title,
+        repeatCount: repeatCount,
+        elapsedTime: elapsedTime,
+        pauseTime: new Date().getTime() / 1000,
+      }))
     }
 
     async function changeToForeground() {
@@ -235,13 +232,19 @@ export default function Lecture() {
     playVoice();
   }, [elapsedTime])
 
-  const adjustElapedTime = async (elapsedTime: number) => {
-    let newRepeatCount = Math.floor(elapsedTime / duration);
-    let newElapsedTime = Math.floor(elapsedTime % duration);
+  const onAdjustElapedTime = async (elapsedTime: number, newDuration?: number) => {
+    const currentDuration = newDuration ?? duration;
+
+    if (currentDuration === 0) {
+      return; // 0으로 나누는 오류 방지
+    }
+
+    let newRepeatCount = Math.floor(elapsedTime / currentDuration);
+    let newElapsedTime = Math.floor(elapsedTime % currentDuration);
 
     setRepeatCount(newRepeatCount);
     setElapsedTime(newElapsedTime);
-    setInitialRemainingTime(duration - newElapsedTime);
+    setInitialRemainingTime(currentDuration - newElapsedTime);
 
     // 타이머 렌더링을 위한 작업
     setTimerKey(timerKey + 1);
@@ -340,6 +343,7 @@ export default function Lecture() {
   }
 
   const onPressCompleteBtn = async (elapsedTime: number) => {
+    await AsyncStorage.removeItem('isPraying');
     router.replace({
       pathname: '/prayerRecord',
       params: {
@@ -356,7 +360,7 @@ export default function Lecture() {
   return (
     <View style={{ paddingTop: insets.top }}>
       {/* Intro */}
-      {showIntro && (
+      {isIntroVisible && (
         <Animated.View style={[styles.intro, { opacity: introOpacity }]}>
           <RegularText
             style={styles.introText}
@@ -378,7 +382,7 @@ export default function Lecture() {
       )}
 
       {/* Content */}
-      {showContent && (
+      {isContentVisible && (
         <Animated.View style={{ opacity: contentOpacity }}>
           <Header
             style={styles.header}
@@ -470,7 +474,7 @@ export default function Lecture() {
               initialRemainingTime={initialRemainingTime}
               isPlaying={isPlaying}
               appState={appStateVisible}
-              adjustElapedTime={adjustElapedTime}
+              onAdjustElapedTime={onAdjustElapedTime}
               setElapsedTime={setElapsedTime}
               onPressNext={onPressNext}
               onPressPlay={onPressPlay}

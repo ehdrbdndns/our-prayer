@@ -118,6 +118,7 @@ export default function AppLayout() {
     }
   }, [isAppInfoSuccess, appInfo, isVersionChecked])
 
+  // 앱이 준비되었는지 확인
   useEffect(() => {
     setAppReady(isTokenRefetched && isVersionChecked);
   }, [isTokenRefetched, isVersionChecked])
@@ -134,7 +135,7 @@ export default function AppLayout() {
     <>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "fade" }} />
-        <Stack.Screen name="(stacks)" options={{ headerShown: false, animation: "fade" }} />
+        <Stack.Screen name="(stacks)" options={{ headerShown: false, animation: "fade", gestureEnabled: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <NetworkErrorPage isShow={isNetworkErrorShown} />
