@@ -180,8 +180,14 @@ export default function Timer(props: TimerProps) {
               >
                 {
                   isPlaying
-                    ? <Pause />
-                    : <Play />
+                    ? <Pause
+                      width={moderateScale(36)}
+                      height={moderateScale(36)}
+                    />
+                    : <Play
+                      width={moderateScale(36)}
+                      height={moderateScale(36)}
+                    />
                 }
               </TouchableOpacity>
 
