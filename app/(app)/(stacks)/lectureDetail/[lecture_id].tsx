@@ -70,6 +70,7 @@ export default function Lecture() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBgmMute, setIsBgmMute] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
+  const repeatCountRef = useRef(0);
   const [duration, setDuration] = useState(0);
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -85,6 +86,10 @@ export default function Lecture() {
   useEffect(() => {
     elapsedTimeRef.current = elapsedTime;
   }, [elapsedTime])
+
+  useEffect(() => {
+    repeatCountRef.current = repeatCount;
+  }, [repeatCount])
 
   // Set initial duration and remaining time
   useEffect(() => {
@@ -114,6 +119,7 @@ export default function Lecture() {
 
           let curTime = new Date().getTime() / 1000;
           let diffTime = curTime - Number(savedPauseTime);
+
           let totalElapsedTime = savedElapsedTime + diffTime + (savedRepeatCount * duration);
 
           await amp?.adjustVoiceBy(totalElapsedTime);
@@ -150,8 +156,8 @@ export default function Lecture() {
         plan_title: plan_title,
         lecture_id: lecture_id,
         lecture_title: lecture.title,
-        repeatCount: repeatCount,
-        elapsedTime: elapsedTime,
+        repeatCount: repeatCountRef.current,
+        elapsedTime: elapsedTimeRef.current,
         pauseTime: new Date().getTime() / 1000,
       }))
     }
