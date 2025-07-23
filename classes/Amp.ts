@@ -86,6 +86,9 @@ export default class Amp {
    * @returns Promise<Boolean> 
    */
   async turnOn(): Promise<Boolean> {
+    // Turn off existing sounds before turning on new ones
+    await this.turnOff();
+
     try {
       // set bgm
       const bgmKey = ASYNC_AUDIO_KEY(this.lectureId);
