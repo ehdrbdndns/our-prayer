@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
 
     paddingTop: moderateScale(6),
     paddingBottom: moderateScale(34),
-    paddingHorizontal: moderateScale(30),
+    paddingHorizontal: moderateScale(20),
     backgroundColor: '#161B29'
   },
   tabButton: {
