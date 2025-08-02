@@ -83,9 +83,7 @@
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "packagerOpts": {
-      "config": "metro.config.js"
-    },
+    
     "splash": {
       "image": "./assets/images/logo.png",
       "backgroundColor": "#242527"
