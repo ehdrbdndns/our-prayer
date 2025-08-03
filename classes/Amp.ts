@@ -17,7 +17,8 @@ export default class Amp {
 
   // bgm
   private bgmSound?: Sound;
-  private isBgmMute: boolean;
+  private silentSound?: Sound;
+  private isBgmOn: boolean;
 
   // voice
   private voiceSoundList: { [lectureAudioId: string]: Sound };
@@ -39,7 +40,7 @@ export default class Amp {
     this.isPlaying = option.isPlaying ?? true;
 
     this.voiceSoundList = {};
-    this.isBgmMute = false;
+    this.isBgmOn = true;
     this.currentVoiceSound = null;
   }
 
@@ -94,6 +95,13 @@ export default class Amp {
       const bgmKey = ASYNC_AUDIO_KEY(this.lectureId);
       this.bgmSound = await this.loadAudio(bgmKey, { shouldPlay: true, isLooping: true });
 
+      // set silent audio
+      const { sound: silentSound } = await Audio.Sound.createAsync(
+        require('../assets/audio/silent.mp3'),
+        { shouldPlay: false, isLooping: true }
+      );
+      this.silentSound = silentSound;
+
       // set voice
       for (const audio of this.audios) {
         const { lecture_audio_id } = audio;
@@ -123,6 +131,10 @@ export default class Amp {
   async turnOff() {
     if (this.bgmSound) {
       await this.bgmSound.unloadAsync();
+    }
+
+    if (this.silentSound) {
+      await this.silentSound.unloadAsync();
     }
 
     for (const audio of this.audios) {
@@ -161,7 +173,7 @@ export default class Amp {
       await this.currentVoiceSound.playAsync();
     }
 
-    if (this.bgmSound && !this.isBgmMute) {
+    if (this.bgmSound && this.isBgmOn) {
       await this.bgmSound.playAsync();
     }
 
@@ -172,9 +184,10 @@ export default class Amp {
    * bgm을 실행합니다.
    */
   async playBgm() {
-    if (this.bgmSound) {
+    if (this.bgmSound && this.silentSound) {
+      await this.silentSound.pauseAsync();
       await this.bgmSound.playAsync();
-      this.isBgmMute = false;
+      this.isBgmOn = true;
     }
   }
 
@@ -182,9 +195,10 @@ export default class Amp {
    * bgm을 일시정지합니다.
    */
   async pauseBgm() {
-    if (this.bgmSound) {
+    if (this.bgmSound && this.silentSound) {
       await this.bgmSound.pauseAsync();
-      this.isBgmMute = true;
+      await this.silentSound.playAsync();
+      this.isBgmOn = false;
     }
   }
 
