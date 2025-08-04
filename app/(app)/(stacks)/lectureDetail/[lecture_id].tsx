@@ -1,7 +1,7 @@
-import Delete from "@/assets/images/icon/delete.svg";
 import Music from "@/assets/images/icon/music.svg";
 import Mute from "@/assets/images/icon/mute.svg";
 import Amp from "@/classes/Amp";
+import CustomButton from "@/components/button/CustomButton";
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
@@ -393,12 +393,15 @@ export default function Lecture() {
           <Header
             style={styles.header}
             prefix={
-              <Pressable
-                onPress={onPressLeftArrow}
-                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-              >
-                <Delete />
-              </Pressable>
+              <CustomButton style={{
+                width: "auto"
+              }} onPress={onPressLeftArrow}>
+                <MediumText style={{
+                  color: "#959FFF"
+                }} fontSize={14}>
+                  그만두기
+                </MediumText>
+              </CustomButton>
             }
             suffix={
               <Pressable
