@@ -1,15 +1,12 @@
 import CheckedCircle from '@/assets/images/icon/checkedCircle.svg';
-import Heart from "@/assets/images/icon/heart.svg";
 import LeftArrow from "@/assets/images/icon/leftArrow.svg";
 import Play from '@/assets/images/icon/play.svg';
-import RightShortArrow from '@/assets/images/icon/rightShortArrow.svg';
 import UnChckedCircle from '@/assets/images/icon/unCheckedCircle.svg';
 import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
-import { useLikeMutation } from '@/utils/mutation';
 import { usePlanQuery } from '@/utils/queries';
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +14,7 @@ import { ImageBackground } from "expo-image";
 import { Href, router, useLocalSearchParams } from "expo-router";
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Image, Platform, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, Animated, Platform, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PlanDetailPage() {
@@ -132,17 +129,7 @@ export default function PlanDetailPage() {
     fetchLectureHistory();
   }, [])
 
-  const { isLiked, mutateLike } = useLikeMutation({
-    plan_id,
-    is_liked: plan?.is_liked || Boolean(Number(isLikedFromParam)),
-    plan_like_id: plan?.plan_like_id || '',
-  });
-
-  const onPressHeart = () => {
-    mutateLike();
-  }
-
-  const onPressLeftArrow = () => {
+  const handlePressLeftArrow = () => {
     if (backToLink !== undefined) {
       router.dismissTo(backToLink as Href);
     } else {
@@ -150,7 +137,7 @@ export default function PlanDetailPage() {
     }
   }
 
-  const onPressLecture = ({ lecture_id }: { lecture_id: string }) => {
+  const handlePressLecture = ({ lecture_id }: { lecture_id: string }) => {
     // Todo - add params
     router.push({
       pathname: '/lectureDetail/[lecture_id]',
@@ -162,11 +149,11 @@ export default function PlanDetailPage() {
     })
   }
 
-  const onPressAuthor = async (uri: string) => {
+  const handlePressAuthor = async (uri: string) => {
     await WebBrowser.openBrowserAsync(uri);
   }
 
-  const onPressContinueBtn = () => {
+  const handlePressContinueBtn = () => {
     // 수강할 강의 ID
     let nextLectureId = getNextLectureId();
     router.push({
@@ -226,29 +213,13 @@ export default function PlanDetailPage() {
           style={styles.header}
           prefix={
             <View style={styles.headerPrefix}>
-              <Pressable onPress={onPressLeftArrow} hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}>
+              <Pressable onPress={handlePressLeftArrow} hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}>
                 <LeftArrow />
               </Pressable>
               <MediumText>{title}</MediumText>
             </View>
           }
-          suffix={
-            <Heart
-              fill={isLiked ? "#FF7D71" : "transparent"}
-              stroke={isLiked ? "#FF7D71" : "white"}
-              onPress={onPressHeart}
-              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-            />
-          }
         />
-        {/* Banner */}
-        <View style={styles.banner}>
-          <Image
-            resizeMode="cover"
-            style={styles.bannerImage}
-            source={{ uri: banner || data?.plan.thumbnail }}
-          />
-        </View>
 
         {/* Content */}
         <View style={styles.container}>
@@ -278,55 +249,6 @@ export default function PlanDetailPage() {
             </RegularText>
           </View>
 
-          {/* Desc Author */}
-          <TouchableOpacity
-            onPress={() => onPressAuthor(plan?.author_deeplink || '')}
-          >
-            <View style={[styles.card, styles.author]}>
-              {/* Profile */}
-              <View style={styles.profile}>
-                <Image
-                  style={styles.profileImage}
-                  source={{ uri: plan?.author_profile }}
-                />
-                <View style={styles.profileName}>
-                  <RegularText
-                    fontSize={12}
-                    lineHeight={18}
-                    color={"#B3B3B3"}
-                  >
-                    더 보기
-                  </RegularText>
-                  <RegularText
-                    fontSize={16}
-                    lineHeight={22}
-                  >
-                    {plan?.author_name}
-                  </RegularText>
-                </View>
-                <Pressable>
-                  <RightShortArrow />
-                </Pressable>
-              </View>
-              {/* Content */}
-              <RegularText
-                style={styles.profileContent}
-                fontSize={12}
-                lineHeight={22}
-              >
-                {plan?.author_description}
-              </RegularText>
-
-              <RegularText
-                fontSize={12}
-                lineHeight={22}
-                color="#B3B3B3"
-              >
-                출판자 소개
-              </RegularText>
-            </View>
-          </TouchableOpacity>
-
           {/* LectureList */}
           <View>
             {/* Title */}
@@ -354,7 +276,7 @@ export default function PlanDetailPage() {
                 lectures.map((row) => (
                   <TouchableOpacity
                     key={row.lecture_id}
-                    onPress={() => onPressLecture({ lecture_id: row.lecture_id })}
+                    onPress={() => handlePressLecture({ lecture_id: row.lecture_id })}
                     style={[styles.card, styles.lecture]}
                   >
                     {/* CheckBox */}
@@ -410,9 +332,10 @@ export default function PlanDetailPage() {
         paddingHorizontal: moderateScale(24),
         opacity: buttonOpacity.current,
         transform: [{ translateY: buttonTranslateY.current }],
-      }}>
+      }
+      }>
         <PrimaryButton
-          onPress={onPressContinueBtn}
+          onPress={handlePressContinueBtn}
           style={{
             paddingVertical: moderateScale(14)
           }}>
