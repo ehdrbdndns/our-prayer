@@ -1,7 +1,6 @@
 import Download from "@/assets/images/icon/download.svg";
 import { useModal } from "@/ctx";
 import { PlanType } from "@/utils/dataType";
-import { useLikeMutation } from "@/utils/mutation";
 import { moderateScale } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
@@ -16,12 +15,6 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
   const { showModal } = useModal();
 
   const [isDownloaded, setIsDownloaded] = useState(false);
-
-  const { isLiked, mutateLike } = useLikeMutation({
-    plan_id: plan.plan_id,
-    is_liked: plan.is_liked,
-    plan_like_id: plan.plan_like_id
-  })
 
   const checkPlanAudit = async () => {
     let audit = JSON.parse(await AsyncStorage.getItem(`planAudit-${plan.plan_id}`) || '{}');
@@ -38,7 +31,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
           plan_id: plan.plan_id,
           title: "기도 플랜",
           banner: plan.thumbnail,
-          isLiked: String(isLiked),
+          isLiked: '',
           backToLink: '/plan'
         },
       });
@@ -59,7 +52,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
                 auditDate: plan.audit_updated_date,
                 thumbnail: plan.thumbnail,
                 title: plan.title,
-                isLiked: isLiked
+                isLiked: false
               });
             }
           }

@@ -1,6 +1,5 @@
 import CheckedCircle from '@/assets/images/icon/checkedCircle.svg';
 import LeftArrow from "@/assets/images/icon/leftArrow.svg";
-import Play from '@/assets/images/icon/play.svg';
 import UnChckedCircle from '@/assets/images/icon/unCheckedCircle.svg';
 import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
@@ -306,11 +305,11 @@ export default function PlanDetailPage() {
                       </RegularText>
                     </View>
 
-                    {/* Button */}
-                    <Play
-                      width={moderateScale(38)}
-                      height={moderateScale(38)}
-                    />
+                    <RegularText
+                      fontSize={14}
+                    >
+                      {row.time}분
+                    </RegularText>
                   </TouchableOpacity>
                 ))
               }
