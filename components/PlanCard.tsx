@@ -1,5 +1,4 @@
 import Download from "@/assets/images/icon/download.svg";
-import Heart from "@/assets/images/icon/heart.svg";
 import { useModal } from "@/ctx";
 import { PlanType } from "@/utils/dataType";
 import { useLikeMutation } from "@/utils/mutation";
@@ -32,7 +31,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
 
   checkPlanAudit();
 
-  const onPressHeart = () => {
+  const handlePressHeart = () => {
     Alert.alert('즐겨찾기', isLiked ? '즐겨찾기를 취소하시겠습니까?' : '즐겨찾기를 등록하시겠습니까?', [
       {
         text: '취소',
@@ -47,7 +46,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
     ])
   }
 
-  const onPressCard = () => {
+  const handlePressCard = () => {
     if (isDownloaded) {
       router.push({
         pathname: `/planDetail/[plan_id]`,
@@ -88,10 +87,11 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
 
   return (
     <TouchableOpacity
-      onPress={onPressCard}
+      onPress={handlePressCard}
     >
       <ImageBackground
         style={styles.card}
+        imageStyle={{ borderRadius: moderateScale(8) }}
         source={plan.s_thumbnail}
       >
         <LinearGradient
@@ -117,19 +117,11 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
         </RegularText>
 
         {
-          isDownloaded ? (
-            <Heart
-              style={styles.heart}
-              fill={isLiked ? "#FF7D71" : "transparent"}
-              stroke={isLiked ? "#FF7D71" : "white"}
-              onPress={onPressHeart}
-              hitSlop={{ top: 18, bottom: 18, left: 18, right: 18 }}
-            />
-          ) : (
+          !isDownloaded ? (
             <Download
               style={styles.heart}
             />
-          )
+          ) : null
         }
       </ImageBackground>
     </TouchableOpacity>

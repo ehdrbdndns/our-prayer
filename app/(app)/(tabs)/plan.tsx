@@ -19,7 +19,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tabs = [
   { label: "전체보기", value: "" },
-  // { label: "시간별 기도", value: "time" },
   { label: "주제별 기도", value: "topic" },
   { label: "자유 기도", value: "free" },
 ];
@@ -129,7 +128,7 @@ export default function PlanPage() {
                     style={styles.title}
                     fontSize={18}
                   >
-                    현재 진행 중인 기도
+                    진행 중인 기도
                   </BoldText>
 
                   {/* Card */}
@@ -145,6 +144,7 @@ export default function PlanPage() {
                       {/* Image */}
                       <ImageBackground
                         style={styles.image}
+                        imageStyle={{ borderRadius: moderateScale(8) }}
                         source={currentPlan.s_thumbnail}
                       >
                         <LinearGradient
@@ -212,15 +212,6 @@ export default function PlanPage() {
 
               {/* Card List */}
             </View>
-
-            <View style={[styles.searchText, !isSearchActive && styles.hidden]}>
-              <RegularText
-                fontSize={16}
-                lineHeight={24}
-              >
-                '{searchQuery}'에 대한 검색결과입니다.
-              </RegularText>
-            </View>
           </View>
         )}
         renderItem={({ item }: { item: PlanType }) => <PlanCard refreshing plan={item} />}
@@ -274,7 +265,7 @@ const styles = StyleSheet.create({
   image: {
     width: moderateScale(60),
     height: moderateScale(60),
-    borderRadius: moderateScale(8),
+    resizeMode: "cover"
   },
   imageFilter: {
     ...StyleSheet.absoluteFillObject,
