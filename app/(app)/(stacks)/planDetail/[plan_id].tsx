@@ -12,7 +12,6 @@ import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import { Href, router, useLocalSearchParams } from "expo-router";
-import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Platform, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -147,10 +146,6 @@ export default function PlanDetailPage() {
         lecture_id: lecture_id,
       }
     })
-  }
-
-  const handlePressAuthor = async (uri: string) => {
-    await WebBrowser.openBrowserAsync(uri);
   }
 
   const handlePressContinueBtn = () => {
