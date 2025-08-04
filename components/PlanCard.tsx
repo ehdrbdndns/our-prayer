@@ -10,7 +10,6 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 import { BoldText } from "./text/BoldText";
-import { RegularText } from "./text/RegularText";
 
 export default function PlanCard({ plan, refreshing }: { plan: PlanType, refreshing: boolean }) {
 
@@ -30,21 +29,6 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
   }
 
   checkPlanAudit();
-
-  const handlePressHeart = () => {
-    Alert.alert('즐겨찾기', isLiked ? '즐겨찾기를 취소하시겠습니까?' : '즐겨찾기를 등록하시겠습니까?', [
-      {
-        text: '취소',
-        style: 'cancel'
-      },
-      {
-        text: '확인',
-        onPress: () => {
-          mutateLike();
-        }
-      }
-    ])
-  }
 
   const handlePressCard = () => {
     if (isDownloaded) {
@@ -101,21 +85,13 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
           }
           style={styles.cardFilter}
         />
+
         <BoldText
           fontSize={16}
           lineHeight={24}
         >
           {plan.title}
         </BoldText>
-
-        <RegularText
-          numberOfLines={1}
-          fontSize={14}
-          lineHeight={22}
-        >
-          {plan.description}
-        </RegularText>
-
         {
           !isDownloaded ? (
             <Download
@@ -135,7 +111,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(8),
 
     paddingLeft: moderateScale(12),
-    paddingBottom: moderateScale(20),
+    paddingBottom: moderateScale(14),
     paddingTop: moderateScale(14),
     paddingRight: moderateScale(14),
 
