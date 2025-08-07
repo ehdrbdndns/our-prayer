@@ -9,3 +9,9 @@ export const ASYNC_TIMER_KEY = 'timer';
 
 // 마지막으로 리뷰를 남긴 앱 버전
 export const ASYNC_LAST_REVIEWED_VERSION = 'last_reviewed_version';
+
+// 스마트 리뷰 요청 횟수
+export const ASYNC_REVIEW_REQUEST_COUNT = 'review_request_count';
+
+// 마지막으로 리뷰를 요청한 시간
+export const ASYNC_LAST_REVIEW_REQUEST_TIMESTAMP = 'last_review_request_timestamp';

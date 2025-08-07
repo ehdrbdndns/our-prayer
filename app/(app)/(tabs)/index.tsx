@@ -9,15 +9,13 @@ import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
 import { useAppContext } from "@/contexts/AppContext";
 import { useSession } from '@/contexts/AuthContext';
-import { ASYNC_LAST_REVIEWED_VERSION } from "@/storage/asyncStorageKeys";
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
+import { handleSmartReviewRequest } from "@/utils/inAppReview";
 import { useBibleQuery, useHistoryQuery } from "@/utils/queries";
 import { moderateScale } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused } from "@react-navigation/native";
-import * as Application from 'expo-application';
 import { router } from "expo-router";
-import * as StoreReview from 'expo-store-review';
 import { useEffect, useState } from "react";
 import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -100,20 +98,10 @@ export default function Index() {
   // 앱 리뷰 요청 로직
   useEffect(() => {
     if (isFocused && shouldRequestReview) {
-      const requestReview = async () => {
-        const lastReviewedVersion = await AsyncStorage.getItem(ASYNC_LAST_REVIEWED_VERSION);
-        const currentVersion = Application.nativeApplicationVersion;
+      const timer = setTimeout(() => {
+        handleSmartReviewRequest(setShouldRequestReview);
+      }, 500);
 
-        if (lastReviewedVersion !== currentVersion) {
-          if (await StoreReview.isAvailableAsync()) {
-            await StoreReview.requestReview();
-            await AsyncStorage.setItem(ASYNC_LAST_REVIEWED_VERSION, currentVersion || '');
-          }
-        }
-        setShouldRequestReview(false);
-      };
-
-      const timer = setTimeout(requestReview, 500);
       return () => clearTimeout(timer);
     }
   }, [isFocused, shouldRequestReview]);
