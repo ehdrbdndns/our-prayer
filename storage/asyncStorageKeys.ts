@@ -6,3 +6,6 @@ export const ASYNC_AUDIO_KEY = (key: string) => `audio-${key}`;
 
 // Timer 상태 전환 키 입니다.
 export const ASYNC_TIMER_KEY = 'timer';
+
+// 마지막으로 리뷰를 남긴 앱 버전
+export const ASYNC_LAST_REVIEWED_VERSION = 'last_reviewed_version';
