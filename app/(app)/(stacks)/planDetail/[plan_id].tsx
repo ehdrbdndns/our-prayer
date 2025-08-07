@@ -31,8 +31,9 @@ export default function PlanDetailPage() {
 
   const { data, isSuccess: isPlanSuccess } = usePlanQuery({ plan_id });
 
-  // [lecture_id]: count
+  // [lecture_id]: 강의 들은 횟수
   const [lectureHistoryDict, setLectureHistoryDict] = useState<{ [lecture_id: string]: number }>({});
+  const [nextLectureId, setNextLectureId] = useState<string | null>(null);
 
   const plan = data?.plan;
   const lectures = (data?.lectures || []).sort((a, b) => a.created_date - b.created_date);
@@ -42,21 +43,6 @@ export default function PlanDetailPage() {
 
   const buttonOpacity = useRef(new Animated.Value(0));
   const buttonTranslateY = useRef(new Animated.Value(20));
-
-  const handleScroll = (event: any) => {
-    const currentScrollY = event.nativeEvent.contentOffset.y;
-    const maxScrollY = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
-
-    // 바운스 효과에 반응하지 않도록 스크롤 위치가 유효한 범위 내에 있는지 확인
-    if (currentScrollY >= 0 && currentScrollY <= maxScrollY) {
-      if (currentScrollY > prevScrollY) {
-        setScrollDirection('down');
-      } else {
-        setScrollDirection('up');
-      }
-      setPrevScrollY(currentScrollY);
-    }
-  };
 
   useEffect(() => {
     const showButton = Animated.parallel([
@@ -127,6 +113,47 @@ export default function PlanDetailPage() {
     fetchLectureHistory();
   }, [])
 
+  // 다음에 수강할 강의 ID를 계산합니다.
+  useEffect(() => {
+    if (lectures.length > 0) {
+      const completedLectureIds = Object.keys(lectureHistoryDict);
+      const completedLectures = lectures
+        .filter(lecture => completedLectureIds.includes(lecture.lecture_id));
+
+      if (completedLectures.length === 0) {
+        setNextLectureId(lectures[0].lecture_id);
+        return;
+      }
+
+      const latestLecture = completedLectures
+        .sort((a, b) => b.created_date - a.created_date)[0];
+
+      const nextLecture = lectures
+        .filter(lecture =>
+          !completedLectureIds.includes(lecture.lecture_id)
+          && lecture.created_date > latestLecture.created_date
+        )
+        .sort((a, b) => a.created_date - b.created_date)[0];
+
+      setNextLectureId(nextLecture ? nextLecture.lecture_id : latestLecture.lecture_id);
+    }
+  }, [lectures, lectureHistoryDict]);
+
+  const handleScroll = (event: any) => {
+    const currentScrollY = event.nativeEvent.contentOffset.y;
+    const maxScrollY = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
+
+    // 바운스 효과에 반응하지 않도록 스크롤 위치가 유효한 범위 내에 있는지 확인
+    if (currentScrollY >= 0 && currentScrollY <= maxScrollY) {
+      if (currentScrollY > prevScrollY) {
+        setScrollDirection('down');
+      } else {
+        setScrollDirection('up');
+      }
+      setPrevScrollY(currentScrollY);
+    }
+  };
+
   const handlePressLeftArrow = () => {
     if (backToLink !== undefined) {
       router.dismissTo(backToLink as Href);
@@ -148,8 +175,9 @@ export default function PlanDetailPage() {
   }
 
   const handlePressContinueBtn = () => {
+    if (!nextLectureId) return;
+
     // 수강할 강의 ID
-    let nextLectureId = getNextLectureId();
     router.push({
       pathname: '/lectureDetail/[lecture_id]',
       params: {
@@ -158,33 +186,6 @@ export default function PlanDetailPage() {
         lecture_id: nextLectureId,
       }
     })
-  }
-
-  /*
-    다음 강의 ID를 가져오는 함수
-    수강한 강의가 없으면 첫 번째 강의 ID를 반환
-    수강한 강의가 있으면 가장 최근 강의 이후의 강의 ID를 반환
-  */
-  const getNextLectureId = () => {
-    const completedLectureIds = Object.keys(lectureHistoryDict);
-    const completedLectures = lectures
-      .filter(lecture => completedLectureIds.includes(lecture.lecture_id));
-
-    if (completedLectures.length === 0) {
-      return lectures[0].lecture_id;
-    }
-
-    const latestLecture = completedLectures
-      .sort((a, b) => b.created_date - a.created_date)[0];
-
-    const nextLecture = lectures
-      .filter(lecture =>
-        !completedLectureIds.includes(lecture.lecture_id)
-        && lecture.created_date > latestLecture.created_date
-      )
-      .sort((a, b) => a.created_date - b.created_date)[0];
-
-    return nextLecture ? nextLecture.lecture_id : latestLecture.lecture_id;
   }
 
   return (
@@ -248,7 +249,7 @@ export default function PlanDetailPage() {
             {/* Title */}
             <BoldText
               style={styles.lectureTitle}
-              fontSize={16}
+              fontSize={18}
               lineHeight={22}
             >
               회차 선택하기
@@ -271,7 +272,11 @@ export default function PlanDetailPage() {
                   <TouchableOpacity
                     key={row.lecture_id}
                     onPress={() => handlePressLecture({ lecture_id: row.lecture_id })}
-                    style={[styles.card, styles.lecture]}
+                    style={[
+                      styles.card
+                      , styles.lecture
+                      , row.lecture_id === nextLectureId && styles.active
+                    ]}
                   >
                     {/* CheckBox */}
                     {
@@ -288,28 +293,39 @@ export default function PlanDetailPage() {
                       )
                     }
 
-                    {/* Content */}
-                    <View style={styles.lectureContent}>
-                      <BoldText
-                        fontSize={16}
-                        lineHeight={24}
-                      >
-                        {row.title}
-                      </BoldText>
+                    <View style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}>
+                      {/* Content */}
+                      <View style={{
+                        width: '80%'
+                      }}>
+                        <BoldText
+                          fontSize={16}
+                          lineHeight={24}
+                          style={{
+                            marginBottom: 2
+                          }}
+                        >
+                          {row.title}
+                        </BoldText>
+                        <RegularText
+                          fontSize={14}
+                          lineHeight={22}
+                          numberOfLines={2}
+                        >
+                          {row.description}
+                        </RegularText>
+                      </View>
+
                       <RegularText
                         fontSize={14}
-                        lineHeight={22}
-                        numberOfLines={1}
                       >
-                        {row.description}
+                        {row.time >= 1 ? `${row.time}분` : ''}
                       </RegularText>
                     </View>
-
-                    <RegularText
-                      fontSize={14}
-                    >
-                      {row.time}분
-                    </RegularText>
                   </TouchableOpacity>
                 ))
               }
@@ -421,8 +437,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: moderateScale(16)
   },
-  lectureContent: {
-    flex: 1,
-    gap: moderateScale(2),
+  active: {
+    borderWidth: 1,
+    borderColor: "#4D5BDC",
+    backgroundColor: 'rgba(255, 255, 255, .08)'
   }
 });
