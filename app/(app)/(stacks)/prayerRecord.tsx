@@ -187,10 +187,7 @@ const styles = StyleSheet.create({
     fontSize: normalizeFontSize(16),
     lineHeight: normalizeFontSize(28),
     color: "#FFFFFF",
-    textAlignVertical: 'top',
-
-    borderWidth: 1,
-    borderColor: 'red'
+    textAlignVertical: 'top'
   },
   buttonList: {
     position: 'absolute',
