@@ -173,7 +173,7 @@ export default function MyPage() {
       [                     // buttons
         { text: '취소', style: 'cancel' },
         {
-          text: '삭제하기', onPress: () => deleteUserMutate()
+          text: '탈퇴하기', onPress: () => deleteUserMutate()
         }
       ]
     )
