@@ -1,4 +1,4 @@
-import { useModal } from '@/ctx';
+import { useModal } from '@/contexts/ModalContext';
 import { addAudio } from '@/utils/audioFile';
 import api from '@/utils/axios';
 import { AudioFileSystemType } from '@/utils/dataType';

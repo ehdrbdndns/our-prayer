@@ -1,3 +1,5 @@
+import { AppProvider } from '@/contexts/AppContext';
+import { SessionProvider } from '@/contexts/AuthContext';
 import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import {
@@ -16,7 +18,6 @@ import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setStatusBarStyle } from "expo-status-bar";
 import { useEffect } from "react";
-import { SessionProvider } from '../ctx';
 
 const queryClient = new QueryClient()
 
@@ -30,9 +31,10 @@ SplashScreen.setOptions({
 // This handler determines how your app handles notifications that come in while the app is foregrounded.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -83,9 +85,11 @@ export default function Root() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionProvider>
-        <Slot initialRouteName='(app)' />
-      </SessionProvider>
+      <AppProvider>
+        <SessionProvider>
+          <Slot initialRouteName='(app)' />
+        </SessionProvider>
+      </AppProvider>
     </QueryClientProvider>
   );
 }

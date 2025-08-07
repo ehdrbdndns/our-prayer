@@ -33,14 +33,19 @@ This governs all data fetched from or sent to the backend API.
 
 ### Tier 2: Global UI & Auth State (React Context)
 
-This is for non-server state that needs to be shared across multiple components, like authentication status or modal visibility.
+This is for non-server state that needs to be shared across multiple components. The project uses a multi-context approach to ensure a clear separation of concerns.
 
 #### **RULES: MUST DO**
--   ✅ **ALWAYS** use the `useSession()` hook from `ctx.tsx` to access user authentication status and methods (`signIn`, `signOut`).
--   ✅ **ALWAYS** use the `useModal()` hook from `ctx.tsx` to control the globally shared modal component.
+-   ✅ **ALWAYS** use the appropriate hook for the required global state:
+    -   `useSession()` from `contexts/AuthContext.tsx` for user authentication status and methods (`signUp`, `signOut`).
+    -   `useModal()` from `contexts/ModalContext.tsx` to control the globally shared modal component.
+    -   `useAppContext()` from `contexts/AppContext.tsx` for other global UI states like triggering an in-app review request.
+-   ✅ **ALWAYS** add new global state to the most relevant context. If a new, distinct domain of global state is needed, create a new context file inside the `contexts/` directory.
 
 #### **RULES: MUST NOT DO**
--   ❌ **NEVER** introduce another global state management library (e.g., Redux, Zustand, Jotai). The project standard for simple global state is the existing Context API setup in `ctx.tsx`.
+-   ❌ **NEVER** add unrelated state to an existing context (e.g., do not add UI state to `AuthContext`).
+-   ❌ **NEVER** combine all contexts back into a single file. The separation is intentional.
+-   ❌ **NEVER** introduce another global state management library (e.g., Redux, Zustand, Jotai). The project standard is the multi-context pattern using React's Context API.
 
 ---
 

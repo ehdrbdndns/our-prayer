@@ -3,7 +3,7 @@ import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
 import { BoldText } from '@/components/text/BoldText';
 import { MediumText } from "@/components/text/MediumText";
-import { useSession } from '@/ctx';
+import { useSession } from '@/contexts/AuthContext';
 import { useUserMutation } from '@/utils/mutation';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import { router } from 'expo-router';

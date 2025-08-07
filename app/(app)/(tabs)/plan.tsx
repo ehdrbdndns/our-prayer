@@ -5,7 +5,7 @@ import PlanCard from "@/components/PlanCard";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
-import { ModalProvider } from "@/ctx";
+import { ModalProvider } from "@/contexts/ModalContext";
 import { PlanType } from "@/utils/dataType";
 import { usePlanListQuery } from "@/utils/queries";
 import { moderateScale, normalizeFontSize, scaleHeight } from "@/utils/style";

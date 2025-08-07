@@ -12,7 +12,11 @@ import { useRef, useState } from "react";
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useAppContext } from '@/contexts/AppContext';
+
 export default function PrayerRecord() {
+
+  const { setShouldRequestReview } = useAppContext();
 
   const insets = useSafeAreaInsets();
 
@@ -44,6 +48,10 @@ export default function PrayerRecord() {
     try {
       await insertPrayerHistory({ lecture_id, duration, note: noteContent });
       setIsSaving(false);
+
+      // Set the flag to request a review
+      setShouldRequestReview(true);
+
       router.dismissTo({
         pathname: `/calendar`,
         params: {

@@ -4,7 +4,7 @@ import PrimaryButton from "@/components/button/PrimaryButton";
 import Header from "@/components/Header";
 import { QUESTION_CONTENT_MAX_LENGTH } from '@/components/InputButton';
 import { MediumText } from "@/components/text/MediumText";
-import { useSession } from '@/ctx';
+import { useSession } from '@/contexts/AuthContext';
 import { ASYNC_TEMP_DRAFT } from '@/storage/asyncStorageKeys';
 import { QuestionType } from '@/utils/dataType';
 import { useInsertQuestionMutation } from '@/utils/mutation';

@@ -7,11 +7,14 @@ import PrayerState from "@/components/PrayerState";
 import ShareCard from "@/components/ShareCard";
 import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
-import { useSession } from "@/ctx";
+import { useAppContext } from "@/contexts/AppContext";
+import { useSession } from '@/contexts/AuthContext';
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
+import { handleSmartReviewRequest } from "@/utils/inAppReview";
 import { useBibleQuery, useHistoryQuery } from "@/utils/queries";
 import { moderateScale } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -20,6 +23,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Index() {
 
   const { session, isLoading } = useSession();
+  const { shouldRequestReview, setShouldRequestReview } = useAppContext();
+  const isFocused = useIsFocused();
 
   const [name, setName] = useState('');
 
@@ -38,7 +43,6 @@ export default function Index() {
 
   // 앱이 준비 되었을 때 기도 중이였는지 확인하고 
   // 기도 중이었다면 Alert로 기도 페이지로 이동 여부 확인
-
   useEffect(() => {
     async function checkIsPraying() {
       const isPraying = await AsyncStorage.getItem('isPraying');
@@ -90,6 +94,17 @@ export default function Index() {
       checkIsPraying();
     }
   }, [session, isLoading]);
+
+  // 앱 리뷰 요청 로직
+  useEffect(() => {
+    if (isFocused && shouldRequestReview) {
+      const timer = setTimeout(() => {
+        handleSmartReviewRequest(setShouldRequestReview);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isFocused, shouldRequestReview]);
 
   if (!isHistorySuccess || !isBibleSuccess || isLoading) {
     return null; // TODO : Add skeleton
