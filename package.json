@@ -12,7 +12,6 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    
     "@expo-google-fonts/ibm-plex-mono": "^0.2.3",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo-google-fonts/noto-sans-kr": "^0.2.3",
@@ -60,7 +59,8 @@
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-web": "^0.20.0",
-    "react-native-webview": "13.13.5"
+    "react-native-webview": "13.13.5",
+    "expo-store-review": "~8.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
