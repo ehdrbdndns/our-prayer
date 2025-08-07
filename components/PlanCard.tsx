@@ -1,5 +1,5 @@
 import Download from "@/assets/images/icon/download.svg";
-import { useModal } from "@/ctx";
+import { useModal } from "@/contexts/ModalContext";
 import { PlanType } from "@/utils/dataType";
 import { moderateScale } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';

@@ -8,7 +8,7 @@ import InputButton from '@/components/InputButton';
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
-import { useSession } from '@/ctx';
+import { useSession } from '@/contexts/AuthContext';
 import api from '@/utils/axios';
 import { QuestionReplyType } from '@/utils/dataType';
 import { formatDateToKorean } from '@/utils/date';
