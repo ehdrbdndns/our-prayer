@@ -87,3 +87,12 @@ This is for non-server state that needs to be shared across multiple components.
 
 -   ✅ **MUST** use absolute path aliases (`@/components/...`) for imports as defined in `tsconfig.json`.
 -   ❌ **DO NOT** use deep relative paths (`../../...`).
+
+---
+
+## 5. Communication & Justification
+
+**Guiding Principle:** All technical assertions must be backed by evidence.
+
+#### **RULES: MUST DO**
+-   ✅ **ALWAYS** provide supporting documentation links (e.g., official API documentation, trusted technical articles) when making a technical claim or proposing a specific implementation strategy.
