@@ -8,6 +8,7 @@ import { usePlanListQuery } from "@/utils/queries";
 import { moderateScale } from "@/utils/style";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { router } from "expo-router";
+import { JSX } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { MediumText } from "./text/MediumText";
 
@@ -130,10 +131,11 @@ const styles = StyleSheet.create({
 
     paddingTop: moderateScale(6),
     paddingBottom: moderateScale(34),
-    paddingHorizontal: moderateScale(30),
+    paddingHorizontal: moderateScale(20),
     backgroundColor: '#161B29'
   },
   tabButton: {
+    minWidth: moderateScale(50),
     justifyContent: 'center'
   },
   tabButtonImage: {

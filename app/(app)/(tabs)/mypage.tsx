@@ -5,7 +5,7 @@ import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
-import { useSession } from '@/ctx';
+import { useSession } from '@/contexts/AuthContext';
 import { calculateContinuousPrayerDays, calculateDaysSinceSignup, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
 import { useDeleteUserMutation, useUserMutation } from '@/utils/mutation';
 import { useHistoryQuery, useUserQuery } from '@/utils/queries';
@@ -173,7 +173,7 @@ export default function MyPage() {
       [                     // buttons
         { text: '취소', style: 'cancel' },
         {
-          text: '삭제하기', onPress: () => deleteUserMutate()
+          text: '탈퇴하기', onPress: () => deleteUserMutate()
         }
       ]
     )

@@ -4,7 +4,7 @@ import CustomButton from "@/components/button/CustomButton";
 import PrimaryButton from "@/components/button/PrimaryButton";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
-import { useSession } from "@/ctx";
+import { useSession } from "@/contexts/AuthContext";
 import { moderateScale } from "@/utils/style";
 import { Image } from "expo-image";
 import { router } from "expo-router";

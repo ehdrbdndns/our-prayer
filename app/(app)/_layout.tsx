@@ -1,6 +1,6 @@
 import BackgroundWithImage from '@/components/BackgroundWithImage';
 import NetworkErrorPage from '@/components/NetworkErrorPage';
-import { useSession } from '@/ctx';
+import { useSession } from '@/contexts/AuthContext';
 import { useUserMutation } from '@/utils/mutation';
 import { registerForPushNotificationsAsync } from '@/utils/notification';
 import { useAppInfoQuery } from '@/utils/queries';

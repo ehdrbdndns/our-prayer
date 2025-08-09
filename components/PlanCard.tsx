@@ -1,8 +1,6 @@
 import Download from "@/assets/images/icon/download.svg";
-import Heart from "@/assets/images/icon/heart.svg";
-import { useModal } from "@/ctx";
+import { useModal } from "@/contexts/ModalContext";
 import { PlanType } from "@/utils/dataType";
-import { useLikeMutation } from "@/utils/mutation";
 import { moderateScale } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
@@ -11,19 +9,12 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 import { BoldText } from "./text/BoldText";
-import { RegularText } from "./text/RegularText";
 
 export default function PlanCard({ plan, refreshing }: { plan: PlanType, refreshing: boolean }) {
 
   const { showModal } = useModal();
 
   const [isDownloaded, setIsDownloaded] = useState(false);
-
-  const { isLiked, mutateLike } = useLikeMutation({
-    plan_id: plan.plan_id,
-    is_liked: plan.is_liked,
-    plan_like_id: plan.plan_like_id
-  })
 
   const checkPlanAudit = async () => {
     let audit = JSON.parse(await AsyncStorage.getItem(`planAudit-${plan.plan_id}`) || '{}');
@@ -32,22 +23,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
 
   checkPlanAudit();
 
-  const onPressHeart = () => {
-    Alert.alert('즐겨찾기', isLiked ? '즐겨찾기를 취소하시겠습니까?' : '즐겨찾기를 등록하시겠습니까?', [
-      {
-        text: '취소',
-        style: 'cancel'
-      },
-      {
-        text: '확인',
-        onPress: () => {
-          mutateLike();
-        }
-      }
-    ])
-  }
-
-  const onPressCard = () => {
+  const handlePressCard = () => {
     if (isDownloaded) {
       router.push({
         pathname: `/planDetail/[plan_id]`,
@@ -55,7 +31,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
           plan_id: plan.plan_id,
           title: "기도 플랜",
           banner: plan.thumbnail,
-          isLiked: String(isLiked),
+          isLiked: '',
           backToLink: '/plan'
         },
       });
@@ -76,7 +52,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
                 auditDate: plan.audit_updated_date,
                 thumbnail: plan.thumbnail,
                 title: plan.title,
-                isLiked: isLiked
+                isLiked: false
               });
             }
           }
@@ -88,10 +64,11 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
 
   return (
     <TouchableOpacity
-      onPress={onPressCard}
+      onPress={handlePressCard}
     >
       <ImageBackground
         style={styles.card}
+        imageStyle={{ borderRadius: moderateScale(8) }}
         source={plan.s_thumbnail}
       >
         <LinearGradient
@@ -101,35 +78,19 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
           }
           style={styles.cardFilter}
         />
+
         <BoldText
           fontSize={16}
           lineHeight={24}
         >
           {plan.title}
         </BoldText>
-
-        <RegularText
-          numberOfLines={1}
-          fontSize={14}
-          lineHeight={22}
-        >
-          {plan.description}
-        </RegularText>
-
         {
-          isDownloaded ? (
-            <Heart
-              style={styles.heart}
-              fill={isLiked ? "#FF7D71" : "transparent"}
-              stroke={isLiked ? "#FF7D71" : "white"}
-              onPress={onPressHeart}
-              hitSlop={{ top: 18, bottom: 18, left: 18, right: 18 }}
-            />
-          ) : (
+          !isDownloaded ? (
             <Download
               style={styles.heart}
             />
-          )
+          ) : null
         }
       </ImageBackground>
     </TouchableOpacity>
@@ -143,7 +104,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(8),
 
     paddingLeft: moderateScale(12),
-    paddingBottom: moderateScale(20),
+    paddingBottom: moderateScale(14),
     paddingTop: moderateScale(14),
     paddingRight: moderateScale(14),
 

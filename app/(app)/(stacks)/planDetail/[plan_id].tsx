@@ -1,23 +1,18 @@
 import CheckedCircle from '@/assets/images/icon/checkedCircle.svg';
-import Heart from "@/assets/images/icon/heart.svg";
 import LeftArrow from "@/assets/images/icon/leftArrow.svg";
-import Play from '@/assets/images/icon/play.svg';
-import RightShortArrow from '@/assets/images/icon/rightShortArrow.svg';
 import UnChckedCircle from '@/assets/images/icon/unCheckedCircle.svg';
 import PrimaryButton from '@/components/button/PrimaryButton';
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
-import { useLikeMutation } from '@/utils/mutation';
 import { usePlanQuery } from '@/utils/queries';
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import { Href, router, useLocalSearchParams } from "expo-router";
-import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Image, Platform, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, Animated, Platform, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PlanDetailPage() {
@@ -36,8 +31,9 @@ export default function PlanDetailPage() {
 
   const { data, isSuccess: isPlanSuccess } = usePlanQuery({ plan_id });
 
-  // [lecture_id]: count
+  // [lecture_id]: 강의 들은 횟수
   const [lectureHistoryDict, setLectureHistoryDict] = useState<{ [lecture_id: string]: number }>({});
+  const [nextLectureId, setNextLectureId] = useState<string | null>(null);
 
   const plan = data?.plan;
   const lectures = (data?.lectures || []).sort((a, b) => a.created_date - b.created_date);
@@ -47,21 +43,6 @@ export default function PlanDetailPage() {
 
   const buttonOpacity = useRef(new Animated.Value(0));
   const buttonTranslateY = useRef(new Animated.Value(20));
-
-  const handleScroll = (event: any) => {
-    const currentScrollY = event.nativeEvent.contentOffset.y;
-    const maxScrollY = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
-
-    // 바운스 효과에 반응하지 않도록 스크롤 위치가 유효한 범위 내에 있는지 확인
-    if (currentScrollY >= 0 && currentScrollY <= maxScrollY) {
-      if (currentScrollY > prevScrollY) {
-        setScrollDirection('down');
-      } else {
-        setScrollDirection('up');
-      }
-      setPrevScrollY(currentScrollY);
-    }
-  };
 
   useEffect(() => {
     const showButton = Animated.parallel([
@@ -132,17 +113,48 @@ export default function PlanDetailPage() {
     fetchLectureHistory();
   }, [])
 
-  const { isLiked, mutateLike } = useLikeMutation({
-    plan_id,
-    is_liked: plan?.is_liked || Boolean(Number(isLikedFromParam)),
-    plan_like_id: plan?.plan_like_id || '',
-  });
+  // 다음에 수강할 강의 ID를 계산합니다.
+  useEffect(() => {
+    if (lectures.length > 0) {
+      const completedLectureIds = Object.keys(lectureHistoryDict);
+      const completedLectures = lectures
+        .filter(lecture => completedLectureIds.includes(lecture.lecture_id));
 
-  const onPressHeart = () => {
-    mutateLike();
-  }
+      if (completedLectures.length === 0) {
+        setNextLectureId(lectures[0].lecture_id);
+        return;
+      }
 
-  const onPressLeftArrow = () => {
+      const latestLecture = completedLectures
+        .sort((a, b) => b.created_date - a.created_date)[0];
+
+      const nextLecture = lectures
+        .filter(lecture =>
+          !completedLectureIds.includes(lecture.lecture_id)
+          && lecture.created_date > latestLecture.created_date
+        )
+        .sort((a, b) => a.created_date - b.created_date)[0];
+
+      setNextLectureId(nextLecture ? nextLecture.lecture_id : latestLecture.lecture_id);
+    }
+  }, [lectures, lectureHistoryDict]);
+
+  const handleScroll = (event: any) => {
+    const currentScrollY = event.nativeEvent.contentOffset.y;
+    const maxScrollY = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
+
+    // 바운스 효과에 반응하지 않도록 스크롤 위치가 유효한 범위 내에 있는지 확인
+    if (currentScrollY >= 0 && currentScrollY <= maxScrollY) {
+      if (currentScrollY > prevScrollY) {
+        setScrollDirection('down');
+      } else {
+        setScrollDirection('up');
+      }
+      setPrevScrollY(currentScrollY);
+    }
+  };
+
+  const handlePressLeftArrow = () => {
     if (backToLink !== undefined) {
       router.dismissTo(backToLink as Href);
     } else {
@@ -150,7 +162,7 @@ export default function PlanDetailPage() {
     }
   }
 
-  const onPressLecture = ({ lecture_id }: { lecture_id: string }) => {
+  const handlePressLecture = ({ lecture_id }: { lecture_id: string }) => {
     // Todo - add params
     router.push({
       pathname: '/lectureDetail/[lecture_id]',
@@ -162,13 +174,10 @@ export default function PlanDetailPage() {
     })
   }
 
-  const onPressAuthor = async (uri: string) => {
-    await WebBrowser.openBrowserAsync(uri);
-  }
+  const handlePressContinueBtn = () => {
+    if (!nextLectureId) return;
 
-  const onPressContinueBtn = () => {
     // 수강할 강의 ID
-    let nextLectureId = getNextLectureId();
     router.push({
       pathname: '/lectureDetail/[lecture_id]',
       params: {
@@ -177,33 +186,6 @@ export default function PlanDetailPage() {
         lecture_id: nextLectureId,
       }
     })
-  }
-
-  /*
-    다음 강의 ID를 가져오는 함수
-    수강한 강의가 없으면 첫 번째 강의 ID를 반환
-    수강한 강의가 있으면 가장 최근 강의 이후의 강의 ID를 반환
-  */
-  const getNextLectureId = () => {
-    const completedLectureIds = Object.keys(lectureHistoryDict);
-    const completedLectures = lectures
-      .filter(lecture => completedLectureIds.includes(lecture.lecture_id));
-
-    if (completedLectures.length === 0) {
-      return lectures[0].lecture_id;
-    }
-
-    const latestLecture = completedLectures
-      .sort((a, b) => b.created_date - a.created_date)[0];
-
-    const nextLecture = lectures
-      .filter(lecture =>
-        !completedLectureIds.includes(lecture.lecture_id)
-        && lecture.created_date > latestLecture.created_date
-      )
-      .sort((a, b) => a.created_date - b.created_date)[0];
-
-    return nextLecture ? nextLecture.lecture_id : latestLecture.lecture_id;
   }
 
   return (
@@ -226,29 +208,13 @@ export default function PlanDetailPage() {
           style={styles.header}
           prefix={
             <View style={styles.headerPrefix}>
-              <Pressable onPress={onPressLeftArrow} hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}>
+              <Pressable onPress={handlePressLeftArrow} hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}>
                 <LeftArrow />
               </Pressable>
               <MediumText>{title}</MediumText>
             </View>
           }
-          suffix={
-            <Heart
-              fill={isLiked ? "#FF7D71" : "transparent"}
-              stroke={isLiked ? "#FF7D71" : "white"}
-              onPress={onPressHeart}
-              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-            />
-          }
         />
-        {/* Banner */}
-        <View style={styles.banner}>
-          <Image
-            resizeMode="cover"
-            style={styles.bannerImage}
-            source={{ uri: banner || data?.plan.thumbnail }}
-          />
-        </View>
 
         {/* Content */}
         <View style={styles.container}>
@@ -278,61 +244,12 @@ export default function PlanDetailPage() {
             </RegularText>
           </View>
 
-          {/* Desc Author */}
-          <TouchableOpacity
-            onPress={() => onPressAuthor(plan?.author_deeplink || '')}
-          >
-            <View style={[styles.card, styles.author]}>
-              {/* Profile */}
-              <View style={styles.profile}>
-                <Image
-                  style={styles.profileImage}
-                  source={{ uri: plan?.author_profile }}
-                />
-                <View style={styles.profileName}>
-                  <RegularText
-                    fontSize={12}
-                    lineHeight={18}
-                    color={"#B3B3B3"}
-                  >
-                    더 보기
-                  </RegularText>
-                  <RegularText
-                    fontSize={16}
-                    lineHeight={22}
-                  >
-                    {plan?.author_name}
-                  </RegularText>
-                </View>
-                <Pressable>
-                  <RightShortArrow />
-                </Pressable>
-              </View>
-              {/* Content */}
-              <RegularText
-                style={styles.profileContent}
-                fontSize={12}
-                lineHeight={22}
-              >
-                {plan?.author_description}
-              </RegularText>
-
-              <RegularText
-                fontSize={12}
-                lineHeight={22}
-                color="#B3B3B3"
-              >
-                출판자 소개
-              </RegularText>
-            </View>
-          </TouchableOpacity>
-
           {/* LectureList */}
           <View>
             {/* Title */}
             <BoldText
               style={styles.lectureTitle}
-              fontSize={16}
+              fontSize={18}
               lineHeight={22}
             >
               회차 선택하기
@@ -354,8 +271,12 @@ export default function PlanDetailPage() {
                 lectures.map((row) => (
                   <TouchableOpacity
                     key={row.lecture_id}
-                    onPress={() => onPressLecture({ lecture_id: row.lecture_id })}
-                    style={[styles.card, styles.lecture]}
+                    onPress={() => handlePressLecture({ lecture_id: row.lecture_id })}
+                    style={[
+                      styles.card
+                      , styles.lecture
+                      , row.lecture_id === nextLectureId && styles.active
+                    ]}
                   >
                     {/* CheckBox */}
                     {
@@ -372,28 +293,39 @@ export default function PlanDetailPage() {
                       )
                     }
 
-                    {/* Content */}
-                    <View style={styles.lectureContent}>
-                      <BoldText
-                        fontSize={16}
-                        lineHeight={24}
-                      >
-                        {row.title}
-                      </BoldText>
+                    <View style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}>
+                      {/* Content */}
+                      <View style={{
+                        width: '80%'
+                      }}>
+                        <BoldText
+                          fontSize={16}
+                          lineHeight={24}
+                          style={{
+                            marginBottom: 2
+                          }}
+                        >
+                          {row.title}
+                        </BoldText>
+                        <RegularText
+                          fontSize={14}
+                          lineHeight={22}
+                          numberOfLines={2}
+                        >
+                          {row.description}
+                        </RegularText>
+                      </View>
+
                       <RegularText
                         fontSize={14}
-                        lineHeight={22}
-                        numberOfLines={1}
                       >
-                        {row.description}
+                        {row.time >= 1 ? `${row.time}분` : ''}
                       </RegularText>
                     </View>
-
-                    {/* Button */}
-                    <Play
-                      width={moderateScale(38)}
-                      height={moderateScale(38)}
-                    />
                   </TouchableOpacity>
                 ))
               }
@@ -410,9 +342,10 @@ export default function PlanDetailPage() {
         paddingHorizontal: moderateScale(24),
         opacity: buttonOpacity.current,
         transform: [{ translateY: buttonTranslateY.current }],
-      }}>
+      }
+      }>
         <PrimaryButton
-          onPress={onPressContinueBtn}
+          onPress={handlePressContinueBtn}
           style={{
             paddingVertical: moderateScale(14)
           }}>
@@ -504,8 +437,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: moderateScale(16)
   },
-  lectureContent: {
-    flex: 1,
-    gap: moderateScale(2),
+  active: {
+    borderWidth: 1,
+    borderColor: "#4D5BDC",
+    backgroundColor: 'rgba(255, 255, 255, .08)'
   }
 });

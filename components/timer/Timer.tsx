@@ -1,5 +1,7 @@
 import Play from "@/assets/images/icon/audio-play.svg";
+import Next from "@/assets/images/icon/next.svg";
 import Pause from "@/assets/images/icon/pause.svg";
+import Prev from "@/assets/images/icon/prev.svg";
 import { ASYNC_TIMER_KEY } from "@/storage/asyncStorageKeys";
 import { moderateScale } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -165,13 +167,17 @@ export default function Timer(props: TimerProps) {
           )
           : (
             <View style={styles.controller}>
-              {/* <TouchableOpacity
-                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-                style={styles.controllerButton}
-                onPress={() => onPressPrev(countdown.remainingTime)}
-              >
-                <Prev />
-              </TouchableOpacity> */}
+              {
+                __DEV__ && (
+                  <TouchableOpacity
+                    hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+                    style={styles.controllerButton}
+                    onPress={() => onPressPrev(countdown.remainingTime)}
+                  >
+                    <Prev />
+                  </TouchableOpacity>
+                )
+              }
 
               <TouchableOpacity
                 style={styles.controllerButton}
@@ -191,13 +197,17 @@ export default function Timer(props: TimerProps) {
                 }
               </TouchableOpacity>
 
-              {/* <TouchableOpacity
-                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-                style={styles.controllerButton}
-                onPress={() => onPressNext(countdown.remainingTime)}
-              >
-                <Next />
-              </TouchableOpacity> */}
+              {
+                __DEV__ && (
+                  <TouchableOpacity
+                    hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+                    style={styles.controllerButton}
+                    onPress={() => onPressNext(countdown.remainingTime)}
+                  >
+                    <Next />
+                  </TouchableOpacity>
+                )
+              }
             </View>
           )
       }
