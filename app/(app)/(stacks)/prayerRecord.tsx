@@ -1,4 +1,3 @@
-import LeftArrow from '@/assets/images/icon/leftArrow.svg';
 import CustomButton from "@/components/button/CustomButton";
 import PrimaryButton from "@/components/button/PrimaryButton";
 import Header from "@/components/Header";
@@ -9,7 +8,7 @@ import { moderateScale, normalizeFontSize } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAppContext } from '@/contexts/AppContext';
@@ -29,7 +28,7 @@ export default function PrayerRecord() {
 
   const [note, setNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [boldTextOpacity, setBoldTextOpacity] = useState(1); // BoldText의 opacity 상태
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const textInputRef = useRef<TextInput>(null); // TextInput의 참조 생성
 
   const { mutateAsync: insertPrayerHistory } = useHistoryMutation()
@@ -67,21 +66,21 @@ export default function PrayerRecord() {
     }
   }
 
-  const onPressSave = async () => {
+  const handlePressSave = async () => {
     await submitPrayerRecord(note);
   }
 
-  const onPressCancel = async () => {
+  const handlePressCancel = async () => {
     await submitPrayerRecord("");
   }
 
-  const onComplete = () => {
+  const handleComplete = () => {
     if (textInputRef.current) {
       textInputRef.current.blur(); // TextInput에 포커스 잃게 하기
     }
   }
 
-  const onChangeNote = (text: string) => {
+  const handleChangeNote = (text: string) => {
     if (text.length > 1500) {
       Alert.alert('길이를 초과했습니다.', `최대 1500자까지 입력 가능합니다.`, [
         {
@@ -119,7 +118,7 @@ export default function PrayerRecord() {
               prefix={<View></View>}
             />
             <BoldText
-              style={[styles.title, { opacity: boldTextOpacity }]} // opacity 상태 적용
+              style={[styles.title, { opacity: isKeyboardVisible ? 0.5 : 1 }]} // opacity 상태 적용
               fontSize={24}
               lineHeight={36}
             >
@@ -133,22 +132,24 @@ export default function PrayerRecord() {
                 multiline={true}
                 style={styles.text}
                 scrollEnabled={true}
-                onChangeText={onChangeNote}
+                onChangeText={handleChangeNote}
                 placeholderTextColor={"#B3B3B3"}
                 placeholder="여기를 탭하여 입력하세요(최대 1500자)"
-                onFocus={() => setBoldTextOpacity(0.5)} // TextInput이 포커스될 때 opacity 변경
-                onBlur={() => setBoldTextOpacity(1)} // TextInput이 포커스를 잃을 때 opacity 복원
+                onFocus={() => setIsKeyboardVisible(true)} // TextInput이 포커스될 때 opacity 변경
+                onBlur={() => setIsKeyboardVisible(false)} // TextInput이 포커스를 잃을 때 opacity 복원
               />
             </View>
-            <View style={[styles.buttonList, { bottom: insets.bottom, opacity: boldTextOpacity !== 1 ? 0 : 1 }]}>
-              <CustomButton onPress={onPressCancel} style={[styles.button, styles.secondaryButton]}>
+            <View style={[styles.buttonList, {
+              bottom: insets.bottom + Platform.OS === 'ios' ? 0 : moderateScale(24)
+            }]}>
+              <CustomButton onPress={handlePressCancel} style={[styles.button, styles.secondaryButton]}>
                 <MediumText
                   fontSize={14}
                 >
                   괜찮습니다
                 </MediumText>
               </CustomButton>
-              <PrimaryButton onPress={onPressSave} style={styles.button}>
+              <PrimaryButton onPress={handlePressSave} style={styles.button}>
                 <MediumText
                   fontSize={14}
                 >
@@ -157,18 +158,6 @@ export default function PrayerRecord() {
               </PrimaryButton>
             </View>
           </SafeAreaView>
-          <View style={styles.inputCompleteButtonLayout}>
-            <TouchableOpacity
-              style={[styles.inputCompleteButton, {
-                opacity: boldTextOpacity === 1 ? 0 : 1,
-                height: boldTextOpacity === 1 ? 0 : moderateScale(40),
-              }]}
-              onPress={onComplete}
-              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-            >
-              <LeftArrow style={{ transform: [{ rotate: '90deg' }] }} />
-            </TouchableOpacity>
-          </View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
     </>
@@ -193,7 +182,6 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: 'NotoSansKR_400Regular',
     fontSize: normalizeFontSize(16),
-    lineHeight: normalizeFontSize(28),
     color: "#FFFFFF",
     textAlignVertical: 'top'
   },
@@ -210,20 +198,5 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: 'rgba(15, 20, 26, 0.4)',
-  },
-  inputCompleteButtonLayout: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    width: '100%',
-    paddingHorizontal: moderateScale(20)
-  },
-  inputCompleteButton: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    borderRadius: 100,
-    marginBottom: moderateScale(12),
-    backgroundColor: '#4F5FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
   }
 })
