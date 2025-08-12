@@ -32,7 +32,7 @@ const LabeledInput = ({
   placeholder: string;
   multiline?: boolean;
   keyboardType?: 'default' | 'numeric' | 'email-address' | 'phone-pad';
-  onFocus?: (ref: React.RefObject<View>) => void;
+  onFocus?: (ref: React.RefObject<View | null>) => void;
 }) => {
   const containerRef = useRef<View>(null);
 
@@ -193,7 +193,7 @@ export default function RequestQuestion() {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleInputFocus = (inputRef: React.RefObject<View>) => {
+  const handleInputFocus = (inputRef: React.RefObject<View | null>) => {
     // A short delay is often needed to allow the keyboard to start its animation
     setTimeout(() => {
       inputRef.current?.measure((_x, y) => {
@@ -362,7 +362,7 @@ export default function RequestQuestion() {
               onPress={() => Keyboard.dismiss()}
               hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
             >
-              <LeftArrow style={{ transform: [{ rotate: '90deg' }] }} />
+              <LeftArrow style={{ transform: [{ rotate: '-90deg' }] }} />
             </TouchableOpacity>
           </View>
 
@@ -467,6 +467,12 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-between',
     marginBottom: moderateScale(20),
+
+    ...Platform.select({
+      android: {
+        marginBottom: moderateScale(40)
+      }
+    })
   },
   enterButton: {
     width: moderateScale(40),

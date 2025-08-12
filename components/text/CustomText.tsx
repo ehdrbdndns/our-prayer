@@ -32,11 +32,18 @@ export default function CustomText({
         styles.text,
         {
           fontSize: normalizedFontSize,
-          lineHeight: normalizeFontSize(lineHeight || fontSize * 1.5),
+          lineHeight: lineHeight || normalizedFontSize * 1.5,
           letterSpacing: getLetterSpacing(normalizedFontSize, letterSpacingPercent),
           textAlign,
           color,
           fontFamily,
+
+          ...Platform.select({
+            android: {
+              includeFontPadding: false,
+              textAlignVertical: 'center',
+            }
+          })
         },
         style,
       ]}
