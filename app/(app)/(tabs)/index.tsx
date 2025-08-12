@@ -178,7 +178,6 @@ export default function Index() {
             <BoldText
               color="#FFFFFF"
               fontSize={16}
-              lineHeight={24}
               letterSpacingPercent={-1}
             >
               나의 기도 기록

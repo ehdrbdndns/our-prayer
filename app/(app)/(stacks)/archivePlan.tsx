@@ -37,7 +37,6 @@ export default function ArchivePlan() {
                 </Pressable>
                 <MediumText
                   fontSize={16}
-                  lineHeight={24}
                 >
                   기도 플랜
                 </MediumText>
