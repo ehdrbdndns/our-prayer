@@ -26,7 +26,8 @@
       "googleServicesFile": "./google-services.json",
       "userInterfaceStyle": "dark",
       "permissions": [
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.WAKE_LOCK"
       ]
     },
     "web": {
