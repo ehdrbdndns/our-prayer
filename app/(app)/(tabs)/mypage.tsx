@@ -191,7 +191,7 @@ export default function MyPage() {
 
   // 문의하기
   const handlePressContact = async () => {
-    await WebBrowser.openBrowserAsync('https://docs.google.com/forms/d/e/1FAIpQLSeOyd4YtHlkRXYJtXDzgcLoLh6659zRi-mqiyrHjbwpQJAgRQ/viewform?usp=dialog');
+    await WebBrowser.openBrowserAsync('https://open.kakao.com/o/szrml9Lh');
   }
 
   // 도움 주신 분들
