@@ -32,7 +32,7 @@ const LabeledInput = ({
   placeholder: string;
   multiline?: boolean;
   keyboardType?: 'default' | 'numeric' | 'email-address' | 'phone-pad';
-  onFocus?: (ref: React.RefObject<View>) => void;
+  onFocus?: (ref: React.RefObject<View | null>) => void;
 }) => {
   const containerRef = useRef<View>(null);
 
@@ -193,7 +193,7 @@ export default function RequestQuestion() {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleInputFocus = (inputRef: React.RefObject<View>) => {
+  const handleInputFocus = (inputRef: React.RefObject<View | null>) => {
     // A short delay is often needed to allow the keyboard to start its animation
     setTimeout(() => {
       inputRef.current?.measure((_x, y) => {
