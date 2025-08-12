@@ -362,7 +362,7 @@ export default function RequestQuestion() {
               onPress={() => Keyboard.dismiss()}
               hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
             >
-              <LeftArrow style={{ transform: [{ rotate: '90deg' }] }} />
+              <LeftArrow style={{ transform: [{ rotate: '-90deg' }] }} />
             </TouchableOpacity>
           </View>
 
@@ -467,6 +467,12 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-between',
     marginBottom: moderateScale(20),
+
+    ...Platform.select({
+      android: {
+        marginBottom: moderateScale(40)
+      }
+    })
   },
   enterButton: {
     width: moderateScale(40),
