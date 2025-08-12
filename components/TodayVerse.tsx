@@ -80,12 +80,9 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
           <MediumText
             color="#FFFFFF"
             fontSize={14}
-            lineHeight={21}
             letterSpacingPercent={-1}
           >
-            {
-              "기도 시작하기"
-            }
+            기도 시작하기
           </MediumText>
         </CustomButton>
       </View>
