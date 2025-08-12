@@ -76,7 +76,7 @@ export default function MyPage() {
     setRefreshing(false);
   }
 
-  const onChangeAlarm = async () => {
+  const handleChangeAlarm = async () => {
     const newEnableAlarm = !enableAlarm;
 
     // 알람 비활성화
@@ -146,11 +146,11 @@ export default function MyPage() {
     }
   }
 
-  const onPressEditName = () => {
+  const handlePressEditName = () => {
     router.navigate('/editNickname');
   }
 
-  const onPressPrayerTime = () => {
+  const handlePressPrayerTime = () => {
     if (enableAlarm) {
       router.navigate('/prayerTime');
     } else {
@@ -158,11 +158,11 @@ export default function MyPage() {
     }
   }
 
-  const onPressHistory = () => {
+  const handlePressHistory = () => {
     router.navigate('/calendar');
   }
 
-  const onPressDeleteAccount = () => {
+  const handlePressDeleteAccount = () => {
     Alert.alert(
       '지금까지 함께해주셔서 감사합니다.', // title
       `우리의 기도는 당신의 신앙 여정을 늘 응원합니다.
@@ -180,22 +180,22 @@ export default function MyPage() {
   }
 
   // 서비스 이용 약관
-  const onPressServicePolicy = async () => {
+  const handlePressServicePolicy = async () => {
     await WebBrowser.openBrowserAsync('https://sunny-book-517.notion.site/our-prayer-182748b531d08033a65af055af5659de?pvs=4')
   }
 
   // 개인정보처리방침
-  const onPressPrivacyPolicy = async () => {
+  const handlePressPrivacyPolicy = async () => {
     await WebBrowser.openBrowserAsync('https://sunny-book-517.notion.site/our-prayer-182748b531d080049a59e5a00cc3980f');
   }
 
   // 문의하기
-  const onPressContact = async () => {
+  const handlePressContact = async () => {
     await WebBrowser.openBrowserAsync('https://docs.google.com/forms/d/e/1FAIpQLSeOyd4YtHlkRXYJtXDzgcLoLh6659zRi-mqiyrHjbwpQJAgRQ/viewform?usp=dialog');
   }
 
   // 도움 주신 분들
-  const onPressSupporterList = () => {
+  const handlePressSupporterList = () => {
     router.navigate('/supportersList');
   }
 
@@ -223,7 +223,7 @@ export default function MyPage() {
         }}>
           {/* Name */}
           <TouchableOpacity
-            onPress={onPressEditName}
+            onPress={handlePressEditName}
             style={{ height: moderateScale(44) }}
           >
             <View style={{ flexDirection: 'row', gap: moderateScale(8), alignItems: 'center' }}>
@@ -274,7 +274,7 @@ export default function MyPage() {
               </BoldText>
             </View>
             <TouchableOpacity
-              onPress={onPressHistory}
+              onPress={handlePressHistory}
               hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
             >
               <MediumText
@@ -380,7 +380,7 @@ export default function MyPage() {
             알림 설정
           </BoldText>
           <Switch
-            onValueChange={onChangeAlarm}
+            onValueChange={handleChangeAlarm}
             trackColor={{ false: '#363E55', true: '#4F5FFF' }}
             thumbColor={enableAlarm ? '#E4E6FC' : '#7781A0'}
             value={enableAlarm}
@@ -392,7 +392,7 @@ export default function MyPage() {
           marginBottom: moderateScale(24),
           gap: moderateScale(12),
         }}>
-          <CustomButton onPress={onPressPrayerTime} style={styles.button}>
+          <CustomButton onPress={handlePressPrayerTime} style={styles.button}>
             <BoldText
               color="#FFFFFF"
               fontSize={14}
@@ -413,7 +413,7 @@ export default function MyPage() {
             </BoldText>
           </CustomButton> */}
           <CustomButton
-            onPress={onPressContact}
+            onPress={handlePressContact}
             style={styles.button}
           >
             <BoldText
@@ -426,7 +426,7 @@ export default function MyPage() {
             </BoldText>
           </CustomButton>
           <CustomButton
-            onPress={onPressSupporterList}
+            onPress={handlePressSupporterList}
             style={styles.button}
           >
             <BoldText
@@ -439,7 +439,7 @@ export default function MyPage() {
             </BoldText>
           </CustomButton>
           <CustomButton
-            onPress={onPressServicePolicy}
+            onPress={handlePressServicePolicy}
             style={styles.button}
           >
             <BoldText
@@ -452,7 +452,7 @@ export default function MyPage() {
             </BoldText>
           </CustomButton>
           <CustomButton
-            onPress={onPressPrivacyPolicy}
+            onPress={handlePressPrivacyPolicy}
             style={styles.button}
           >
             <BoldText
@@ -467,7 +467,7 @@ export default function MyPage() {
         </View>
 
         {/* 회원 탈퇴 */}
-        <TouchableOpacity onPress={onPressDeleteAccount} style={styles.textButton}>
+        <TouchableOpacity onPress={handlePressDeleteAccount} style={styles.textButton}>
           <MediumText
             fontSize={12}
             color="#B3B3B3"
