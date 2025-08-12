@@ -22,7 +22,7 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
 
   const handlePressButton = () => {
     if (!!currentPlan) {
-      router.push({
+      router.navigate({
         pathname: `/planDetail/[plan_id]`,
         params: {
           plan_id: currentPlan.plan_id,
@@ -32,7 +32,7 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
         },
       });
     } else {
-      router.push("/plan");
+      router.navigate("/plan");
     }
   }
 

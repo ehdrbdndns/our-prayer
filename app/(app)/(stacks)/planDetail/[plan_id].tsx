@@ -164,7 +164,7 @@ export default function PlanDetailPage() {
 
   const handlePressLecture = ({ lecture_id }: { lecture_id: string }) => {
     // Todo - add params
-    router.push({
+    router.navigate({
       pathname: '/lectureDetail/[lecture_id]',
       params: {
         plan_id: plan_id,
@@ -178,7 +178,7 @@ export default function PlanDetailPage() {
     if (!nextLectureId) return;
 
     // 수강할 강의 ID
-    router.push({
+    router.navigate({
       pathname: '/lectureDetail/[lecture_id]',
       params: {
         plan_id: plan_id,

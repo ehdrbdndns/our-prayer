@@ -120,7 +120,7 @@ export default function QuestionDetail() {
   }
 
   const onPressEdit = () => {
-    router.push({
+    router.navigate({
       pathname: `/editQuestion/[question_id]`,
       params: {
         question_id,

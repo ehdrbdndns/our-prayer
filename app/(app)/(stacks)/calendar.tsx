@@ -74,7 +74,7 @@ export default function CalendarPage() {
               created_date={row.created_date}
               duration={row.duration}
               onPressNote={() => {
-                router.push(`/historyDetail/${row.prayer_history_id}`)
+                router.navigate(`/historyDetail/${row.prayer_history_id}`)
               }}
             />
           )

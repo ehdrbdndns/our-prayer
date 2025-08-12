@@ -65,7 +65,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
 
         const imageSource = ImageSourceDict[name as TabBarKeys];
 
-        const onPress = () => {
+        const handlePressButton = () => {
           const event = emit({
             type: 'tabPress',
             target: key,
@@ -75,7 +75,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
           if (!isFocused && !event.defaultPrevented) {
             if (name === "currentPlan") {
               if (!!currentPlan) {
-                router.push(`/planDetail/${currentPlan.plan_id}`);
+                router.navigate(`/planDetail/${currentPlan.plan_id}`);
               } else {
                 navigate("plan");
               }
@@ -85,7 +85,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
           }
         }
 
-        const onLongPress = () => {
+        const handleLongPressButton = () => {
           emit({
             type: 'tabLongPress',
             target: key,
@@ -95,8 +95,8 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
         return (
           <Pressable
             style={styles.tabButton}
-            onPress={onPress}
-            onLongPress={onLongPress}
+            onPress={handlePressButton}
+            onLongPress={handleLongPressButton}
             key={key}
             hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
           >

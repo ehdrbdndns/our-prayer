@@ -51,17 +51,17 @@ export default function QuestionPage() {
   }
 
   const onPressQuestionGuid = () => {
-    router.push('/questionGuide')
+    router.navigate('/questionGuide')
   }
 
   const onPressPastor = () => {
-    router.push('/introducePastor')
+    router.navigate('/introducePastor')
   }
 
   const onPressQuestionCard = (question_id: string) => {
     if (!question_id) return;
 
-    router.push({
+    router.navigate({
       pathname: `/questionDetail/[question_id]`,
       params: {
         question_id,
@@ -70,7 +70,7 @@ export default function QuestionPage() {
   }
 
   const onPressEdit = (question_id: string) => {
-    router.push({
+    router.navigate({
       pathname: `/editQuestion/[question_id]`,
       params: {
         question_id,
@@ -79,7 +79,7 @@ export default function QuestionPage() {
   }
 
   const onPressRequestQuestion = () => {
-    router.push('/requestQuestion');
+    router.navigate('/requestQuestion');
   }
 
   return (
