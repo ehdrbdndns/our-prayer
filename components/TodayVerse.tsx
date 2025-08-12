@@ -20,7 +20,7 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
     ? plan.plans.filter((row) => row.plan_id === plan.currentPlan?.plan_id)[0]
     : null;
 
-  const onPress = () => {
+  const handlePressButton = () => {
     if (!!currentPlan) {
       router.push({
         pathname: `/planDetail/[plan_id]`,
@@ -75,7 +75,7 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
         {/* button */}
         <CustomButton
           style={styles.button}
-          onPress={onPress}
+          onPress={handlePressButton}
         >
           <MediumText
             color="#FFFFFF"
