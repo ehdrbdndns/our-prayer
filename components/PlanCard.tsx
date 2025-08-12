@@ -25,7 +25,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
 
   const handlePressCard = () => {
     if (isDownloaded) {
-      router.push({
+      router.navigate({
         pathname: `/planDetail/[plan_id]`,
         params: {
           plan_id: plan.plan_id,

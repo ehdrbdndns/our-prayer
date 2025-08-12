@@ -20,9 +20,9 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
     ? plan.plans.filter((row) => row.plan_id === plan.currentPlan?.plan_id)[0]
     : null;
 
-  const onPress = () => {
+  const handlePressButton = () => {
     if (!!currentPlan) {
-      router.push({
+      router.navigate({
         pathname: `/planDetail/[plan_id]`,
         params: {
           plan_id: currentPlan.plan_id,
@@ -32,7 +32,7 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
         },
       });
     } else {
-      router.push("/plan");
+      router.navigate("/plan");
     }
   }
 
@@ -75,7 +75,7 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
         {/* button */}
         <CustomButton
           style={styles.button}
-          onPress={onPress}
+          onPress={handlePressButton}
         >
           <MediumText
             color="#FFFFFF"

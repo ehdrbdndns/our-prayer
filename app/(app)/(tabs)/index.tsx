@@ -38,7 +38,7 @@ export default function Index() {
   const todayPrayerTime = calculateTodayPrayerTime(history || []);
 
   const onPressHistory = () => {
-    router.push("/calendar");
+    router.navigate("/calendar");
   }
 
   // 앱이 준비 되었을 때 기도 중이였는지 확인하고 
@@ -71,7 +71,7 @@ export default function Index() {
             text: "이어서 기도하기",
             onPress: () => {
               // 기도 페이지로 이동
-              router.push({
+              router.navigate({
                 pathname: '/lectureDetail/[lecture_id]',
                 params: {
                   plan_id: plan_id,
@@ -87,7 +87,7 @@ export default function Index() {
     }
 
     if (!isLoading && !session) {
-      router.push("/login");
+      router.navigate("/login");
     } else if (!isLoading && !!session) {
       const { name } = JSON.parse(session);
       setName(name);
@@ -178,7 +178,6 @@ export default function Index() {
             <BoldText
               color="#FFFFFF"
               fontSize={16}
-              lineHeight={24}
               letterSpacingPercent={-1}
             >
               나의 기도 기록

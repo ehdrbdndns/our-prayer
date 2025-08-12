@@ -89,7 +89,6 @@ export default function login() {
           <PrimaryButton onPress={onPressStart}>
             <MediumText
               fontSize={15}
-              lineHeight={27}
               letterSpacingPercent={-1}
             >
               시작하기
@@ -111,7 +110,6 @@ export default function login() {
                   />
                   <MediumText
                     fontSize={15}
-                    lineHeight={27}
                     letterSpacingPercent={-1}
                     color="#000000"
                   >
@@ -133,7 +131,6 @@ export default function login() {
               />
               <MediumText
                 fontSize={15}
-                lineHeight={27}
                 letterSpacingPercent={-1}
                 color="#000000"
               >

@@ -15,7 +15,7 @@ interface MyPrayerPlanProps {
 export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
 
   const onPressBtn = () => {
-    router.push("/plan")
+    router.navigate("/plan")
   }
 
   const onPressPlan = (params: {
@@ -25,7 +25,7 @@ export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
     isLiked: boolean;
   }) => {
     const { id, title, banner, isLiked } = params;
-    router.push({
+    router.navigate({
       pathname: `/planDetail/[plan_id]`,
       params: {
         plan_id: id,

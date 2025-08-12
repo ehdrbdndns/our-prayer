@@ -147,19 +147,19 @@ export default function MyPage() {
   }
 
   const onPressEditName = () => {
-    router.push('/editNickname');
+    router.navigate('/editNickname');
   }
 
   const onPressPrayerTime = () => {
     if (enableAlarm) {
-      router.push('/prayerTime');
+      router.navigate('/prayerTime');
     } else {
       Alert.alert('알림을 활성화해주세요.');
     }
   }
 
   const onPressHistory = () => {
-    router.push('/calendar');
+    router.navigate('/calendar');
   }
 
   const onPressDeleteAccount = () => {
@@ -196,7 +196,7 @@ export default function MyPage() {
 
   // 도움 주신 분들
   const onPressSupporterList = () => {
-    router.push('/supportersList');
+    router.navigate('/supportersList');
   }
 
   if (isLoading) {

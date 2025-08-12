@@ -124,7 +124,7 @@ export default function DownloadModal() {
         setTimeout(() => {
           hideModal();
           initValue();
-          router.push({
+          router.navigate({
             pathname: `/planDetail/[plan_id]`,
             params: {
               plan_id: planId,

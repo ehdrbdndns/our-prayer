@@ -68,7 +68,7 @@ export default function PlanPage() {
   }) => {
     const { id, banner, isLiked } = params;
 
-    router.push({
+    router.navigate({
       pathname: `/planDetail/[plan_id]`,
       params: {
         plan_id: id,
