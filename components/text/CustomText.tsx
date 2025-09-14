@@ -32,11 +32,22 @@ export default function CustomText({
         styles.text,
         {
           fontSize: normalizedFontSize,
-          lineHeight: normalizeFontSize(lineHeight || fontSize * 1.5),
+          // TODO: 만약 안드로이드에서 텍스트가 짤린다면 normalizedFontSize * 1.5로 고정해야 할 수도 있음.
+          lineHeight: lineHeight || normalizedFontSize * 1.5,
           letterSpacing: getLetterSpacing(normalizedFontSize, letterSpacingPercent),
           textAlign,
           color,
           fontFamily,
+
+          ...Platform.select({
+            android: {
+              includeFontPadding: false,
+              textAlignVertical: 'center',
+            },
+            ios: {
+              lineHeight: lineHeight || normalizedFontSize * 1.5,
+            }
+          })
         },
         style,
       ]}

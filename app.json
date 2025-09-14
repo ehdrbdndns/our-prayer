@@ -2,7 +2,7 @@
   "expo": {
     "name": "우리의 기도",
     "slug": "our-prayer-wesdlmg8pomqcxfrwnqcj",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -26,7 +26,8 @@
       "googleServicesFile": "./google-services.json",
       "userInterfaceStyle": "dark",
       "permissions": [
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.WAKE_LOCK"
       ]
     },
     "web": {
@@ -66,7 +67,18 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 35,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -83,7 +95,6 @@
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    
     "splash": {
       "image": "./assets/images/logo.png",
       "backgroundColor": "#242527"
