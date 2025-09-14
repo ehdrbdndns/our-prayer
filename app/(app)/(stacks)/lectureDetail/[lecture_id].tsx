@@ -123,7 +123,7 @@ export default function Lecture() {
           let totalElapsedTime = savedElapsedTime + diffTime + (savedRepeatCount * duration);
 
           await amp?.adjustVoiceBy(totalElapsedTime);
-          onAdjustElapedTime(totalElapsedTime, duration);
+          handleAdjustElapsedTime(totalElapsedTime, duration);
         }
       }
     }
@@ -238,7 +238,7 @@ export default function Lecture() {
     playVoice();
   }, [elapsedTime])
 
-  const onAdjustElapedTime = async (elapsedTime: number, newDuration?: number) => {
+  const handleAdjustElapsedTime = async (elapsedTime: number, newDuration?: number) => {
     const currentDuration = newDuration ?? duration;
 
     if (currentDuration === 0) {
@@ -274,7 +274,7 @@ export default function Lecture() {
       '기도 기록 페이지로 넘어갑니다.', // message
       [                     // buttons
         { text: '취소', style: 'cancel' },
-        { text: '그만두기', onPress: () => onPressCompleteBtn(elapsedTime) }
+        { text: '그만두기', onPress: () => handlePressCompleteBtn(elapsedTime) }
       ]
     )
   }
@@ -299,12 +299,12 @@ export default function Lecture() {
     )
   }
 
-  const onPressTab = (mode: "default" | "text") => {
+  const handlePressTab = (mode: "default" | "text") => {
     setMode(mode);
   }
 
   // Timer event handlers
-  const onCompleteTimer = () => {
+  const handleCompleteTimer = () => {
     setRepeatCount(repeatCount + 1);
     return { shouldRepeat: true }
   }
@@ -312,7 +312,7 @@ export default function Lecture() {
   /**
    * Timer의 Play or Pause 버튼을 누를 시 실행되는 함수
    */
-  const onPressPlay = async () => {
+  const handlePressPlay = async () => {
     if (isPlaying) {
       // stop audio
       await pauseAll();
@@ -322,7 +322,7 @@ export default function Lecture() {
     }
   }
 
-  const onPressPrev = async (remainingTime: number) => {
+  const handlePressPrev = async (remainingTime: number) => {
     // 10초 더하기, 단 duration(총 타이머 수)을 넘지 않도록
     const newInitialRemainingTime = Math.min(remainingTime + 10, duration)
     setInitialRemainingTime(newInitialRemainingTime);
@@ -335,7 +335,7 @@ export default function Lecture() {
     setTimerKey(timerKey + 1);
   }
 
-  const onPressNext = async (remainingTime: number) => {
+  const handlePressNext = async (remainingTime: number) => {
     // 10초 빼기, 단 0보다 작아지지 않도록
     const newInitialRemainingTime = Math.max(remainingTime - 10, 0);
     setInitialRemainingTime(newInitialRemainingTime);
@@ -348,7 +348,7 @@ export default function Lecture() {
     setTimerKey(timerKey + 1);
   }
 
-  const onPressCompleteBtn = async (elapsedTime: number) => {
+  const handlePressCompleteBtn = async (elapsedTime: number) => {
     await AsyncStorage.removeItem('isPraying');
     router.replace({
       pathname: '/prayerRecord',
@@ -419,7 +419,7 @@ export default function Lecture() {
 
           {/* Tabs */}
           <View style={styles.tabList}>
-            <TouchableOpacity onPress={() => onPressTab('default')}>
+            <TouchableOpacity onPress={() => handlePressTab('default')}>
               <View style={[styles.tab, mode === 'default' && styles.activeTab]}>
                 <RegularText
                   fontSize={14}
@@ -432,7 +432,7 @@ export default function Lecture() {
             </TouchableOpacity>
             {
               lectureAudios.length > 0 && (
-                <TouchableOpacity onPress={() => onPressTab('text')}>
+                <TouchableOpacity onPress={() => handlePressTab('text')}>
                   <View style={[styles.tab, mode === 'text' && styles.activeTab]}>
                     <RegularText
                       fontSize={14}
@@ -483,13 +483,13 @@ export default function Lecture() {
               initialRemainingTime={initialRemainingTime}
               isPlaying={isPlaying}
               appState={appStateVisible}
-              onAdjustElapedTime={onAdjustElapedTime}
+              onAdjustElapedTime={handleAdjustElapsedTime}
               setElapsedTime={setElapsedTime}
-              onPressNext={onPressNext}
-              onPressPlay={onPressPlay}
-              onPressPrev={onPressPrev}
-              onComplete={onCompleteTimer}
-              onPressCompleteBtn={onPressCompleteBtn}
+              onPressNext={handlePressNext}
+              onPressPlay={handlePressPlay}
+              onPressPrev={handlePressPrev}
+              onComplete={handleCompleteTimer}
+              onPressCompleteBtn={handlePressCompleteBtn}
             />
           </View>
         </Animated.View>
