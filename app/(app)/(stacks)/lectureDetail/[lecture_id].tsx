@@ -268,7 +268,7 @@ export default function Lecture() {
     setIsPlaying(true);
   }
 
-  const onPressLeftArrow = () => {
+  const handlePressLeftArrow = () => {
     Alert.alert(
       '그만두시겠습니까?', // title
       '기도 기록 페이지로 넘어갑니다.', // message
@@ -279,7 +279,7 @@ export default function Lecture() {
     )
   }
 
-  const onPressMusic = () => {
+  const handlePressMusic = () => {
     Alert.alert(
       isBgmMute ? '배경음악을 키겠습니까?' : '배경음악을 끄겠습니까?', // title
       '', // message
@@ -395,7 +395,7 @@ export default function Lecture() {
             prefix={
               <CustomButton style={{
                 width: "auto"
-              }} onPress={onPressLeftArrow}>
+              }} onPress={handlePressLeftArrow}>
                 <MediumText style={{
                   color: "#959FFF"
                 }} fontSize={14}>
@@ -406,7 +406,7 @@ export default function Lecture() {
             suffix={
               <Pressable
                 hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-                onPress={onPressMusic}
+                onPress={handlePressMusic}
               >
                 {
                   isBgmMute
