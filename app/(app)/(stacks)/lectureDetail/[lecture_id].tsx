@@ -66,15 +66,19 @@ export default function Lecture() {
     isDataLoaded: isLectureSuccess,
   });
 
+  // Timer States
   const [timerKey, setTimerKey] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isBgmMute, setIsBgmMute] = useState(false);
   const [repeatCount, setRepeatCount] = useState(0);
   const repeatCountRef = useRef(0);
   const [duration, setDuration] = useState(0);
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const elapsedTimeRef = useRef(0);
+  const [endTime, setEndTime] = useState(0);
+
+  // Audio Player States
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isBgmMute, setIsBgmMute] = useState(false);
 
   const [amp, setAmp] = useState<Amp>();
 
@@ -322,32 +326,6 @@ export default function Lecture() {
     }
   }
 
-  const handlePressPrev = async (remainingTime: number) => {
-    // 10초 더하기, 단 duration(총 타이머 수)을 넘지 않도록
-    const newInitialRemainingTime = Math.min(remainingTime + 10, duration)
-    setInitialRemainingTime(newInitialRemainingTime);
-
-    if (repeatCount === 0 && amp) {
-      await amp.adjustVoiceBy(Math.max(elapsedTime - 10, 0));
-    }
-
-    // 타이머 렌더링을 위한 작업
-    setTimerKey(timerKey + 1);
-  }
-
-  const handlePressNext = async (remainingTime: number) => {
-    // 10초 빼기, 단 0보다 작아지지 않도록
-    const newInitialRemainingTime = Math.max(remainingTime - 10, 0);
-    setInitialRemainingTime(newInitialRemainingTime);
-
-    if (repeatCount === 0 && amp) {
-      await amp.adjustVoiceBy(Math.min(elapsedTime + 10, duration));
-    }
-
-    // 타이머 렌더링을 위한 작업
-    setTimerKey(timerKey + 1);
-  }
-
   const handlePressCompleteBtn = async (elapsedTime: number) => {
     await AsyncStorage.removeItem('isPraying');
     router.replace({
@@ -485,9 +463,7 @@ export default function Lecture() {
               appState={appStateVisible}
               onAdjustElapedTime={handleAdjustElapsedTime}
               setElapsedTime={setElapsedTime}
-              onPressNext={handlePressNext}
               onPressPlay={handlePressPlay}
-              onPressPrev={handlePressPrev}
               onComplete={handleCompleteTimer}
               onPressCompleteBtn={handlePressCompleteBtn}
             />
