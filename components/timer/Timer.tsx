@@ -72,6 +72,8 @@ export default function Timer(props: TimerProps) {
     }
 
     async function updateTimerByStoredTime() {
+      if (!isPlaying) return;
+
       const storedTime = await AsyncStorage.getItem(ASYNC_TIMER_KEY);
 
       if (storedTime === null) return;
