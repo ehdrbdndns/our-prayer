@@ -117,7 +117,7 @@ export default function Lecture() {
         const timeOffsetFromEnd = curTime - savedEndTime;
         const lectureTimeMs = lectureTimeSeconds * 1000;
 
-            const totalElapsedTime = timeOffsetFromEnd + (savedRepeatCount + 1) * lectureTimeMs;
+        const totalElapsedTime = timeOffsetFromEnd + (savedRepeatCount + 1) * lectureTimeMs;
         return totalElapsedTime;
       } catch (error) {
         console.error('Error handling reconnection:', error);
@@ -166,8 +166,6 @@ export default function Lecture() {
               lectureTimeSeconds
             );
             const totalElapsedTimeInSec = totalElapsedTimeInMs / 1000;
-
-            console.log("경과 시간: ", totalElapsedTimeInSec, "초");
 
             await amp?.adjustVoiceBy(totalElapsedTimeInSec);
             handleAdjustElapsedTime(totalElapsedTimeInSec, lectureTimeSeconds);
