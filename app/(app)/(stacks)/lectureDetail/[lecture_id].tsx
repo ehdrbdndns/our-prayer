@@ -7,6 +7,7 @@ import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
+import { ASYNC_IS_PRAYING, AsyncIsPrayingType } from "@/storage/asyncStorageKeys";
 import { LectureType } from "@/utils/dataType";
 import { useScreenTransition } from "@/utils/hooks/useScreenTransition";
 import { useLectureQuery } from "@/utils/queries";
@@ -70,11 +71,12 @@ export default function Lecture() {
   const [timerKey, setTimerKey] = useState(0);
   const [repeatCount, setRepeatCount] = useState(0);
   const repeatCountRef = useRef(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(0); // in seconds
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const elapsedTimeRef = useRef(0);
-  const [endTime, setEndTime] = useState(0);
+  const endTimeRef = useRef(0);
+  const [pausedTime, setPausedTime] = useState(0); // milliseconds
 
   // Audio Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -97,37 +99,92 @@ export default function Lecture() {
 
   // Set initial duration and remaining time
   useEffect(() => {
+    function startNewTimer(lectureTimeSeconds: number) {
+      const curTime = new Date().getTime();
+      setIsPlaying(true);
+      setDuration(lectureTimeSeconds);
+      endTimeRef.current = curTime + (lectureTimeSeconds * 1000);
+      setInitialRemainingTime(lectureTimeSeconds);
+    }
+
+    function calculateElapsedTimeFromSavedState(
+      savedRepeatCount: number,
+      savedEndTime: number,
+      lectureTimeSeconds: number
+    ) {
+      try {
+        const curTime = new Date().getTime();
+        const timeOffsetFromEnd = curTime - savedEndTime;
+        const lectureTimeMs = lectureTimeSeconds * 1000;
+
+            const totalElapsedTime = timeOffsetFromEnd + (savedRepeatCount + 1) * lectureTimeMs;
+        return totalElapsedTime;
+      } catch (error) {
+        console.error('Error handling reconnection:', error);
+        throw error;
+      }
+    }
+
     async function startLecture() {
       if (isLectureSuccess && isContentVisible) {
 
         if (lecture.bgm === '') {
-          Alert.alert('알림!', '새로운 오디오 파일이 추가되었습니다. 파일을 다시 다운로드 해주세요.');
-          await AsyncStorage.removeItem(`planAudit-${plan_id}`);
-          router.dismissTo('/plan');
+          Alert.alert('알림!', '새로운 오디오 파일이 추가되었습니다. 파일을 다시 다운로드 해주세요.', [
+            {
+              text: '확인',
+              onPress: async () => {
+                await AsyncStorage.removeItem(`planAudit-${plan_id}`);
+                router.dismissTo('/plan');
+              }
+            }
+          ]);
+
+          return;
         }
 
-        const isPraying = await AsyncStorage.getItem('isPraying');
-        const duration = lecture.time === 0 ? 1 : (lecture.time * 60);
-
-        setIsPlaying(true);
-        setDuration(duration);
-        setInitialRemainingTime(duration);
+        const lectureTimeSeconds = lecture.time === 0 ? 1 : (lecture.time * 60);
+        const isPraying = await AsyncStorage.getItem(ASYNC_IS_PRAYING);
 
         if (!!isReconnect && !!isPraying) {
-          // If already praying, set the elapsed time and repeat count
-          const {
-            repeatCount: savedRepeatCount
-            , elapsedTime: savedElapsedTime
-            , pauseTime: savedPauseTime
-          } = JSON.parse(isPraying);
+          // 재연결 시에는 저장된 상태부터 복원
+          try {
+            const {
+              repeatCount: savedRepeatCount,
+              endTime: savedEndTime
+            } = JSON.parse(isPraying) as AsyncIsPrayingType;
 
-          let curTime = new Date().getTime() / 1000;
-          let diffTime = curTime - Number(savedPauseTime);
+            await AsyncStorage.removeItem(ASYNC_IS_PRAYING);
 
-          let totalElapsedTime = savedElapsedTime + diffTime + (savedRepeatCount * duration);
+            // 복원된 상태로 설정
+            setIsPlaying(true);
+            setDuration(lectureTimeSeconds);
+            endTimeRef.current = savedEndTime; // ✅ 저장된 endTime 사용
 
-          await amp?.adjustVoiceBy(totalElapsedTime);
-          handleAdjustElapsedTime(totalElapsedTime, duration);
+            const totalElapsedTimeInMs = calculateElapsedTimeFromSavedState(
+              savedRepeatCount,
+              savedEndTime,
+              lectureTimeSeconds
+            );
+            const totalElapsedTimeInSec = totalElapsedTimeInMs / 1000;
+
+            console.log("경과 시간: ", totalElapsedTimeInSec, "초");
+
+            await amp?.adjustVoiceBy(totalElapsedTimeInSec);
+            handleAdjustElapsedTime(totalElapsedTimeInSec, lectureTimeSeconds);
+          } catch {
+            await AsyncStorage.removeItem(ASYNC_IS_PRAYING);
+            Alert.alert('알림!', '재연결 중 오류가 발생했습니다.', [
+              {
+                text: '확인',
+                onPress: async () => {
+                  router.dismissTo('/plan');
+                }
+              }
+            ]);
+          }
+        } else {
+          // 새로 시작
+          startNewTimer(lectureTimeSeconds);
         }
       }
     }
@@ -145,25 +202,22 @@ export default function Lecture() {
   // Turn on amp
   useEffect(() => {
     async function changeToBackground() {
-      // 1. 타이머 정지
       setIsPlaying(false);
 
-      // 2. Amp 모드 전환
       if (!!amp) {
         await amp.changeToBackgroundState(elapsedTimeRef.current);
       }
 
       // 3. 기도중이라는 상태를 AsyncStorage에 저장
       //    나중에 메인 화면에서 기도중인지 확인하기 위함
-      await AsyncStorage.setItem('isPraying', JSON.stringify({
+      await AsyncStorage.setItem(ASYNC_IS_PRAYING, JSON.stringify({
         plan_id: plan_id,
         plan_title: plan_title,
         lecture_id: lecture_id,
         lecture_title: lecture.title,
         repeatCount: repeatCountRef.current,
-        elapsedTime: elapsedTimeRef.current,
-        pauseTime: new Date().getTime() / 1000,
-      }))
+        endTime: endTimeRef.current,
+      } as AsyncIsPrayingType))
     }
 
     async function changeToForeground() {
@@ -264,12 +318,16 @@ export default function Lecture() {
     if (!amp) return;
     await amp.pause();
     setIsPlaying(false);
+    setPausedTime(new Date().getTime())
   }
 
   const resumeAll = async () => {
     if (!amp) return;
     await amp.resumeAudio();
     setIsPlaying(true);
+
+    const pauseDuration = new Date().getTime() - pausedTime;
+    endTimeRef.current = endTimeRef.current + pauseDuration;
   }
 
   const handlePressLeftArrow = () => {
@@ -327,7 +385,7 @@ export default function Lecture() {
   }
 
   const handlePressCompleteBtn = async (elapsedTime: number) => {
-    await AsyncStorage.removeItem('isPraying');
+    await AsyncStorage.removeItem(ASYNC_IS_PRAYING);
     router.replace({
       pathname: '/prayerRecord',
       params: {
