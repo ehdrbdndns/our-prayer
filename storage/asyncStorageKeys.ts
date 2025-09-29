@@ -15,3 +15,15 @@ export const ASYNC_REVIEW_REQUEST_COUNT = 'review_request_count';
 
 // 마지막으로 리뷰를 요청한 시간
 export const ASYNC_LAST_REVIEW_REQUEST_TIMESTAMP = 'last_review_request_timestamp';
+
+// 기도 중인지 여부
+export const ASYNC_IS_PRAYING = 'is_praying';
+
+export type AsyncIsPrayingType = {
+  plan_id: string,
+  plan_title: string,
+  lecture_id: string,
+  lecture_title: string,
+  repeatCount: number,
+  endTime: number // new Date().getTime() 형태로 저장
+}

@@ -9,6 +9,7 @@ import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
 import { useAppContext } from "@/contexts/AppContext";
 import { useSession } from '@/contexts/AuthContext';
+import { ASYNC_IS_PRAYING } from "@/storage/asyncStorageKeys";
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
 import { handleSmartReviewRequest } from "@/utils/inAppReview";
 import { useBibleQuery, useHistoryQuery } from "@/utils/queries";
@@ -45,7 +46,7 @@ export default function Index() {
   // 기도 중이었다면 Alert로 기도 페이지로 이동 여부 확인
   useEffect(() => {
     async function checkIsPraying() {
-      const isPraying = await AsyncStorage.getItem('isPraying');
+      const isPraying = await AsyncStorage.getItem(ASYNC_IS_PRAYING);
 
       if (!isPraying) { return }
 
@@ -64,7 +65,7 @@ export default function Index() {
             style: "cancel",
             onPress: async () => {
               // 기도 중 상태 초기화
-              await AsyncStorage.removeItem('isPraying');
+              await AsyncStorage.removeItem(ASYNC_IS_PRAYING);
             }
           },
           {
