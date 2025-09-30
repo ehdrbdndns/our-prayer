@@ -64,6 +64,7 @@ export default function login() {
 
         <BoldText
           fontSize={36}
+          letterSpacingPercent={0}
         >
           우리의 기도
         </BoldText>
@@ -89,7 +90,6 @@ export default function login() {
           <PrimaryButton onPress={onPressStart}>
             <MediumText
               fontSize={15}
-              letterSpacingPercent={-1}
             >
               시작하기
             </MediumText>
