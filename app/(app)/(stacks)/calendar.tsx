@@ -7,7 +7,7 @@ import HistoryNote from '@/components/HistoryNote';
 import PrayerState from '@/components/PrayerState';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
-import { calculateContinuousPrayerDays, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
+import { calculateContinuousPrayerDays, calculateToday, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
 import { useHistoryDetailMutation } from '@/utils/mutation';
 import { useHistoryQuery } from '@/utils/queries';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
@@ -26,9 +26,6 @@ LocaleConfig.locales['kr'] = {
 }
 
 LocaleConfig.defaultLocale = 'kr';
-
-const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-const Today = new Date().toLocaleDateString('sv-SE', { timeZone: userTimeZone });
 
 const EmptyNote = () => (
   <View key="emptyNote" style={styles.emptyQuestion}>
@@ -54,7 +51,7 @@ export default function CalendarPage() {
   }>();
 
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedDay, setSelectedDay] = useState(Today);
+  const [selectedDay, setSelectedDay] = useState(() => calculateToday());
   const [selectedNoteList, setSelectedNoteList] = useState<JSX.Element[]>([<EmptyNote key="empty" />]);
   const [markedDates, setMarkedDates] = useState<{ [key: string]: { marked: boolean, dotColor: string, prayer_history_id_list: string[] } }>({});
 

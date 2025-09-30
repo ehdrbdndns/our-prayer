@@ -9,7 +9,7 @@ import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
 import { useAppContext } from "@/contexts/AppContext";
 import { useSession } from '@/contexts/AuthContext';
-import { ASYNC_IS_PRAYING } from "@/storage/asyncStorageKeys";
+import { ASYNC_IS_PRAYING, AsyncIsPrayingType } from "@/storage/asyncStorageKeys";
 import { calculateContinuousPrayerDays, calculateTodayPrayerTime } from "@/utils/date";
 import { handleSmartReviewRequest } from "@/utils/inAppReview";
 import { useBibleQuery, useHistoryQuery } from "@/utils/queries";
@@ -54,7 +54,15 @@ export default function Index() {
         plan_id
         , plan_title
         , lecture_id
-      } = JSON.parse(isPraying);
+        , endTime
+      } = JSON.parse(isPraying) as AsyncIsPrayingType
+
+      // 3시간 이상 지난 경우 기도 중 상태 초기화
+      const now = new Date().getTime();
+      if (now - endTime > 3 * 60 * 60 * 1000) {
+        await AsyncStorage.removeItem(ASYNC_IS_PRAYING);
+        return;
+      }
 
       Alert.alert(
         `혹시 기도 중이셨나요?`,

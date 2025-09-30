@@ -1,4 +1,4 @@
-import { getLetterSpacing, normalizeFontSize } from "@/utils/style";
+import { normalizeFontSize } from "@/utils/style";
 import { PropsWithChildren } from "react";
 import { Platform, StyleSheet, Text } from "react-native";
 
@@ -34,7 +34,7 @@ export default function CustomText({
           fontSize: normalizedFontSize,
           // TODO: 만약 안드로이드에서 텍스트가 짤린다면 normalizedFontSize * 1.5로 고정해야 할 수도 있음.
           lineHeight: lineHeight || normalizedFontSize * 1.5,
-          letterSpacing: getLetterSpacing(normalizedFontSize, letterSpacingPercent),
+          // letterSpacing: getLetterSpacing(normalizedFontSize, letterSpacingPercent),
           textAlign,
           color,
           fontFamily,

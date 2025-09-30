@@ -77,6 +77,8 @@ export default function Lecture() {
   const elapsedTimeRef = useRef(0);
   const endTimeRef = useRef(0);
   const [pausedTime, setPausedTime] = useState(0); // milliseconds
+  const wasPlayingBeforeBackgroundRef = useRef(false);
+  const isPlayingRef = useRef(false);
 
   // Audio Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -96,6 +98,10 @@ export default function Lecture() {
   useEffect(() => {
     repeatCountRef.current = repeatCount;
   }, [repeatCount])
+
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying])
 
   // Set initial duration and remaining time
   useEffect(() => {
@@ -117,7 +123,7 @@ export default function Lecture() {
         const timeOffsetFromEnd = curTime - savedEndTime;
         const lectureTimeMs = lectureTimeSeconds * 1000;
 
-            const totalElapsedTime = timeOffsetFromEnd + (savedRepeatCount + 1) * lectureTimeMs;
+        const totalElapsedTime = timeOffsetFromEnd + (savedRepeatCount + 1) * lectureTimeMs;
         return totalElapsedTime;
       } catch (error) {
         console.error('Error handling reconnection:', error);
@@ -167,8 +173,6 @@ export default function Lecture() {
             );
             const totalElapsedTimeInSec = totalElapsedTimeInMs / 1000;
 
-            console.log("경과 시간: ", totalElapsedTimeInSec, "초");
-
             await amp?.adjustVoiceBy(totalElapsedTimeInSec);
             handleAdjustElapsedTime(totalElapsedTimeInSec, lectureTimeSeconds);
           } catch {
@@ -202,6 +206,7 @@ export default function Lecture() {
   // Turn on amp
   useEffect(() => {
     async function changeToBackground() {
+      wasPlayingBeforeBackgroundRef.current = isPlayingRef.current;
       setIsPlaying(false);
 
       if (!!amp) {
@@ -222,10 +227,10 @@ export default function Lecture() {
 
     async function changeToForeground() {
       // 1. 타이머 재개
-      setIsPlaying(true);
+      setIsPlaying(wasPlayingBeforeBackgroundRef.current);
 
       // 2. Amp 모드 전환
-      if (!!amp) {
+      if (!!amp && wasPlayingBeforeBackgroundRef.current) {
         amp.changeToForgroundState();
       }
     }
