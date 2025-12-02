@@ -10,7 +10,6 @@ type BackgroundWithImageProps = PropsWithChildren<{
   animation?: 'fade' | 'none';
 }>;
 
-// Todo - 이미지가 로딩되면 fade 효과를 주기
 export default function BackgroundWithImage({ children, style, animation }: BackgroundWithImageProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
