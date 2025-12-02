@@ -13,8 +13,7 @@ export default function StackLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        headerShadowVisible: false,
-        gestureEnabled: false,
+        headerShadowVisible: false
       }}
       screenLayout={ScreenLayout}
     >
