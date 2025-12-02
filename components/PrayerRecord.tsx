@@ -46,7 +46,7 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
     return startOfWeek
   }
 
-  const RegenerateRecord = (history: HistoryType[]): RecordType[] => {
+  const calculateRecordFromHistory = (history: HistoryType[]): RecordType[] => {
     const records: RecordType[] = [];
 
     const startOfCurrentWeek = getStartDateOfThisWeek();
@@ -90,7 +90,7 @@ export default function PrayerRecord({ history }: PrayerRecordProps) {
     return records;
   };
 
-  const records = RegenerateRecord(history);
+  const records = calculateRecordFromHistory(history);
 
   return (
     <View style={styles.record}>
