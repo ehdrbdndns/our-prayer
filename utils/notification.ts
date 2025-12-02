@@ -30,6 +30,7 @@ export async function registerForPushNotificationsAsync() {
     if (!projectId) {
       throw new Error('No project ID found');
     }
+
     try {
       const pushTokenString = (
         await getExpoPushTokenAsync({
@@ -42,6 +43,7 @@ export async function registerForPushNotificationsAsync() {
       throw new Error(e as string);
     }
   } else {
-    throw new Error('Must use physical device for push notifications');
+    return ""
+    // throw new Error('Must use physical device for push notifications');
   }
 }

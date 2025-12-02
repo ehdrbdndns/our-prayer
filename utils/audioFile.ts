@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 export const AUDIO_DIR = 'audio/';
 const audioFileUri = (path: string) => AUDIO_DIR + `${path}`;

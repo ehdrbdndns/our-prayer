@@ -38,7 +38,7 @@ export default function Index() {
   const continuousPrayerDays = calculateContinuousPrayerDays(history || []);
   const todayPrayerTime = calculateTodayPrayerTime(history || []);
 
-  const onPressHistory = () => {
+  const handlePressHistory = () => {
     router.navigate("/calendar");
   }
 
@@ -173,7 +173,7 @@ export default function Index() {
         {/* 기도 일자 데이터 */}
         <TouchableOpacity
           style={[styles.content, { marginBottom: moderateScale(40) }]}
-          onPress={onPressHistory}
+          onPress={handlePressHistory}
         >
           {/* Title */}
           <View
@@ -202,7 +202,7 @@ export default function Index() {
               backgroundColor: "rgba(255, 255, 255, 0.05)",
             }}
           >
-            <PrayerRecord history={history || []} />
+            <PrayerRecord history={history.sort((a, b) => b.created_date - a.created_date).slice(0, 28) || []} />
           </View>
         </TouchableOpacity>
 
