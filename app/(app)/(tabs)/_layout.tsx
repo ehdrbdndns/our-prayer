@@ -1,30 +1,29 @@
-import BackgroundWithImage from '@/components/BackgroundWithImage';
-import TabBar from '@/components/TabBar';
-import { Tabs } from 'expo-router';
-import { PropsWithChildren } from 'react';
+import Feather from '@expo/vector-icons/Feather';
+
+import { Icon, Label, NativeTabs, VectorIcon } from 'expo-router/unstable-native-tabs';
 
 export default function TabLayout() {
-  const ScreenLayout = ({ children }: PropsWithChildren) => (
-    <BackgroundWithImage animation='fade'>
-      {children}
-    </BackgroundWithImage>
-  );
-
   return (
-    <Tabs
-      tabBar={props => <TabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-        headerShadowVisible: false,
-      }}
-      screenLayout={ScreenLayout}
+    <NativeTabs
+      labelVisibilityMode="labeled"
+      iconColor={{ default: 'default', selected: "#4F5FFF" }}
     >
-      <Tabs.Screen name="index" />
-      <Tabs.Screen name="plan" />
-      <Tabs.Screen name="currentPlan" />
-      {/* <Tabs.Screen name="question" /> */}
-      <Tabs.Screen name="question" />
-      <Tabs.Screen name="mypage" />
-    </Tabs>
+      <NativeTabs.Trigger name="index">
+        <Icon src={<VectorIcon family={Feather} name="home" />} />
+        <Label>홈</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="plan">
+        <Icon src={<VectorIcon family={Feather} name="book-open" />} />
+        <Label>기도 플랜</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="question">
+        <Icon src={<VectorIcon family={Feather} name="message-square" />} />
+        <Label>질문</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="mypage">
+        <Icon src={<VectorIcon family={Feather} name="settings" />} />
+        <Label>설정</Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

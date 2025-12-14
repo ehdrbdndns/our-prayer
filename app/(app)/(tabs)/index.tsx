@@ -4,6 +4,7 @@ import Star from "@/assets/images/icon/star.svg";
 import Header from "@/components/Header";
 import PrayerRecord from "@/components/PrayerRecord";
 import PrayerState from "@/components/PrayerState";
+import ScreenLayout from "@/components/ScreenLayout";
 import ShareCard from "@/components/ShareCard";
 import { BoldText } from "@/components/text/BoldText";
 import TodayVerse from "@/components/TodayVerse";
@@ -120,98 +121,102 @@ export default function Index() {
   }
 
   return (
-    <ScrollView
-      style={[styles.scrollViewContent]}
-      showsVerticalScrollIndicator={false}
+    <ScreenLayout
+      style={{ paddingBottom: 60 }}
     >
-      <SafeAreaView style={styles.container}>
-        {/* Header */}
-        <Header style={styles.header} />
+      <ScrollView
+        style={[styles.scrollViewContent]}
+        showsVerticalScrollIndicator={false}
+      >
+        <SafeAreaView style={styles.container}>
+          {/* Header */}
+          <Header style={styles.header} />
 
-        {/* Content */}
-        <View style={styles.content}>
-          <BoldText style={styles.intro} fontSize={24} lineHeight={36} letterSpacingPercent={-1}>
-            {`안녕하세요, ${name}님\n오늘의 기도를 시작해보세요.`}
-          </BoldText>
-        </View>
-
-        {/* 기도 데이터 */}
-        <View style={styles.content}>
-          <View style={styles.prayerStateList}>
-            {/* 연속 기도 일수 */}
-            <PrayerState
-              style={styles.prayerState}
-              title={"연속 기도일 수"}
-              icon={<Fire width={moderateScale(24)} height={moderateScale(24)} />}
-              data={continuousPrayerDays}
-              unit={"일"}
-            />
-
-            {/* 오늘의 기도 시간 */}
-            <PrayerState
-              style={styles.prayerState}
-              title={"오늘의 기도 시간"}
-              icon={<Star width={moderateScale(24)} height={moderateScale(24)} />}
-              data={todayPrayerTime}
-              unit={"분"}
-            />
-          </View>
-        </View>
-
-        {/* 오늘의 말씀 */}
-        <View style={styles.content}>
-          {
-            isBibleSuccess ? (
-              <TodayVerse
-                subTitle={bible.title}
-                content={bible.content}
-              />
-            ) : null // TODO : Add skeleton loader
-          }
-
-        </View>
-        {/* 기도 일자 데이터 */}
-        <TouchableOpacity
-          style={[styles.content, { marginBottom: moderateScale(40) }]}
-          onPress={handlePressHistory}
-        >
-          {/* Title */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: moderateScale(16)
-            }}
-          >
-            <BoldText
-              color="#FFFFFF"
-              fontSize={16}
-              letterSpacingPercent={-1}
-            >
-              나의 기도 기록
+          {/* Content */}
+          <View style={styles.content}>
+            <BoldText style={styles.intro} fontSize={24} lineHeight={36} letterSpacingPercent={-1}>
+              {`안녕하세요, ${name}님\n오늘의 기도를 시작해보세요.`}
             </BoldText>
-            <RightShortArrow />
           </View>
 
-          <View
-            style={{
-              paddingVertical: moderateScale(18),
-              paddingHorizontal: moderateScale(16),
-              borderRadius: moderateScale(10),
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-            }}
+          {/* 기도 데이터 */}
+          <View style={styles.content}>
+            <View style={styles.prayerStateList}>
+              {/* 연속 기도 일수 */}
+              <PrayerState
+                style={styles.prayerState}
+                title={"연속 기도일 수"}
+                icon={<Fire width={moderateScale(24)} height={moderateScale(24)} />}
+                data={continuousPrayerDays}
+                unit={"일"}
+              />
+
+              {/* 오늘의 기도 시간 */}
+              <PrayerState
+                style={styles.prayerState}
+                title={"오늘의 기도 시간"}
+                icon={<Star width={moderateScale(24)} height={moderateScale(24)} />}
+                data={todayPrayerTime}
+                unit={"분"}
+              />
+            </View>
+          </View>
+
+          {/* 오늘의 말씀 */}
+          <View style={styles.content}>
+            {
+              isBibleSuccess ? (
+                <TodayVerse
+                  subTitle={bible.title}
+                  content={bible.content}
+                />
+              ) : null // TODO : Add skeleton loader
+            }
+
+          </View>
+          {/* 기도 일자 데이터 */}
+          <TouchableOpacity
+            style={[styles.content, { marginBottom: moderateScale(40) }]}
+            onPress={handlePressHistory}
           >
-            <PrayerRecord history={history.sort((a, b) => b.created_date - a.created_date).slice(0, 28) || []} />
-          </View>
-        </TouchableOpacity>
+            {/* Title */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: moderateScale(16)
+              }}
+            >
+              <BoldText
+                color="#FFFFFF"
+                fontSize={16}
+                letterSpacingPercent={-1}
+              >
+                나의 기도 기록
+              </BoldText>
+              <RightShortArrow />
+            </View>
 
-        {/* 공유 카드 */}
-        <View style={styles.shareCard}>
-          <ShareCard />
-        </View>
-      </SafeAreaView>
-    </ScrollView>
+            <View
+              style={{
+                paddingVertical: moderateScale(18),
+                paddingHorizontal: moderateScale(16),
+                borderRadius: moderateScale(10),
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+              }}
+            >
+              <PrayerRecord history={history.sort((a, b) => b.created_date - a.created_date).slice(0, 28) || []} />
+            </View>
+          </TouchableOpacity>
+
+          {/* 공유 카드 */}
+          <View style={styles.shareCard}>
+            <ShareCard />
+          </View>
+        </SafeAreaView>
+      </ScrollView>
+    </ScreenLayout>
   );
 }
 

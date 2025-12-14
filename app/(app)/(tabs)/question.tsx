@@ -3,6 +3,7 @@ import Edit from '@/assets/images/icon/edit.svg';
 import Send from "@/assets/images/icon/send.svg";
 import Star from '@/assets/images/icon/star.svg';
 import Trash from '@/assets/images/icon/trash.svg';
+import ScreenLayout from '@/components/ScreenLayout';
 import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from "@/components/text/MediumText";
@@ -83,181 +84,181 @@ export default function QuestionPage() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Title */}
-      <BoldText
-        style={styles.title}
-        fontSize={24}
-        lineHeight={36}
-      >
-        궁금한 점이 있으신가요?
-      </BoldText>
-
-      {/* Desc */}
-      <RegularText
-        style={styles.desc}
-        color="#B3B3B3"
-        fontSize={14}
-        lineHeight={24}
-      >
-        신앙생활을 하며 겪는 죄의 문제가 있으신가요? {'\n'}목사님과 상담하고 답을 찾아가세요.
-      </RegularText>
-
-      {/* Link */}
-      <TouchableOpacity
-        onPress={onPressPastor}
-        style={[styles.textButton, { marginBottom: moderateScale(0) }]}
-      >
-        <MediumText
-          style={{ textDecorationLine: 'underline' }}
-          fontSize={14}
-          lineHeight={28}
-          color="#959FFF"
-        >
-          목사님 소개
-        </MediumText>
-      </TouchableOpacity>
-
-      {/* Link */}
-      <TouchableOpacity
-        onPress={onPressQuestionGuid}
-        style={styles.textButton}
-      >
-        <MediumText
-          style={{ textDecorationLine: 'underline' }}
-          fontSize={14}
-          lineHeight={28}
-          color="#959FFF"
-        >
-          상담하는 방법 자세히 알아보기
-        </MediumText>
-      </TouchableOpacity>
-
-      {/* Question List */}
-      <View style={styles.questionList}>
+    <ScreenLayout
+      style={{ paddingBottom: 60 }}
+    >
+      <SafeAreaView style={styles.container}>
+        {/* Title */}
         <BoldText
-          style={{ paddingHorizontal: moderateScale(24), }}
-          fontSize={16}
-          lineHeight={24}
+          style={styles.title}
+          fontSize={24}
+          lineHeight={36}
         >
-          상담 신청 내역
+          궁금한 점이 있으신가요?
         </BoldText>
 
-        {
-          (questionList ?? []).length === 0 ? (
-            <View style={styles.emptyQuestion}>
-              <Star opacity={0.8} />
-              <RegularText
-                color="#B3B3B3"
-                fontSize={14}
-                lineHeight={24}
-              >
-                아직 신청 내역이 없습니다!
-              </RegularText>
-            </View>
-          ) : (
-            <ScrollView
-              style={{ paddingHorizontal: moderateScale(24) }}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollView}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
-                  tintColor={"#FFFFFF"}
-                />
-              }
-            >
-              {
-                (questionList ?? []).map((question) => {
-                  return (
-                    <TouchableOpacity
-                      key={question.question_id}
-                      style={styles.card}
-                      onPress={() => onPressQuestionCard(question.question_id)}
-                    >
-                      {/* date */}
-                      <MediumText
-                        style={{ marginBottom: moderateScale(4) }}
-                        color='#B3B3B3'
-                        fontSize={14}
-                        lineHeight={26}
-                      >
-                        {formatDateToKorean(question.created_date)}
-                      </MediumText>
-
-                      {/* Text */}
-                      <RegularText
-                        style={{ marginBottom: moderateScale(16) }}
-                        fontSize={16}
-                        lineHeight={28}
-                        numberOfLines={5}
-                      >
-                        {question.content}
-                      </RegularText>
-
-                      <View style={styles.cardIconList}>
-                        {/* Chat */}
-                        <View style={{ flexDirection: 'row', gap: moderateScale(4), alignItems: 'center' }}>
-                          <Chat width={moderateScale(24)} height={moderateScale(24)} />
-                          <CustomText
-                            style={{ fontFamily: 'Inter_600SemiBold' }}
-                            fontSize={16}
-                            lineHeight={28}
-                            color='#959FFF'
-                          >
-                            {question.reply_count}
-                          </CustomText>
-                        </View>
-
-                        <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
-                          {/* Edit */}
-                          <TouchableOpacity
-                            onPress={() => onPressEdit(question.question_id)}
-                            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-                          >
-                            <Edit width={moderateScale(24)} height={moderateScale(24)} />
-                          </TouchableOpacity>
-
-                          {/* Trash */}
-                          <TouchableOpacity
-                            onPress={() => onPressDelete(question.question_id)}
-                            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-                          >
-                            <Trash width={moderateScale(24)} height={moderateScale(24)} />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  )
-                })
-              }
-            </ScrollView>
-          )
-        }
-      </View>
-
-      <View style={styles.inputTriggerContainer}>
-        <TouchableOpacity
-          onPress={onPressRequestQuestion}
-          style={styles.inputTriggerButton}
+        {/* Desc */}
+        <RegularText
+          style={styles.desc}
+          color="#B3B3B3"
+          fontSize={14}
+          lineHeight={24}
         >
-          <RegularText
-            color="#B3B3B3"
-            fontSize={16}
-            lineHeight={24}
-          >
-            {
-              "상담 신청 내용을 입력해주세요."
-            }
-          </RegularText>
-          <Send />
-        </TouchableOpacity>
-      </View>
+          신앙생활을 하며 겪는 죄의 문제가 있으신가요? {'\n'}목사님과 상담하고 답을 찾아가세요.
+        </RegularText>
 
-      {/* <InputButton onSubmit={insertQuestion} /> */}
-    </SafeAreaView >
+        {/* Link */}
+        <TouchableOpacity
+          onPress={onPressPastor}
+          style={[styles.textButton, { marginBottom: moderateScale(0) }]}
+        >
+          <MediumText
+            style={{ textDecorationLine: 'underline' }}
+            fontSize={14}
+            lineHeight={28}
+            color="#959FFF"
+          >
+            목사님 소개
+          </MediumText>
+        </TouchableOpacity>
+
+        {/* Link */}
+        <TouchableOpacity
+          onPress={onPressQuestionGuid}
+          style={styles.textButton}
+        >
+          <MediumText
+            style={{ textDecorationLine: 'underline' }}
+            fontSize={14}
+            lineHeight={28}
+            color="#959FFF"
+          >
+            상담하는 방법 자세히 알아보기
+          </MediumText>
+        </TouchableOpacity>
+
+        {/* Question List */}
+        <View style={styles.questionList}>
+          <View style={styles.sectionHeader}>
+            <BoldText
+              fontSize={16}
+              lineHeight={24}
+            >
+              상담 신청 내역
+            </BoldText>
+            <TouchableOpacity
+              onPress={onPressRequestQuestion}
+              style={styles.inlineCtaButton}
+            >
+              <RegularText
+                fontSize={14}
+                lineHeight={20}
+                color="#FFFFFF"
+              >
+                상담 신청하기
+              </RegularText>
+              <Send width={moderateScale(18)} height={moderateScale(18)} />
+            </TouchableOpacity>
+          </View>
+
+          {
+            (questionList ?? []).length === 0 ? (
+              <View style={styles.emptyQuestion}>
+                <Star opacity={0.8} />
+                <RegularText
+                  color="#B3B3B3"
+                  fontSize={14}
+                  lineHeight={24}
+                >
+                  아직 신청 내역이 없습니다!
+                </RegularText>
+              </View>
+            ) : (
+              <ScrollView
+                style={{ paddingHorizontal: moderateScale(24) }}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollView}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
+                    tintColor={"#FFFFFF"}
+                  />
+                }
+              >
+                {
+                  (questionList ?? []).map((question) => {
+                    return (
+                      <TouchableOpacity
+                        key={question.question_id}
+                        style={styles.card}
+                        onPress={() => onPressQuestionCard(question.question_id)}
+                      >
+                        {/* date */}
+                        <MediumText
+                          style={{ marginBottom: moderateScale(4) }}
+                          color='#B3B3B3'
+                          fontSize={14}
+                          lineHeight={26}
+                        >
+                          {formatDateToKorean(question.created_date)}
+                        </MediumText>
+
+                        {/* Text */}
+                        <RegularText
+                          style={{ marginBottom: moderateScale(16) }}
+                          fontSize={16}
+                          lineHeight={28}
+                          numberOfLines={5}
+                        >
+                          {question.content}
+                        </RegularText>
+
+                        <View style={styles.cardIconList}>
+                          {/* Chat */}
+                          <View style={{ flexDirection: 'row', gap: moderateScale(4), alignItems: 'center' }}>
+                            <Chat width={moderateScale(24)} height={moderateScale(24)} />
+                            <CustomText
+                              style={{ fontFamily: 'Inter_600SemiBold' }}
+                              fontSize={16}
+                              lineHeight={28}
+                              color='#959FFF'
+                            >
+                              {question.reply_count}
+                            </CustomText>
+                          </View>
+
+                          <View style={{ flexDirection: 'row', gap: moderateScale(24) }}>
+                            {/* Edit */}
+                            <TouchableOpacity
+                              onPress={() => onPressEdit(question.question_id)}
+                              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+                            >
+                              <Edit width={moderateScale(24)} height={moderateScale(24)} />
+                            </TouchableOpacity>
+
+                            {/* Trash */}
+                            <TouchableOpacity
+                              onPress={() => onPressDelete(question.question_id)}
+                              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+                            >
+                              <Trash width={moderateScale(24)} height={moderateScale(24)} />
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      </TouchableOpacity>
+                    )
+                  })
+                }
+              </ScrollView>
+            )
+          }
+        </View>
+
+        {/* <InputButton onSubmit={insertQuestion} /> */}
+      </SafeAreaView>
+    </ScreenLayout>
   )
 }
 
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     gap: moderateScale(12),
-    paddingBottom: moderateScale(100),
+    paddingBottom: moderateScale(24),
   },
   card: {
     borderRadius: moderateScale(10),
@@ -306,20 +307,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  inputTriggerContainer: {
-    width: '100%',
-    position: 'absolute',
-    bottom: moderateScale(28),
-
-    paddingHorizontal: moderateScale(20),
-  },
-  inputTriggerButton: {
+  sectionHeader: {
+    paddingHorizontal: moderateScale(24),
+    marginBottom: moderateScale(12),
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: moderateScale(12),
+  },
+  inlineCtaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: moderateScale(8),
     paddingHorizontal: moderateScale(14),
-    paddingVertical: moderateScale(10),
-
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingVertical: moderateScale(8),
+    backgroundColor: '#4F5FFF',
     borderRadius: moderateScale(12),
   },
 })

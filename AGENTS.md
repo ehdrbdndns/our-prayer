@@ -24,6 +24,13 @@
 - Expo Router routes: lowercase filenames; group by folder segments to mirror navigation.
 - Order imports: external libs, then absolute app modules, then relative paths; avoid default exports for shared pieces.
 
+## Color Palette (observed in code)
+- Primary/Highlight: `#4F5FFF` (most common), lighter accent `#959FFF`, occasional `#4D5BDC`.
+- Text/Secondary grays: frequent `#B3B3B3`; also `#7781A0`, `#8892B8`, `#858585`, `#5E6577`, mid grays `#51545D`/`#51525C`/`#555`/`#888`.
+- Dark backgrounds: `#0F141A`, `#161B29`, `#262624`, `#242527`, `#2D2D2D`, `#3A3A3B`, `#000000`.
+- Light/Surface: `#FFFFFF`/`#FFF`, `#FEFEFE`, `#E4E6FC`, `#CFCFCF`, `#B9B9B9`.
+- Special single-use tones spotted: `#F7EE91`, `#FEE500`, `#FF231F7C`, `#5EA3FE`, `#FF0000`.
+
 ## Testing Guidelines
 - No automated suite yet; add Jest + React Native Testing Library when introducing non-trivial logic.
 - Place tests alongside sources (`*.test.ts(x)` or `__tests__/`).
