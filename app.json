@@ -69,14 +69,7 @@
       "expo-font",
       "expo-web-browser",
       [
-        "expo-build-properties",
-        {
-          "android": {
-            "minSdkVersion": 35,
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35
-          }
-        }
+        "expo-build-properties"
       ]
     ],
     "experiments": {
