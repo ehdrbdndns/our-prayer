@@ -19,7 +19,7 @@ export default function CustomText({
   lineHeight,
   letterSpacingPercent = -1,
   color = '#FFFFFF',
-  fontFamily = 'NotoSansKR_500Medium',
+  fontFamily = Platform.OS === 'ios' ? "NotoSansKR_500Medium" : "Inter_500Medium",
   textAlign = "left",
   style,
   ...props
