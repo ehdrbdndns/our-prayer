@@ -4,7 +4,7 @@
 import { AppProvider } from '@/contexts/AppContext';
 import { SessionProvider } from '@/contexts/AuthContext';
 import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';
-import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import {
   NotoSansKR_400Regular,
   NotoSansKR_500Medium,
@@ -47,6 +47,7 @@ export default function Root() {
     NotoSansKR_400Regular,
     NotoSansKR_500Medium,
     NotoSansKR_700Bold,
+    Inter_700Bold,
     Inter_600SemiBold,
     Inter_500Medium,
     Inter_400Regular,
