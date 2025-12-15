@@ -1,3 +1,6 @@
+// ari_minahPark
+// jerry..out
+
 import { AppProvider } from '@/contexts/AppContext';
 import { SessionProvider } from '@/contexts/AuthContext';
 import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';

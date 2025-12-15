@@ -27,13 +27,11 @@ export default function BackgroundWithImage({ children, style, animation }: Back
 
   return (
     <View style={[styles.container, style]}>
-      <View style={[styles.imageContainer]}>
-        <Animated.View style={[StyleSheet.absoluteFill, { opacity: fadeAnim }]}>
-          <Image source={BackgroundImage} style={{ position: 'absolute', top: 0, width: "100%", height: "100%" }} />
-        </Animated.View>
-        <View style={styles.content}>
-          {children}
-        </View>
+      <Animated.View style={[StyleSheet.absoluteFill, { opacity: fadeAnim }]}>
+        <Image source={BackgroundImage} style={{ position: 'absolute', top: 0, width: "100%", height: "100%" }} />
+      </Animated.View>
+      <View style={[StyleSheet.absoluteFill, styles.content]}>
+        {children}
       </View>
     </View >
   );
