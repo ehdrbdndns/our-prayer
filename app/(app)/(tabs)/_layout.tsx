@@ -7,6 +7,8 @@ export default function TabLayout() {
     <NativeTabs
       labelVisibilityMode="labeled"
       iconColor={{ default: 'default', selected: "#4F5FFF" }}
+      backgroundColor="#161B29"
+      disableTransparentOnScrollEdge
     >
       <NativeTabs.Trigger name="index">
         <Icon src={<VectorIcon family={Feather} name="home" />} />
