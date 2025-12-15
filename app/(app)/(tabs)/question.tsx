@@ -84,9 +84,7 @@ export default function QuestionPage() {
   }
 
   return (
-    <ScreenLayout
-      style={{ paddingBottom: 60 }}
-    >
+    <ScreenLayout>
       <SafeAreaView style={styles.container}>
         {/* Title */}
         <BoldText
@@ -258,6 +256,8 @@ export default function QuestionPage() {
 
         {/* <InputButton onSubmit={insertQuestion} /> */}
       </SafeAreaView>
+
+      <View style={{ height: moderateScale(60) }} />
     </ScreenLayout>
   )
 }

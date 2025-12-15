@@ -85,9 +85,7 @@ export default function PlanPage() {
   }
 
   return (
-    <ScreenLayout
-      style={{ paddingBottom: 60 }}
-    >
+    <ScreenLayout>
       <ModalProvider>
         <FlatList
           numColumns={2}
@@ -223,6 +221,7 @@ export default function PlanPage() {
         {/* Audio Download Modal */}
         <DownloadModal />
       </ModalProvider>
+      <View style={{ height: moderateScale(60) }} />
     </ScreenLayout>
   )
 }

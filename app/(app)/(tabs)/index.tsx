@@ -121,9 +121,7 @@ export default function Index() {
   }
 
   return (
-    <ScreenLayout
-      style={{ paddingBottom: 60 }}
-    >
+    <ScreenLayout>
       <ScrollView
         style={[styles.scrollViewContent]}
         showsVerticalScrollIndicator={false}
@@ -215,6 +213,7 @@ export default function Index() {
             <ShareCard />
           </View>
         </SafeAreaView>
+        <View style={{ height: moderateScale(60) }} />
       </ScrollView>
     </ScreenLayout>
   );

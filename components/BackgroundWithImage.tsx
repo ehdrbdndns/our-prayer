@@ -30,7 +30,7 @@ export default function BackgroundWithImage({ children, style, animation }: Back
       <Animated.View style={[StyleSheet.absoluteFill, { opacity: fadeAnim }]}>
         <Image source={BackgroundImage} style={{ position: 'absolute', top: 0, width: "100%", height: "100%" }} />
       </Animated.View>
-      <View style={styles.content}>
+      <View style={[StyleSheet.absoluteFill, styles.content]}>
         {children}
       </View>
     </View >

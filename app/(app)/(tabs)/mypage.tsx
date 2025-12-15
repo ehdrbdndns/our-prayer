@@ -205,9 +205,7 @@ export default function MyPage() {
   }
 
   return (
-    <ScreenLayout
-      style={{ paddingBottom: 60 }}
-    >
+    <ScreenLayout>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -479,6 +477,7 @@ export default function MyPage() {
               회원 탈퇴
             </MediumText>
           </TouchableOpacity>
+          <View style={{ height: moderateScale(120) }} />
         </ScrollView >
       </View>
     </ScreenLayout>
