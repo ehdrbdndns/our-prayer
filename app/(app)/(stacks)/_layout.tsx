@@ -1,20 +1,12 @@
-import BackgroundWithImage from "@/components/BackgroundWithImage";
+import ScreenLayout from "@/components/ScreenLayout";
 import { Stack } from "expo-router";
-import { PropsWithChildren } from "react";
 
 export default function StackLayout() {
-  const ScreenLayout = ({ children }: PropsWithChildren) => (
-    <BackgroundWithImage animation='fade'>
-      {children}
-    </BackgroundWithImage>
-  );
-
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        headerShadowVisible: false,
-        gestureEnabled: false,
+        headerShadowVisible: false
       }}
       screenLayout={ScreenLayout}
     >

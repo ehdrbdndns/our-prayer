@@ -2,6 +2,7 @@ import LeftArrow from "@/assets/images/icon/leftArrow.svg";
 import DownloadModal from "@/components/DownloadModal";
 import Header from "@/components/Header";
 import PlanCard from "@/components/PlanCard";
+import ScreenLayout from "@/components/ScreenLayout";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
@@ -84,141 +85,144 @@ export default function PlanPage() {
   }
 
   return (
-    <ModalProvider>
-      <FlatList
-        numColumns={2}
-        data={filteredPlans}
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-        extraData={refreshing}
-        keyExtractor={(item) => item.plan_id}
-        columnWrapperStyle={styles.columnWrapper}
-        refreshing={refreshing}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
-            tintColor={"#FFFFFF"}
-            progressViewOffset={scaleHeight(50)}
-          />
-        }
-        ListHeaderComponent={(
-          <View style={{ paddingTop: insets.top }}>
-            {/* Header */}
-            <Header
-              style={styles.header}
-              prefix={
-                <Pressable
-                  onPress={handlePressLeftArrow}
-                  style={[styles.headerPrefix, !isSearchActive && styles.hidden]}
-                  hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-                >
-                  <LeftArrow />
-                </Pressable>
-              }
+    <ScreenLayout>
+      <ModalProvider>
+        <FlatList
+          numColumns={2}
+          data={filteredPlans}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          extraData={refreshing}
+          keyExtractor={(item) => item.plan_id}
+          columnWrapperStyle={styles.columnWrapper}
+          refreshing={refreshing}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
+              tintColor={"#FFFFFF"}
+              progressViewOffset={scaleHeight(50)}
             />
-
-            {/* 현재 진행중인 기도 */}
-            {
-              currentPlan && (
-                <View style={[styles.container, isSearchActive && styles.hidden]}>
-                  {/* Title */}
-                  <BoldText
-                    style={styles.title}
-                    fontSize={18}
+          }
+          ListHeaderComponent={(
+            <View style={{ paddingTop: insets.top }}>
+              {/* Header */}
+              <Header
+                style={styles.header}
+                prefix={
+                  <Pressable
+                    onPress={handlePressLeftArrow}
+                    style={[styles.headerPrefix, !isSearchActive && styles.hidden]}
+                    hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
                   >
-                    진행 중인 기도
-                  </BoldText>
-
-                  {/* Card */}
-                  <TouchableOpacity
-                    onPress={() => handlePressPlan({
-                      id: currentPlan.plan_id,
-                      title: currentPlan.title,
-                      banner: currentPlan.thumbnail,
-                      isLiked: currentPlan.is_liked
-                    })}
-                  >
-                    <View style={styles.opacityBackground}>
-                      {/* Image */}
-                      <ImageBackground
-                        style={styles.image}
-                        imageStyle={{ borderRadius: moderateScale(8) }}
-                        source={currentPlan.s_thumbnail}
-                      >
-                        <LinearGradient
-                          colors={["rgba(0, 0, 0, 0)", "#161B29"]}
-                          style={styles.imageFilter}
-                        />
-                      </ImageBackground>
-
-                      <View style={{
-                        width: moderateScale(228)
-                      }}>
-                        {/* SubTitle */}
-                        <BoldText
-                          fontSize={16}
-                          lineHeight={24}
-                        >
-                          {currentPlan.title}
-                        </BoldText>
-
-                        {/* Content */}
-                        <RegularText
-                          numberOfLines={1}
-                          fontSize={14}
-                          lineHeight={22}
-                        >
-                          {currentPlan.description}
-                        </RegularText>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              )
-            }
-
-            {/* 기도 플랜 찾기 */}
-            <View style={isSearchActive && styles.hidden}>
-              {/* Title */}
-              <BoldText
-                style={[styles.title, { paddingHorizontal: moderateScale(24) }]}
-                fontSize={18}
-              >
-                기도 플랜 찾기
-              </BoldText>
-
-              {/* Tabs (전체보기, 시간별 기도, 주제별 기도, 자유 기도) */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.tabList}
-              >
-                {
-                  Tabs.map(tab => (
-                    <TouchableOpacity
-                      key={tab.value}
-                      onPress={() => handlePressTab(tab.value)}
-                      style={planType === tab.value ? styles.activeTab : styles.tab}
-                    >
-                      <MediumText fontSize={14} lineHeight={22}>
-                        {tab.label}
-                      </MediumText>
-                    </TouchableOpacity>
-                  ))
+                    <LeftArrow />
+                  </Pressable>
                 }
-              </ScrollView>
+              />
 
-              {/* Card List */}
+              {/* 현재 진행중인 기도 */}
+              {
+                currentPlan && (
+                  <View style={[styles.container, isSearchActive && styles.hidden]}>
+                    {/* Title */}
+                    <BoldText
+                      style={styles.title}
+                      fontSize={18}
+                    >
+                      진행 중인 기도
+                    </BoldText>
+
+                    {/* Card */}
+                    <TouchableOpacity
+                      onPress={() => handlePressPlan({
+                        id: currentPlan.plan_id,
+                        title: currentPlan.title,
+                        banner: currentPlan.thumbnail,
+                        isLiked: currentPlan.is_liked
+                      })}
+                    >
+                      <View style={styles.opacityBackground}>
+                        {/* Image */}
+                        <ImageBackground
+                          style={styles.image}
+                          imageStyle={{ borderRadius: moderateScale(8) }}
+                          source={currentPlan.s_thumbnail}
+                        >
+                          <LinearGradient
+                            colors={["rgba(0, 0, 0, 0)", "#161B29"]}
+                            style={styles.imageFilter}
+                          />
+                        </ImageBackground>
+
+                        <View style={{
+                          width: moderateScale(228)
+                        }}>
+                          {/* SubTitle */}
+                          <BoldText
+                            fontSize={16}
+                            lineHeight={24}
+                          >
+                            {currentPlan.title}
+                          </BoldText>
+
+                          {/* Content */}
+                          <RegularText
+                            numberOfLines={1}
+                            fontSize={14}
+                            lineHeight={22}
+                          >
+                            {currentPlan.description}
+                          </RegularText>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                )
+              }
+
+              {/* 기도 플랜 찾기 */}
+              <View style={isSearchActive && styles.hidden}>
+                {/* Title */}
+                <BoldText
+                  style={[styles.title, { paddingHorizontal: moderateScale(24) }]}
+                  fontSize={18}
+                >
+                  기도 플랜 찾기
+                </BoldText>
+
+                {/* Tabs (전체보기, 시간별 기도, 주제별 기도, 자유 기도) */}
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.tabList}
+                >
+                  {
+                    Tabs.map(tab => (
+                      <TouchableOpacity
+                        key={tab.value}
+                        onPress={() => handlePressTab(tab.value)}
+                        style={planType === tab.value ? styles.activeTab : styles.tab}
+                      >
+                        <MediumText fontSize={14} lineHeight={22}>
+                          {tab.label}
+                        </MediumText>
+                      </TouchableOpacity>
+                    ))
+                  }
+                </ScrollView>
+
+                {/* Card List */}
+              </View>
             </View>
-          </View>
-        )}
-        renderItem={({ item }: { item: PlanType }) => <PlanCard refreshing plan={item} />}
-      />
-      {/* Audio Download Modal */}
-      <DownloadModal />
-    </ModalProvider>
+          )}
+          renderItem={({ item }: { item: PlanType }) => <PlanCard refreshing plan={item} />}
+        />
+        {/* Audio Download Modal */}
+        <DownloadModal />
+      </ModalProvider>
+      <View style={{ height: moderateScale(60) }} />
+    </ScreenLayout>
   )
 }
 

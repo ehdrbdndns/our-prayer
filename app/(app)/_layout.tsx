@@ -134,8 +134,8 @@ export default function AppLayout() {
   return (
     <>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "fade" }} />
-        <Stack.Screen name="(stacks)" options={{ headerShown: false, animation: "fade", gestureEnabled: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "fade", freezeOnBlur: true }} />
+        <Stack.Screen name="(stacks)" options={{ headerShown: false, animation: "fade", freezeOnBlur: true }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <NetworkErrorPage isShow={isNetworkErrorShown} />

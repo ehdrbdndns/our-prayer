@@ -2,7 +2,7 @@ import { ASYNC_AUDIO_KEY } from "@/storage/asyncStorageKeys";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 import { Sound } from "expo-av/build/Audio";
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { LectureAudioType } from "../utils/dataType";
 
 type AudioMap = { [startTime: number]: LectureAudioType };

@@ -1,6 +1,7 @@
 import Edit from '@/assets/images/icon/edit.svg';
 import Star from '@/assets/images/icon/star.svg';
 import CustomButton from '@/components/button/CustomButton';
+import ScreenLayout from '@/components/ScreenLayout';
 import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
@@ -204,205 +205,206 @@ export default function MyPage() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: scaleHeight(20) }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefetch}
-            colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
-            tintColor={'#FFFFFF'}
-          />
-        }
-      >
-        <View style={{
-          marginTop: scaleHeight(60),
-          marginBottom: scaleHeight(40),
-        }}>
-          {/* Name */}
-          <TouchableOpacity
-            onPress={handlePressEditName}
-            style={{ height: moderateScale(44) }}
-          >
-            <View style={{ flexDirection: 'row', gap: moderateScale(8), alignItems: 'center' }}>
-              <BoldText
-                fontSize={24}
-                lineHeight={36}
-              >
-                {name}
-              </BoldText>
-              <Edit
-                width={moderateScale(20)}
-                height={moderateScale(20)}
-              />
-            </View>
-          </TouchableOpacity>
-
-          {/* Sub Description */}
-          <BoldText
-            fontSize={14}
-            lineHeight={16}
-            color='#B3B3B3'
-          >
-            '우리의 기도'와 함께한지 {daysSinceSignup}일이 되었어요
-          </BoldText>
-        </View>
-
-        {/* Data */}
-        <View
-          style={{
-            backgroundColor: 'rgba(31, 31, 31, 0.5)',
-            borderRadius: moderateScale(10),
-            gap: scaleHeight(12),
-            padding: moderateScale(12)
-          }}
+    <ScreenLayout>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: scaleHeight(20) }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefetch}
+              colors={[Platform.OS === "ios" ? "#FFFFFF" : "#000000"]}
+              tintColor={'#FFFFFF'}
+            />
+          }
         >
-          {/* Title */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <View style={{
-              flexDirection: 'row',
-              gap: moderateScale(8)
-            }}>
-              <Star
-                width={moderateScale(22)}
-                height={moderateScale(24)}
-              />
-              <BoldText fontSize={14}>
-                나의 기도 데이터
-              </BoldText>
-            </View>
+          <View style={{
+            marginTop: scaleHeight(60),
+            marginBottom: scaleHeight(40),
+          }}>
+            {/* Name */}
             <TouchableOpacity
-              onPress={handlePressHistory}
-              hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+              onPress={handlePressEditName}
+              style={{ height: moderateScale(44) }}
             >
-              <MediumText
-                fontSize={12}
-                color="#B3B3B3"
-              >
-                기도 기록 보기
-              </MediumText>
+              <View style={{ flexDirection: 'row', gap: moderateScale(8), alignItems: 'center' }}>
+                <BoldText
+                  fontSize={24}
+                  lineHeight={36}
+                >
+                  {name}
+                </BoldText>
+                <Edit
+                  width={moderateScale(20)}
+                  height={moderateScale(20)}
+                />
+              </View>
             </TouchableOpacity>
+
+            {/* Sub Description */}
+            <BoldText
+              fontSize={14}
+              lineHeight={16}
+              color='#B3B3B3'
+            >
+              '우리의 기도'와 함께한지 {daysSinceSignup}일이 되었어요
+            </BoldText>
           </View>
 
-          {/* CardList */}
+          {/* Data */}
+          <View
+            style={{
+              backgroundColor: 'rgba(31, 31, 31, 0.5)',
+              borderRadius: moderateScale(10),
+              gap: scaleHeight(12),
+              padding: moderateScale(12)
+            }}
+          >
+            {/* Title */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={{
+                flexDirection: 'row',
+                gap: moderateScale(8)
+              }}>
+                <Star
+                  width={moderateScale(22)}
+                  height={moderateScale(24)}
+                />
+                <BoldText fontSize={14}>
+                  나의 기도 데이터
+                </BoldText>
+              </View>
+              <TouchableOpacity
+                onPress={handlePressHistory}
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+              >
+                <MediumText
+                  fontSize={12}
+                  color="#B3B3B3"
+                >
+                  기도 기록 보기
+                </MediumText>
+              </TouchableOpacity>
+            </View>
+
+            {/* CardList */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              {/* 연속 기도 일수 */}
+              <View style={styles.card}>
+                <MediumText
+                  fontSize={12}
+                  color='#B3B3B3'>
+                  연속 기도 일수
+                </MediumText>
+                <View
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: moderateScale(2) }}
+                >
+                  <CustomText
+                    fontFamily='Inter_600SemiBold'
+                    fontSize={20}
+                  >
+                    {continuousPrayerDays}
+                  </CustomText>
+                  <RegularText fontSize={12}>
+                    일
+                  </RegularText>
+                </View>
+              </View>
+
+              {/* 오늘 기도 시간 */}
+              <View style={styles.card}>
+                <MediumText
+                  fontSize={12}
+                  color='#B3B3B3'>
+                  오늘 기도 시간
+                </MediumText>
+                <View
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: moderateScale(2) }}
+                >
+                  <CustomText
+                    fontFamily='Inter_600SemiBold'
+                    fontSize={20}
+                  >
+                    {todayPrayerTime}
+                  </CustomText>
+                  <RegularText fontSize={12}>
+                    분
+                  </RegularText>
+                </View>
+              </View>
+
+              {/* 전체 기도 시간 */}
+              <View style={styles.card}>
+                <MediumText
+                  fontSize={12}
+                  color='#B3B3B3'>
+                  전체 기도 시간
+                </MediumText>
+                <View
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: moderateScale(2) }}
+                >
+                  <CustomText
+                    fontFamily='Inter_600SemiBold'
+                    fontSize={20}
+                  >
+                    {totalPrayerTime.time}
+                  </CustomText>
+                  <RegularText fontSize={12}>
+                    {totalPrayerTime.unit}
+                  </RegularText>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* 알림 */}
           <View
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              alignItems: 'center'
+              alignItems: 'center',
+              paddingVertical: moderateScale(10),
+              paddingHorizontal: moderateScale(12),
+              marginVertical: moderateScale(24),
             }}
           >
-            {/* 연속 기도 일수 */}
-            <View style={styles.card}>
-              <MediumText
-                fontSize={12}
-                color='#B3B3B3'>
-                연속 기도 일수
-              </MediumText>
-              <View
-                style={{ flexDirection: 'row', alignItems: 'center', gap: moderateScale(2) }}
-              >
-                <CustomText
-                  fontFamily='Inter_600SemiBold'
-                  fontSize={20}
-                >
-                  {continuousPrayerDays}
-                </CustomText>
-                <RegularText fontSize={12}>
-                  일
-                </RegularText>
-              </View>
-            </View>
-
-            {/* 오늘 기도 시간 */}
-            <View style={styles.card}>
-              <MediumText
-                fontSize={12}
-                color='#B3B3B3'>
-                오늘 기도 시간
-              </MediumText>
-              <View
-                style={{ flexDirection: 'row', alignItems: 'center', gap: moderateScale(2) }}
-              >
-                <CustomText
-                  fontFamily='Inter_600SemiBold'
-                  fontSize={20}
-                >
-                  {todayPrayerTime}
-                </CustomText>
-                <RegularText fontSize={12}>
-                  분
-                </RegularText>
-              </View>
-            </View>
-
-            {/* 전체 기도 시간 */}
-            <View style={styles.card}>
-              <MediumText
-                fontSize={12}
-                color='#B3B3B3'>
-                전체 기도 시간
-              </MediumText>
-              <View
-                style={{ flexDirection: 'row', alignItems: 'center', gap: moderateScale(2) }}
-              >
-                <CustomText
-                  fontFamily='Inter_600SemiBold'
-                  fontSize={20}
-                >
-                  {totalPrayerTime.time}
-                </CustomText>
-                <RegularText fontSize={12}>
-                  {totalPrayerTime.unit}
-                </RegularText>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* 알림 */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingVertical: moderateScale(10),
-            paddingHorizontal: moderateScale(12),
-            marginVertical: moderateScale(24),
-          }}
-        >
-          <BoldText
-            fontSize={14}
-            lineHeight={22}
-          >
-            알림 설정
-          </BoldText>
-          <Switch
-            onValueChange={handleChangeAlarm}
-            trackColor={{ false: '#363E55', true: '#4F5FFF' }}
-            thumbColor={enableAlarm ? '#E4E6FC' : '#7781A0'}
-            value={enableAlarm}
-          />
-        </View>
-
-        {/* 버튼 리스트 */}
-        <View style={{
-          marginBottom: moderateScale(24),
-          gap: moderateScale(12),
-        }}>
-          <CustomButton onPress={handlePressPrayerTime} style={styles.button}>
             <BoldText
-              color="#FFFFFF"
               fontSize={14}
               lineHeight={22}
-              letterSpacingPercent={-1}
             >
-              기도 시간 설정하기
+              알림 설정
             </BoldText>
-          </CustomButton>
-          {/* <CustomButton style={styles.button}>
+            <Switch
+              onValueChange={handleChangeAlarm}
+              trackColor={{ false: '#363E55', true: '#4F5FFF' }}
+              thumbColor={enableAlarm ? '#E4E6FC' : '#7781A0'}
+              value={enableAlarm}
+            />
+          </View>
+
+          {/* 버튼 리스트 */}
+          <View style={{
+            marginBottom: moderateScale(24),
+            gap: moderateScale(12),
+          }}>
+            <CustomButton onPress={handlePressPrayerTime} style={styles.button}>
+              <BoldText
+                color="#FFFFFF"
+                fontSize={14}
+                lineHeight={22}
+                letterSpacingPercent={-1}
+              >
+                기도 시간 설정하기
+              </BoldText>
+            </CustomButton>
+            {/* <CustomButton style={styles.button}>
             <BoldText
               color="#FFFFFF"
               fontSize={14}
@@ -412,71 +414,73 @@ export default function MyPage() {
               카카오 계정 연동하기
             </BoldText>
           </CustomButton> */}
-          <CustomButton
-            onPress={handlePressContact}
-            style={styles.button}
-          >
-            <BoldText
-              color="#FFFFFF"
-              fontSize={14}
-              lineHeight={22}
-              letterSpacingPercent={-1}
+            <CustomButton
+              onPress={handlePressContact}
+              style={styles.button}
             >
-              '우리의 기도'에 문의하기
-            </BoldText>
-          </CustomButton>
-          <CustomButton
-            onPress={handlePressSupporterList}
-            style={styles.button}
-          >
-            <BoldText
-              color="#FFFFFF"
-              fontSize={14}
-              lineHeight={22}
-              letterSpacingPercent={-1}
+              <BoldText
+                color="#FFFFFF"
+                fontSize={14}
+                lineHeight={22}
+                letterSpacingPercent={-1}
+              >
+                '우리의 기도'에 문의하기
+              </BoldText>
+            </CustomButton>
+            <CustomButton
+              onPress={handlePressSupporterList}
+              style={styles.button}
             >
-              도움 주신 분들
-            </BoldText>
-          </CustomButton>
-          <CustomButton
-            onPress={handlePressServicePolicy}
-            style={styles.button}
-          >
-            <BoldText
-              color="#FFFFFF"
-              fontSize={14}
-              lineHeight={22}
-              letterSpacingPercent={-1}
+              <BoldText
+                color="#FFFFFF"
+                fontSize={14}
+                lineHeight={22}
+                letterSpacingPercent={-1}
+              >
+                도움 주신 분들
+              </BoldText>
+            </CustomButton>
+            <CustomButton
+              onPress={handlePressServicePolicy}
+              style={styles.button}
             >
-              서비스 이용 약관
-            </BoldText>
-          </CustomButton>
-          <CustomButton
-            onPress={handlePressPrivacyPolicy}
-            style={styles.button}
-          >
-            <BoldText
-              color="#FFFFFF"
-              fontSize={14}
-              lineHeight={22}
-              letterSpacingPercent={-1}
+              <BoldText
+                color="#FFFFFF"
+                fontSize={14}
+                lineHeight={22}
+                letterSpacingPercent={-1}
+              >
+                서비스 이용 약관
+              </BoldText>
+            </CustomButton>
+            <CustomButton
+              onPress={handlePressPrivacyPolicy}
+              style={styles.button}
             >
-              개인 정보 처리 방침
-            </BoldText>
-          </CustomButton>
-        </View>
+              <BoldText
+                color="#FFFFFF"
+                fontSize={14}
+                lineHeight={22}
+                letterSpacingPercent={-1}
+              >
+                개인 정보 처리 방침
+              </BoldText>
+            </CustomButton>
+          </View>
 
-        {/* 회원 탈퇴 */}
-        <TouchableOpacity onPress={handlePressDeleteAccount} style={styles.textButton}>
-          <MediumText
-            fontSize={12}
-            color="#B3B3B3"
-          >
-            회원 탈퇴
-          </MediumText>
-        </TouchableOpacity>
-      </ScrollView >
-    </View>
+          {/* 회원 탈퇴 */}
+          <TouchableOpacity onPress={handlePressDeleteAccount} style={styles.textButton}>
+            <MediumText
+              fontSize={12}
+              color="#B3B3B3"
+            >
+              회원 탈퇴
+            </MediumText>
+          </TouchableOpacity>
+          <View style={{ height: moderateScale(120) }} />
+        </ScrollView >
+      </View>
+    </ScreenLayout>
   )
 }
 
