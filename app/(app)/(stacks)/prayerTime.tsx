@@ -7,6 +7,7 @@ import { BoldText } from '@/components/text/BoldText';
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from '@/components/text/RegularText';
 import { ASYNC_PERSONAL_PRAYER_ALARM_TIME } from '@/storage/asyncStorageKeys';
+import { cancelPersonalPrayerNotificationsFromStorage } from '@/utils/notification';
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
@@ -131,7 +132,7 @@ export default function PrayerTime() {
 
   const onPressSave = async () => {
     // 기존에 설정된 알림 취소
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    await cancelPersonalPrayerNotificationsFromStorage();
 
     selectedTimes.forEach(async (selected, hour) => {
       if (selected) {

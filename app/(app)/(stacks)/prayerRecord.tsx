@@ -3,7 +3,9 @@ import PrimaryButton from "@/components/button/PrimaryButton";
 import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
+import { useSession } from '@/contexts/AuthContext';
 import { useHistoryMutation } from "@/utils/mutation";
+import { scheduleStreakReminderForTomorrow } from '@/utils/notification';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
@@ -16,6 +18,7 @@ import { useAppContext } from '@/contexts/AppContext';
 export default function PrayerRecord() {
 
   const { setShouldRequestReview } = useAppContext();
+  const { session } = useSession();
 
   const insets = useSafeAreaInsets();
 
@@ -50,6 +53,13 @@ export default function PrayerRecord() {
 
       // Set the flag to request a review
       setShouldRequestReview(true);
+
+      if (session) {
+        const { alarm } = JSON.parse(session);
+        if (alarm) {
+          await scheduleStreakReminderForTomorrow();
+        }
+      }
 
       router.dismissTo({
         pathname: `/calendar`,
