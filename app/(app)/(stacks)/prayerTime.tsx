@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import { BoldText } from '@/components/text/BoldText';
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from '@/components/text/RegularText';
+import { ASYNC_PERSONAL_PRAYER_ALARM_TIME } from '@/storage/asyncStorageKeys';
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
@@ -26,7 +27,7 @@ const times = Array.from({ length: 24 }, (_, i) => i + 1);
 
 const saveNotificationIds = async (ids: { [hour: number]: string[] }) => {
   try {
-    await AsyncStorage.setItem('notificationIds', JSON.stringify(ids));
+    await AsyncStorage.setItem(ASYNC_PERSONAL_PRAYER_ALARM_TIME, JSON.stringify(ids));
   } catch (e) {
     console.error('Failed to save notification IDs', e);
   }
@@ -34,7 +35,7 @@ const saveNotificationIds = async (ids: { [hour: number]: string[] }) => {
 
 const getNotificationIds = async () => {
   try {
-    const ids = await AsyncStorage.getItem('notificationIds');
+    const ids = await AsyncStorage.getItem(ASYNC_PERSONAL_PRAYER_ALARM_TIME);
     return ids ? JSON.parse(ids) : {};
   } catch (e) {
     console.error('Failed to fetch notification IDs', e);
