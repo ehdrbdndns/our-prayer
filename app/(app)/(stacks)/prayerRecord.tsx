@@ -4,12 +4,13 @@ import Header from "@/components/Header";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { useSession } from '@/contexts/AuthContext';
-import { useHistoryMutation } from "@/utils/mutation";
+import { ASYNC_LECTURE_HISTORY } from '@/storage/asyncStorageKeys';
+import { useHistoryMutation, useUpdateHistoryMutation } from "@/utils/mutation";
 import { scheduleStreakReminderForTomorrow } from '@/utils/notification';
 import { moderateScale, normalizeFontSize } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -31,35 +32,76 @@ export default function PrayerRecord() {
 
   const [note, setNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isCreating, setIsCreating] = useState(true);
+  const [historyId, setHistoryId] = useState<string | null>(null);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const textInputRef = useRef<TextInput>(null); // TextInput의 참조 생성
+  const hasCreatedRef = useRef(false);
 
   const { mutateAsync: insertPrayerHistory } = useHistoryMutation()
+  const { mutateAsync: updatePrayerHistory } = useUpdateHistoryMutation({
+    params: {
+      history_id: historyId ?? '',
+      note: note,
+    },
+    onSuccess: () => null,
+    onError: () => null,
+  });
+
+  useEffect(() => {
+    if (hasCreatedRef.current) {
+      return;
+    }
+    hasCreatedRef.current = true;
+
+    const createHistory = async () => {
+      setIsCreating(true);
+
+      try {
+        const res = await insertPrayerHistory({ lecture_id, duration, note: '' });
+        const { prayer_history_id } = res as { prayer_history_id?: string };
+        if (!prayer_history_id) {
+          throw new Error('Missing prayer_history_id');
+        }
+        setHistoryId(prayer_history_id);
+
+        const lectureHistory = await AsyncStorage.getItem(ASYNC_LECTURE_HISTORY);
+        const lectureHistoryData = lectureHistory ? JSON.parse(lectureHistory) : {};
+        lectureHistoryData[lecture_id] = lectureHistoryData[lecture_id] ? lectureHistoryData[lecture_id] + 1 : 1;
+        await AsyncStorage.setItem(ASYNC_LECTURE_HISTORY, JSON.stringify(lectureHistoryData));
+
+        if (session) {
+          const { alarm } = JSON.parse(session);
+          if (alarm) {
+            await scheduleStreakReminderForTomorrow();
+          }
+        }
+      } catch (e) {
+        Alert.alert('오류', '기록 저장에 실패했습니다.');
+        router.dismissTo('/');
+      } finally {
+        setIsCreating(false);
+      }
+    };
+
+    createHistory();
+  }, [duration, insertPrayerHistory, lecture_id, session]);
 
   const submitPrayerRecord = async (noteContent: string) => {
-    if (isSaving) return;
+    if (isSaving || isCreating) return;
+    if (!historyId) {
+      Alert.alert('오류', '기록 저장에 실패했습니다.');
+      return;
+    }
 
     setIsSaving(true);
 
-    // save lecture history in AsyncStorage
-    const lectureHistory = await AsyncStorage.getItem('lecture-history');
-    const lectureHistoryData = lectureHistory ? JSON.parse(lectureHistory) : {};
-    lectureHistoryData[lecture_id] = lectureHistoryData[lecture_id] ? lectureHistoryData[lecture_id] + 1 : 1;
-    await AsyncStorage.setItem('lecture-history', JSON.stringify(lectureHistoryData));
-
     try {
-      await insertPrayerHistory({ lecture_id, duration, note: noteContent });
+      await updatePrayerHistory();
       setIsSaving(false);
 
       // Set the flag to request a review
       setShouldRequestReview(true);
-
-      if (session) {
-        const { alarm } = JSON.parse(session);
-        if (alarm) {
-          await scheduleStreakReminderForTomorrow();
-        }
-      }
 
       router.dismissTo({
         pathname: `/calendar`,

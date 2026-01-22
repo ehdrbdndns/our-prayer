@@ -1,3 +1,4 @@
+import { ASYNC_PERSONAL_PRAYER_ALARM_TIME, ASYNC_STREAK_REMINDER_NOTIFICATION_ID } from '@/storage/asyncStorageKeys';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import * as Device from "expo-device";
@@ -7,15 +8,14 @@ import {
   getExpoPushTokenAsync,
   getPermissionsAsync,
   requestPermissionsAsync,
-  scheduleNotificationAsync,
   SchedulableTriggerInputTypes,
+  scheduleNotificationAsync,
   setNotificationChannelAsync
 } from "expo-notifications";
 import { Platform } from "react-native";
-import { ASYNC_PERSONAL_PRAYER_ALARM_TIME, ASYNC_STREAK_REMINDER_NOTIFICATION_ID } from '@/storage/asyncStorageKeys';
 
-const STREAK_REMINDER_TITLE = '연속 기도 리마인드';
-const STREAK_REMINDER_BODY = '오늘 기도하지 않으면 연속 기도 기록이 0으로 초기화될 수 있어요.';
+const STREAK_REMINDER_TITLE = '오늘 기도하셨나요?';
+const STREAK_REMINDER_BODY = '오늘 기도를 하지 않으면 연속 기도 기록이 초기화될 수 있어요.';
 
 export async function registerForPushNotificationsAsync() {
   if (Platform.OS === 'android') {
@@ -81,8 +81,7 @@ export async function scheduleStreakReminderForTomorrow() {
   await cancelStreakReminderNotification();
 
   const triggerDate = new Date();
-  triggerDate.setDate(triggerDate.getDate() + 1);
-  triggerDate.setHours(22, 0, 0, 0);
+  triggerDate.setMinutes(triggerDate.getMinutes() + 1);
 
   const notificationId = await scheduleNotificationAsync({
     content: {
