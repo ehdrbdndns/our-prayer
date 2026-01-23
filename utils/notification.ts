@@ -81,7 +81,8 @@ export async function scheduleStreakReminderForTomorrow() {
   await cancelStreakReminderNotification();
 
   const triggerDate = new Date();
-  triggerDate.setMinutes(triggerDate.getMinutes() + 1);
+  triggerDate.setDate(triggerDate.getDate() + 1);
+  triggerDate.setHours(22, 0, 0, 0);
 
   const notificationId = await scheduleNotificationAsync({
     content: {
