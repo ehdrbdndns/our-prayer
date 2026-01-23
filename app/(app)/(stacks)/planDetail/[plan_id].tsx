@@ -9,6 +9,7 @@ import { RegularText } from "@/components/text/RegularText";
 import { usePlanQuery } from '@/utils/queries';
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ASYNC_LECTURE_HISTORY } from '@/storage/asyncStorageKeys';
 import { ImageBackground } from "expo-image";
 import { Href, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from 'react';
@@ -105,7 +106,7 @@ export default function PlanDetailPage() {
   // fetch lecture history from AsyncStorage
   useEffect(() => {
     async function fetchLectureHistory() {
-      const lectureHistory = await AsyncStorage.getItem('lecture-history');
+      const lectureHistory = await AsyncStorage.getItem(ASYNC_LECTURE_HISTORY);
       const lectureHistoryData = lectureHistory ? JSON.parse(lectureHistory) : {};
       setLectureHistoryDict(lectureHistoryData);
     }

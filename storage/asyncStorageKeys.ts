@@ -19,6 +19,15 @@ export const ASYNC_LAST_REVIEW_REQUEST_TIMESTAMP = 'last_review_request_timestam
 // 기도 중인지 여부
 export const ASYNC_IS_PRAYING = 'is_praying';
 
+// 개인 기도 알림 시간 저장
+export const ASYNC_PERSONAL_PRAYER_ALARM_TIME = 'notificationIds';
+
+// 강의 수강 기록 저장
+export const ASYNC_LECTURE_HISTORY = 'lecture-history';
+
+// 연속 기도 리마인드 알림 ID (단일)
+export const ASYNC_STREAK_REMINDER_NOTIFICATION_ID = 'streak_reminder_notification_id';
+
 export type AsyncIsPrayingType = {
   plan_id: string,
   plan_title: string,
