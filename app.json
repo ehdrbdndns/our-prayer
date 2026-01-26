@@ -67,15 +67,7 @@
         }
       ],
       "expo-font",
-      "expo-web-browser",
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "minSdkVersion": 35
-          }
-        }
-      ]
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
