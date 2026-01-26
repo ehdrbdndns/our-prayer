@@ -125,3 +125,10 @@ export interface AppInfoType {
   updated_date: string;
   created_date: string;
 }
+
+export interface AppNoticeType {
+  // 1: 일반 공지, 2: 긴급/차단 공지
+  type: 1 | 2;
+  title: string;
+  body: string;
+}

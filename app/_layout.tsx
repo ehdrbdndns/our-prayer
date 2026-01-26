@@ -1,8 +1,6 @@
 // ari_minahPark
 // jerry..out
 
-import { AppProvider } from '@/contexts/AppContext';
-import { SessionProvider } from '@/contexts/AuthContext';
 import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import {
@@ -21,6 +19,10 @@ import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setStatusBarStyle } from "expo-status-bar";
 import { useEffect } from "react";
+
+import { AppProvider } from '@/contexts/AppContext';
+import { SessionProvider } from '@/contexts/AuthContext';
+import { AppNoticeModal } from '@/components/AppNoticeModal';
 
 const queryClient = new QueryClient()
 
@@ -89,6 +91,7 @@ export default function Root() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AppNoticeModal />
       <AppProvider>
         <SessionProvider>
           <Slot initialRouteName='(app)' />
