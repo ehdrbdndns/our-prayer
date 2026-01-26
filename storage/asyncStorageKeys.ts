@@ -28,6 +28,9 @@ export const ASYNC_LECTURE_HISTORY = 'lecture-history';
 // 연속 기도 리마인드 알림 ID (단일)
 export const ASYNC_STREAK_REMINDER_NOTIFICATION_ID = 'streak_reminder_notification_id';
 
+// 앱 공지 하루 숨김 키 prefix (appNotice:dismissed:YYYY-MM-DD)
+export const ASYNC_APP_NOTICE_DISMISSED_PREFIX = 'appNotice:dismissed:';
+
 export type AsyncIsPrayingType = {
   plan_id: string,
   plan_title: string,

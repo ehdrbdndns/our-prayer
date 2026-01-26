@@ -1,5 +1,5 @@
 import api from '@/utils/axios';
-import { AppInfoType, BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionReplyType, QuestionType, UserType } from '@/utils/dataType';
+import { AppInfoType, AppNoticeType, BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionReplyType, QuestionType, UserType } from '@/utils/dataType';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -306,5 +306,21 @@ export const useAppInfoQuery = () => {
     },
     staleTime: 24 * 60 * 60 * 1000, // 24시간
     gcTime: 24 * 60 * 60 * 1000, // 24시간
+  });
+}
+
+export const useAppNoticeQuery = () => {
+  return useQuery<AppNoticeType[]>({
+    queryKey: ["appNotice"],
+    queryFn: async () => {
+      const res = await api.get<AppNoticeType[]>(`/appNotice`);
+      return res.data;
+    },
+    retry: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    staleTime: 3 * 60 * 1000, // 3분
+    gcTime: 3 * 60 * 1000, // 3분
   });
 }

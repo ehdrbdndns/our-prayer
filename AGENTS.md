@@ -53,3 +53,4 @@
 ## Security & Configuration Tips
 - Never commit credentials; keep secrets in platform config or secure env tooling.
 - When changing bundle identifiers or app IDs, update both platform key files and `app.json` to keep OTA/store builds aligned.
+- AsyncStorage keys must be defined in `storage/asyncStorageKeys.ts` (including new key prefixes such as `appNotice:dismissed:`).
