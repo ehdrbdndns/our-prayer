@@ -7,8 +7,10 @@ import CustomText from '@/components/text/CustomText';
 import { MediumText } from '@/components/text/MediumText';
 import { RegularText } from '@/components/text/RegularText';
 import { useSession } from '@/contexts/AuthContext';
+import { ASYNC_PERSONAL_PRAYER_ALARM_TIME } from '@/storage/asyncStorageKeys';
 import { calculateContinuousPrayerDays, calculateDaysSinceSignup, calculateTodayPrayerTime, calculateTotalPrayerTime } from '@/utils/date';
 import { useDeleteUserMutation, useUserMutation } from '@/utils/mutation';
+import { cancelPersonalPrayerNotificationsFromStorage, cancelStreakReminderNotification } from '@/utils/notification';
 import { useHistoryQuery, useUserQuery } from '@/utils/queries';
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -82,7 +84,8 @@ export default function MyPage() {
 
     // 알람 비활성화
     if (!newEnableAlarm) {
-      await Notifications.cancelAllScheduledNotificationsAsync();
+      await cancelPersonalPrayerNotificationsFromStorage();
+      await cancelStreakReminderNotification();
     } else {
       // 알람 활성화
       const { status } = await Notifications.requestPermissionsAsync();
@@ -96,7 +99,7 @@ export default function MyPage() {
       }
 
       // schedule notifications from notificationIds
-      const notificationIds = await AsyncStorage.getItem('notificationIds');
+      const notificationIds = await AsyncStorage.getItem(ASYNC_PERSONAL_PRAYER_ALARM_TIME);
       if (notificationIds) {
         const ids = JSON.parse(notificationIds);
         Object.keys(ids).forEach(async (hour) => {
@@ -135,7 +138,7 @@ export default function MyPage() {
           ids[hour] = notificationIds;
         });
 
-        await AsyncStorage.setItem('notificationIds', JSON.stringify(ids));
+        await AsyncStorage.setItem(ASYNC_PERSONAL_PRAYER_ALARM_TIME, JSON.stringify(ids));
       }
     }
 

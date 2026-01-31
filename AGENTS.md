@@ -31,6 +31,15 @@
 - Light/Surface: `#FFFFFF`/`#FFF`, `#FEFEFE`, `#E4E6FC`, `#CFCFCF`, `#B9B9B9`.
 - Special single-use tones spotted: `#F7EE91`, `#FEE500`, `#FF231F7C`, `#5EA3FE`, `#FF0000`.
 
+## Notifications & Scheduling Overview
+- `utils/notification.ts`: Expo notification permission, channel setup, and push token registration helper.
+- `app/_layout.tsx`: Foreground notification handling and badge reset; registers push token on app start.
+- `contexts/AuthContext.tsx`: Updates user alarm flag/push token in session and backend.
+- `app/(app)/(tabs)/mypage.tsx`: Alarm toggle and daily schedule registration; stores notification IDs in AsyncStorage.
+- `app/(app)/(stacks)/prayerTime.tsx`: Per-hour schedule creation/removal; reads/writes AsyncStorage notification IDs.
+- `utils/mutation.ts`, `utils/queries.ts`, `utils/dataType.ts`: Backend alarm/token fields wiring.
+- `app/login.tsx`: Login payload includes `alarm` and `expo_push_token`.
+
 ## Testing Guidelines
 - No automated suite yet; add Jest + React Native Testing Library when introducing non-trivial logic.
 - Place tests alongside sources (`*.test.ts(x)` or `__tests__/`).
@@ -44,3 +53,4 @@
 ## Security & Configuration Tips
 - Never commit credentials; keep secrets in platform config or secure env tooling.
 - When changing bundle identifiers or app IDs, update both platform key files and `app.json` to keep OTA/store builds aligned.
+- AsyncStorage keys must be defined in `storage/asyncStorageKeys.ts` (including new key prefixes such as `appNotice:dismissed:`).

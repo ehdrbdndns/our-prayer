@@ -123,6 +123,7 @@ export default function AppLayout() {
     setAppReady(isTokenRefetched && isVersionChecked);
   }, [isTokenRefetched, isVersionChecked])
 
+
   if (!isLoading && !session) {
     return <Redirect href="/login" />
   }
