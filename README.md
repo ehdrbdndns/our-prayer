@@ -94,10 +94,6 @@ https://github.com/user-attachments/assets/062fc8ff-5763-4f7b-8c52-74a646af53df
 
 ### 4) 상담/질문 기능
 
-| 질문 등록 | 관리자 답변 |
-|----------|------------|
-| ![](https://github.com/user-attachments/assets/1f544a73-b1a6-4a71-b050-6f4baeca9f3e) | ![](https://github.com/user-attachments/assets/4ac71053-5f56-4113-b5e1-3adfdb9943db) |
-
 #### 질문 등록
 https://github.com/user-attachments/assets/1f544a73-b1a6-4a71-b050-6f4baeca9f3e
 
@@ -112,3 +108,16 @@ https://github.com/user-attachments/assets/4ac71053-5f56-4113-b5e1-3adfdb9943db
 - TanStack Query + Mutation으로 목록 동기화 및 낙관적 업데이트
 - 상세 화면은 라우트 파라미터 기반으로 데이터 로딩
 - 사용자의 Expo Push Token을 통해 관리자 답변 알림 수신
+
+## 4. 트러블 슈팅 및 신경 쓴 부분
+### 1) OS별 백그라운드 정책으로 인한 Timer 강제 종료
+👉 [문제 분석 및 해결 과정](https://medium.com/@ehdrbdndns/%EC%9A%B0%EB%A6%AC%EC%9D%98-%EA%B8%B0%EB%8F%84-os%EB%B3%84-%EB%B0%B1%EA%B7%B8%EB%9D%BC%EC%9A%B4%EB%93%9C-%EC%A0%95%EC%B1%85%EC%9C%BC%EB%A1%9C-%EC%9D%B8%ED%95%9C-react-native-countdown-circle-timer-%EA%B0%95%EC%A0%9C-%EC%A2%85%EB%A3%8C-%EC%9D%B4%EC%8A%88-%ED%95%B4%EA%B2%B0-d11e2e62cd7c?postPublishedType=repub)
+
+### 2) Expo Tab을 JS Tab에서 Native Tab으로 전환
+👉 [렌더링 방식 차이와 전환 이유](https://medium.com/@ehdrbdndns/expo-native-tab%EA%B3%BC-js-tab%EC%9D%98-%EB%A0%8C%EB%8D%94%EB%A7%81-%EB%B0%A9%EC%8B%9D-%EC%B0%A8%EC%9D%B4%EC%A0%90-d776c671b2d1)
+
+### 3) 기도 강의 파일 크기 최적화
+👉 [CBR / VBR 인코딩 비교 및 최적화](https://medium.com/@ehdrbdndns/%EC%9A%B0%EB%A6%AC%EC%9D%98-%EA%B8%B0%EB%8F%84-%EC%9D%8C%EC%84%B1-%ED%8C%8C%EC%9D%BC-%ED%81%AC%EA%B8%B0-%EC%B5%9C%EC%A0%81%ED%99%94-cbr-vbr-%EC%9D%B8%EC%BD%94%EB%94%A9-%EB%B0%A9%EC%8B%9D-f3dc697e3888)
+
+### 4) Expo SDK 52 버전 충돌 해결
+👉 [빌드 에러 원인과 해결 과정](https://medium.com/@ehdrbdndns/%EC%9D%B4%EC%8A%88-%ED%95%B4%EA%B2%B0-xcode-16-3%EA%B3%BC-expo-sdk-52-%EB%B2%84%EC%A0%84-%EC%B6%A9%EB%8F%8C-%ED%95%B4%EA%B2%B0%EA%B8%B0-c11cfd699887)
