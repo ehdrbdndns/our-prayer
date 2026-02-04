@@ -62,7 +62,7 @@ iOS와 Android에 실제 배포되어 운영되고 있습니다.
 | Notification | Expo Push Token | 푸시 알림 연동 |
 
 ## 3. 주요 기능
-### 1) 기도 플랜 탐색
+### 1) 🔍 기도 플랜 탐색
 https://github.com/user-attachments/assets/527dadec-4f93-4367-bfa5-ecbede7b8e63
 
 **페이지 설명**
@@ -72,7 +72,7 @@ https://github.com/user-attachments/assets/527dadec-4f93-4367-bfa5-ecbede7b8e63
 - TanStack Query로 플랜 목록 캐싱 및 갱신
 - 필터/검색 UI에서 로컬 상태로 빠른 탐색 제공
 
-### 2) 강의 기반 기도 진행
+### 2) 🎧 강의 기반 기도 진행
 https://github.com/user-attachments/assets/773587ad-f1a3-43e8-9dc1-b40792a4c5be
 
 **페이지 설명**
@@ -82,7 +82,7 @@ https://github.com/user-attachments/assets/773587ad-f1a3-43e8-9dc1-b40792a4c5be
 - `expo-av` + FileSystem 캐시로 오디오 재생 안정화 (`classes/Amp.ts`, `utils/audioFile.ts`)
 - 타이머 진행 상태를 로컬에 저장해 중단/복귀 흐름 제공 (`ASYNC_IS_PRAYING`)
 
-### 3) 기도 기록/통계
+### 3) 📊 기도 기록/통계
 https://github.com/user-attachments/assets/062fc8ff-5763-4f7b-8c52-74a646af53df
 
 **페이지 설명**
@@ -92,7 +92,7 @@ https://github.com/user-attachments/assets/062fc8ff-5763-4f7b-8c52-74a646af53df
 - 기록 API 조회 후 클라이언트 계산 로직으로 통계 집계 (`utils/date.ts`)
 - TanStack Query 캐싱으로 화면 전환 시 로딩 최소화
 
-### 4) 상담/질문 기능
+### 4) ❓ 상담/질문 기능
 
 #### 질문 등록
 https://github.com/user-attachments/assets/1f544a73-b1a6-4a71-b050-6f4baeca9f3e
