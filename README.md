@@ -6,7 +6,7 @@
 
 ## 1. 프로젝트 소개
 **우리의 기도**는 기독교 신앙을 기반으로,  
-사용자가 **기도를 배우고 이를 일상의 습관으로 만들 수 있도록 돕는 서비스**입니다.
+사용자가 **기도를 배우고 이를 습관으로 만들 수 있도록 돕는 서비스**입니다.
 
 기도는 **타이머 기반**으로 제공되며,  
 사용자는 **기도 강의를 들으며 기도하거나**, 혹은 **강의 없이 자유롭게 기도**할 수 있습니다.
@@ -121,3 +121,6 @@ https://github.com/user-attachments/assets/4ac71053-5f56-4113-b5e1-3adfdb9943db
 
 ### 4) Expo SDK 52 버전 충돌 해결
 👉 [빌드 에러 원인과 해결 과정](https://medium.com/@ehdrbdndns/%EC%9D%B4%EC%8A%88-%ED%95%B4%EA%B2%B0-xcode-16-3%EA%B3%BC-expo-sdk-52-%EB%B2%84%EC%A0%84-%EC%B6%A9%EB%8F%8C-%ED%95%B4%EA%B2%B0%EA%B8%B0-c11cfd699887)
+
+### 5) AWS 클라우드 운영 비용 절감
+👉 [AWS 클라우드 비용 36% 줄였던 경험](https://medium.com/@ehdrbdndns/aws-%ED%81%B4%EB%9D%BC%EC%9A%B0%EB%93%9C-%EB%B9%84%EC%9A%A9-36-%EC%A4%84%EC%9D%B4%EA%B8%B0-free-tier-%EC%A2%85%EB%A3%8C-%ED%9B%84-rds%EB%A5%BC-ec2-docker-mysql%EB%A1%9C-%EC%98%AE%EA%B8%B0%EA%B8%B0-418b9f7c1011)
