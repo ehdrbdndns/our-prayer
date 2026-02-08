@@ -62,7 +62,7 @@ iOS와 Android에 실제 배포되어 운영되고 있습니다.
 | Notification | Expo Push Token | 푸시 알림 연동 |
 
 ## 3. 주요 기능
-### 1) 🔍 기도 플랜 탐색
+### 1) 🔍 기도 강의 탐색
 https://github.com/user-attachments/assets/527dadec-4f93-4367-bfa5-ecbede7b8e63
 
 **페이지 설명**
