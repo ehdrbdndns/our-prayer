@@ -23,7 +23,23 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
 
   checkPlanAudit();
 
+  const isPlayable = plan.type === "free" || isDownloaded;
+
   const handlePressCard = () => {
+    if (plan.type === "free") {
+      router.navigate({
+        pathname: `/freePrayerSetup`,
+        params: {
+          plan_id: plan.plan_id,
+          title: plan.title,
+          banner: plan.thumbnail,
+          description: plan.description,
+          backToLink: "/plan",
+        },
+      });
+      return;
+    }
+
     if (isDownloaded) {
       router.navigate({
         pathname: `/planDetail/[plan_id]`,
@@ -72,7 +88,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
         source={plan.s_thumbnail}
       >
         <LinearGradient
-          colors={isDownloaded
+          colors={isPlayable
             ? ["rgba(0, 0, 0, 0)", "#161B29"]
             : ["rgba(0, 0, 0, 1)", "rgba(0, 0, 0, 1)"]
           }
@@ -85,13 +101,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
         >
           {plan.title}
         </BoldText>
-        {
-          !isDownloaded ? (
-            <Download
-              style={styles.heart}
-            />
-          ) : null
-        }
+        {!isPlayable ? <Download style={styles.heart} /> : null}
       </ImageBackground>
     </TouchableOpacity>
   )

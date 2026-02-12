@@ -22,6 +22,20 @@ export default function TodayVerse({ subTitle, content }: TodayVerseProps) {
 
   const handlePressButton = () => {
     if (!!currentPlan) {
+      if (currentPlan.type === "free") {
+        router.navigate({
+          pathname: `/freePrayerSetup`,
+          params: {
+            plan_id: currentPlan.plan_id,
+            title: currentPlan.title,
+            banner: currentPlan.thumbnail,
+            description: currentPlan.description,
+            backToLink: "/plan",
+          },
+        });
+        return;
+      }
+
       router.navigate({
         pathname: `/planDetail/[plan_id]`,
         params: {

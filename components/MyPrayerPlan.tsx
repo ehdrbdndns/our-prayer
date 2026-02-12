@@ -18,20 +18,28 @@ export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
     router.navigate("/plan")
   }
 
-  const onPressPlan = (params: {
-    id: string;
-    title: string;
-    banner: string;
-    isLiked: boolean;
-  }) => {
-    const { id, title, banner, isLiked } = params;
+  const onPressPlan = (plan: PlanType) => {
+    if (plan.type === "free") {
+      router.navigate({
+        pathname: `/freePrayerSetup`,
+        params: {
+          plan_id: plan.plan_id,
+          title: plan.title,
+          banner: plan.thumbnail,
+          description: plan.description,
+          backToLink: "/plan",
+        },
+      });
+      return;
+    }
+
     router.navigate({
       pathname: `/planDetail/[plan_id]`,
       params: {
-        plan_id: id,
-        title,
-        banner,
-        isLiked: String(isLiked),
+        plan_id: plan.plan_id,
+        title: plan.title,
+        banner: plan.thumbnail,
+        isLiked: String(plan.is_liked),
       },
     });
   }
@@ -65,12 +73,7 @@ export default function MyPrayerPlan({ plans }: MyPrayerPlanProps) {
         contentContainerStyle={styles.cardList}
         renderItem={({ item }: { item: PlanType }) => (
           <TouchableOpacity
-            onPress={() => onPressPlan({
-              id: item.plan_id,
-              title: item.title,
-              isLiked: item.is_liked,
-              banner: item.thumbnail,
-            })}>
+            onPress={() => onPressPlan(item)}>
             <ImageBackground
               style={styles.card}
               source={item.s_thumbnail}
