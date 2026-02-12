@@ -50,7 +50,8 @@
         "expo-asset",
         {
           "assets": [
-            "./assets/images/background.png"
+            "./assets/images/background.png",
+            "./assets/audio/free"
           ]
         }
       ],
