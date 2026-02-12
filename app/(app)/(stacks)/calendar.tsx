@@ -265,14 +265,16 @@ export default function CalendarPage() {
         </View>
 
         {/* User Memo */}
-        <View style={{ paddingHorizontal: moderateScale(24), flexGrow: 1 }}>
+        <View style={styles.memoContainer}>
           <MediumText
             fontSize={14}
             lineHeight={24}
           >
             {`${selectedDay.split('-')[0]}년 ${selectedDay.split('-')[1]}월 ${selectedDay.split('-')[2]}일`}
           </MediumText>
-          {selectedNoteList.map((note) => note)}
+          <View style={styles.noteListContainer}>
+            {selectedNoteList.map((note) => note)}
+          </View>
         </View>
         {
           Platform.OS === 'ios' ? null : (
@@ -298,6 +300,14 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: moderateScale(24)
   },
+  memoContainer: {
+    paddingHorizontal: moderateScale(24),
+    flexGrow: 1,
+  },
+  noteListContainer: {
+    position: 'relative',
+    minHeight: moderateScale(220),
+  },
   calendar: {
     borderRadius: moderateScale(10),
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -308,11 +318,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(10),
   },
   emptyQuestion: {
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -50 }, { translateY: 50 }]
+    justifyContent: 'center',
   },
   note: {
     marginTop: moderateScale(12),
