@@ -37,6 +37,7 @@ export default function PrayerRecord() {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const textInputRef = useRef<TextInput>(null); // TextInput의 참조 생성
   const hasCreatedRef = useRef(false);
+  const buttonBottomInset = Platform.OS === "ios" ? insets.bottom : insets.bottom + moderateScale(24);
 
   const { mutateAsync: insertPrayerHistory } = useHistoryMutation()
   const { mutateAsync: updatePrayerHistory } = useUpdateHistoryMutation({
@@ -151,13 +152,8 @@ export default function PrayerRecord() {
         style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(15, 20, 26, 0.4)' }}
       />
       <TouchableWithoutFeedback onPress={() => {
-        if (!textInputRef.current) return;
-
-        if (Keyboard.isVisible()) {
-          textInputRef.current.blur();
-        } else {
-          textInputRef.current.focus();
-        }
+        if (!textInputRef.current || !Keyboard.isVisible()) return;
+        textInputRef.current.blur();
       }}>
         <KeyboardAvoidingView
           style={styles.container}
@@ -192,7 +188,7 @@ export default function PrayerRecord() {
               />
             </View>
             <View style={[styles.buttonList, {
-              bottom: insets.bottom + Platform.OS === 'ios' ? 0 : moderateScale(24)
+              bottom: buttonBottomInset,
             }]}>
               <CustomButton onPress={handlePressCancel} style={[styles.button, styles.secondaryButton]}>
                 <MediumText
@@ -230,19 +226,23 @@ const styles = StyleSheet.create({
   },
   textInput: {
     paddingHorizontal: moderateScale(24),
+    flex: 1,
+    paddingBottom: moderateScale(108),
   },
   text: {
     fontFamily: 'NotoSansKR_400Regular',
     fontSize: normalizeFontSize(16),
+    lineHeight: normalizeFontSize(28),
+    letterSpacing: 0,
     color: "#FFFFFF",
-    textAlignVertical: 'top'
+    textAlignVertical: 'top',
+    flex: 1,
   },
   buttonList: {
     position: 'absolute',
     flexDirection: 'row',
     paddingHorizontal: moderateScale(20),
     gap: moderateScale(8),
-    marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(24),
   },
   button: {
     flex: 1,
