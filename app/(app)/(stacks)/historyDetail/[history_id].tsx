@@ -141,7 +141,7 @@ export default function HistoryDetailPage() {
                   color="#FFF"
                   fontSize={16}
                 >
-                  기도 기록 편집
+                  캘린더
                 </MediumText>
               </View>
             }
@@ -181,7 +181,7 @@ export default function HistoryDetailPage() {
             }}
           >
             <View style={[styles.buttonList]}>
-              <CustomButton onPress={onPressDelete} style={[styles.button, styles.secondaryButton]}>
+              <CustomButton testID="history-detail-delete" onPress={onPressDelete} style={[styles.button, styles.secondaryButton]}>
                 <MediumText
                   fontSize={14}
                 >

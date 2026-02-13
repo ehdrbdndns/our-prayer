@@ -5,16 +5,18 @@ import { MediumText } from "./text/MediumText";
 import { RegularText } from "./text/RegularText";
 
 export default function HistoryNote({
-  note, created_date, duration, onPressNote
+  note, created_date, duration, onPressNote, testID
 }: {
   note: string;
   created_date: number;
   duration: number;
   onPressNote: () => void;
+  testID?: string;
 }) {
 
   return (
     <TouchableOpacity
+      testID={testID}
       onPress={onPressNote}
     >
       <View style={{

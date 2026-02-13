@@ -88,6 +88,36 @@ describe("TimerPicker", () => {
     expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
   });
 
+  it("emits onChange on scroll end drag when momentum does not start", async () => {
+    const onChange = jest.fn();
+    const { getByTestId } = render(<TimerPicker value={1} onChange={onChange} />);
+    const list = getByTestId("timer-picker-list");
+
+    fireEvent(list, "scrollBeginDrag");
+    fireEvent.scroll(list, {
+      nativeEvent: {
+        contentOffset: { x: 0, y: 440 },
+        contentSize: { width: 320, height: 13200 },
+        layoutMeasurement: { width: 320, height: 220 },
+      },
+    });
+
+    act(() => {
+      list.props.onScrollEndDrag({
+        nativeEvent: {
+          contentOffset: { x: 0, y: 440 },
+        },
+      });
+    });
+
+    await waitFor(() => expect(onChange).toHaveBeenCalled());
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const emitted = onChange.mock.calls[0][0];
+    expect(Number.isInteger(emitted)).toBe(true);
+    expect(emitted).toBeGreaterThan(1);
+    expect(emitted).toBeLessThanOrEqual(300);
+  });
+
   it("clamps to max on huge offset", async () => {
     const onChange = jest.fn();
     const { getByTestId } = render(<TimerPicker value={1} min={1} max={120} onChange={onChange} />);

@@ -33,6 +33,9 @@ export default function TimerPicker({
   const lastHapticMinuteRef = useRef(clampedValue);
   const pendingProgrammaticOffsetRef = useRef<number | null>(null);
   const isUserDraggingRef = useRef(false);
+  const isMomentumScrollingRef = useRef(false);
+  const endDragCommitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastCommittedMinuteRef = useRef(clampedValue);
 
   const minutes = useMemo(
     () => Array.from({ length: safeMax - safeMin + 1 }, (_, i) => safeMin + i),
@@ -43,12 +46,21 @@ export default function TimerPicker({
   useEffect(() => {
     setPreviewMinute(clampedValue);
     lastHapticMinuteRef.current = clampedValue;
+    lastCommittedMinuteRef.current = clampedValue;
     pendingProgrammaticOffsetRef.current = minuteToOffset(clampedValue, safeMin, ITEM_HEIGHT);
     listRef.current?.scrollToOffset({
       offset: pendingProgrammaticOffsetRef.current,
       animated: true,
     });
   }, [clampedValue, safeMin]);
+
+  useEffect(() => {
+    return () => {
+      if (endDragCommitTimeoutRef.current !== null) {
+        clearTimeout(endDragCommitTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const getMinuteByEvent = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     return offsetToMinute(event.nativeEvent.contentOffset.y, safeMin, safeMax, ITEM_HEIGHT);
@@ -73,16 +85,54 @@ export default function TimerPicker({
     }
   };
 
-  const handleScrollBeginDrag = () => {
-    isUserDraggingRef.current = true;
-    pendingProgrammaticOffsetRef.current = null;
+  const commitMinute = (minute: number) => {
+    if (minute === lastCommittedMinuteRef.current) {
+      return;
+    }
+
+    lastCommittedMinuteRef.current = minute;
+    onChange(minute);
   };
 
-  const handleScrollEndDrag = () => {
+  const clearEndDragCommitTimeout = () => {
+    if (endDragCommitTimeoutRef.current !== null) {
+      clearTimeout(endDragCommitTimeoutRef.current);
+      endDragCommitTimeoutRef.current = null;
+    }
+  };
+
+  const handleScrollBeginDrag = () => {
+    isUserDraggingRef.current = true;
+    isMomentumScrollingRef.current = false;
+    pendingProgrammaticOffsetRef.current = null;
+    clearEndDragCommitTimeout();
+  };
+
+  const handleScrollEndDrag = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     isUserDraggingRef.current = false;
+
+    const endDragMinute = getMinuteByEvent(event);
+    if (endDragMinute !== previewMinute) {
+      setPreviewMinute(endDragMinute);
+    }
+
+    clearEndDragCommitTimeout();
+    endDragCommitTimeoutRef.current = setTimeout(() => {
+      if (!isMomentumScrollingRef.current) {
+        commitMinute(endDragMinute);
+      }
+      endDragCommitTimeoutRef.current = null;
+    }, 0);
+  };
+
+  const handleMomentumScrollBegin = () => {
+    isMomentumScrollingRef.current = true;
+    clearEndDragCommitTimeout();
   };
 
   const handleMomentumScrollEnd = async (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    clearEndDragCommitTimeout();
+
     const snappedMinute = getMinuteByEvent(event);
     if (snappedMinute !== previewMinute) {
       setPreviewMinute(snappedMinute);
@@ -93,10 +143,8 @@ export default function TimerPicker({
       await Haptics.selectionAsync();
     }
     isUserDraggingRef.current = false;
-
-    if (snappedMinute !== clampedValue) {
-      onChange(snappedMinute);
-    }
+    isMomentumScrollingRef.current = false;
+    commitMinute(snappedMinute);
   };
 
   return (
@@ -116,6 +164,7 @@ export default function TimerPicker({
         onScroll={handleScroll}
         onScrollBeginDrag={handleScrollBeginDrag}
         onScrollEndDrag={handleScrollEndDrag}
+        onMomentumScrollBegin={handleMomentumScrollBegin}
         onMomentumScrollEnd={handleMomentumScrollEnd}
         scrollEventThrottle={60}
         contentContainerStyle={styles.contentContainer}
@@ -130,7 +179,7 @@ export default function TimerPicker({
           return (
             <View style={styles.item}>
               <MediumText
-                testID={isSelected ? "timer-selected-minute" : undefined}
+                testID={isSelected ? `timer-selected-minute-${item}` : undefined}
                 fontSize={isSelected ? 28 : 18}
                 lineHeight={isSelected ? 36 : 26}
                 color="#FFFFFF"

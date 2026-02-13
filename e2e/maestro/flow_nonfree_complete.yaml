@@ -1,0 +1,52 @@
+appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
+---
+- launchApp:
+    clearState: false
+
+- tapOn:
+    point: "92%,43%"
+
+- tapOn: ".*기도 플랜.*"
+
+- extendedWaitUntil:
+    visible:
+      id: "plan-tab-all"
+    timeout: 20000
+
+- tapOn:
+    id: "plan-tab-topic"
+
+- tapOn:
+    id: "plan-card-topic-0"
+
+# 이미 다운로드된 플랜이면 Alert가 보이지 않을 수 있습니다.
+- runFlow:
+    when:
+      visible: ".*다운로드.*"
+    commands:
+      - tapOn:
+          text: ".*다운로드.*"
+          index: 1
+
+- extendedWaitUntil:
+    visible:
+      id: "plan-detail-start"
+    timeout: 20000
+
+- tapOn:
+    id: "plan-detail-lecture-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "timer-complete"
+    timeout: 20000
+
+- tapOn:
+    id: "timer-complete"
+
+- waitForAnimationToEnd
+
+- runFlow:
+    file: subflows/save_and_delete_record.yaml
+    env:
+      NOTE_PREFIX: "SLOW_NONFREE"

@@ -20,6 +20,25 @@
         "simulator": true
       }
     },
+    "e2e-ios-simulator": {
+      "extends": "development-simulator",
+      "env": {
+        "EXPO_PUBLIC_E2E_ENABLED": "1",
+        "EXPO_PUBLIC_E2E_TIMER_SECONDS": "8",
+        "EXPO_PUBLIC_MODE": "development"
+      }
+    },
+    "e2e-android-emulator": {
+      "extends": "development",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_E2E_ENABLED": "1",
+        "EXPO_PUBLIC_E2E_TIMER_SECONDS": "8",
+        "EXPO_PUBLIC_MODE": "development"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "channel": "main",

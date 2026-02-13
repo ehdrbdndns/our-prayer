@@ -174,6 +174,7 @@ export default function Index() {
           </View>
           {/* 기도 일자 데이터 */}
           <TouchableOpacity
+            testID="home-history-entry"
             style={[styles.content, { marginBottom: moderateScale(40) }]}
             onPress={handlePressHistory}
           >

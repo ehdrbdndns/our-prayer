@@ -162,6 +162,7 @@ export default function PrayerRecord() {
 
             <View style={styles.textInput}>
               <TextInput
+                testID="prayer-record-input"
                 ref={textInputRef}
                 value={note}
                 multiline
@@ -186,7 +187,7 @@ export default function PrayerRecord() {
                     괜찮습니다
                   </MediumText>
                 </CustomButton>
-                <PrimaryButton onPress={handlePressSave} style={styles.button}>
+                <PrimaryButton testID="prayer-record-save" onPress={handlePressSave} style={styles.button}>
                   <MediumText
                     fontSize={14}
                   >

@@ -7,6 +7,11 @@ import { LectureAudioType } from "../utils/dataType";
 
 type AudioMap = { [startTime: number]: LectureAudioType };
 type PlaybackOption = { shouldPlay: boolean; isLooping: boolean };
+type EffectPlaybackOption = {
+  restart?: boolean;
+  bgmVolumeWhilePlaying?: number;
+  restoreBgmVolume?: number;
+};
 
 export type AudioSource =
   | { kind: "storage-key"; storageKey: string }
@@ -39,11 +44,13 @@ export default class Amp {
   private effectSources: Record<string, AudioSource>;
   private effectSoundList: { [effectId: string]: Sound };
   private effectPlayingMap: { [effectId: string]: boolean };
+  private effectRestoreBgmVolumeMap: { [effectId: string]: number | null };
 
   // currnet voice sound
   private currentVoiceSound: Sound | null;
 
   private isPlaying: boolean;
+  private bgmVolume: number;
 
   private scheduleIdList: NodeJS.Timeout[] = [];
 
@@ -61,8 +68,10 @@ export default class Amp {
     this.voiceSoundList = {};
     this.effectSoundList = {};
     this.effectPlayingMap = {};
+    this.effectRestoreBgmVolumeMap = {};
     this.isBgmOn = true;
     this.currentVoiceSound = null;
+    this.bgmVolume = 1.0;
   }
 
   private async loadAudioFromStorageKey(storageKey: string, option: PlaybackOption) {
@@ -99,6 +108,29 @@ export default class Amp {
     return this.loadAudioFromStorageKey(source.storageKey, option);
   }
 
+  private normalizeVolume(volume: number) {
+    return Math.max(0, Math.min(1, volume));
+  }
+
+  private async setBgmVolume(volume: number) {
+    const safeVolume = this.normalizeVolume(volume);
+    this.bgmVolume = safeVolume;
+    if (this.bgmSound) {
+      await this.bgmSound.setVolumeAsync(safeVolume);
+    }
+  }
+
+  private async restoreEffectBgmVolume(effectId: string) {
+    const restoreBgmVolume = this.effectRestoreBgmVolumeMap[effectId];
+    this.effectRestoreBgmVolumeMap[effectId] = null;
+
+    if (restoreBgmVolume === null || restoreBgmVolume === undefined) {
+      return;
+    }
+
+    await this.setBgmVolume(restoreBgmVolume);
+  }
+
   private async stopCurrentVoice() {
     if (this.currentVoiceSound) {
       await this.currentVoiceSound.stopAsync();
@@ -124,6 +156,7 @@ export default class Amp {
       // set bgm
       const bgmSource = this.bgmSource ?? { kind: "storage-key", storageKey: ASYNC_AUDIO_KEY(this.lectureId) };
       this.bgmSound = await this.loadAudioFromSource(bgmSource, { shouldPlay: true, isLooping: true });
+      this.bgmVolume = 1.0;
 
       // set silent audio
       const { sound: silentSound } = await Audio.Sound.createAsync(
@@ -140,9 +173,7 @@ export default class Amp {
 
         sound.setOnPlaybackStatusUpdate(async (status) => {
           if (status.isLoaded && status.didJustFinish) {
-            if (this.bgmSound) {
-              await this.bgmSound.setVolumeAsync(1.0);
-            }
+            await this.setBgmVolume(1.0);
           }
         });
         this.voiceSoundList[lecture_audio_id] = sound;
@@ -151,15 +182,23 @@ export default class Amp {
       // set effects
       for (const [effectId, source] of Object.entries(this.effectSources)) {
         const sound = await this.loadAudioFromSource(source, { shouldPlay: false, isLooping: false });
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (!status.isLoaded || status.didJustFinish) {
+        sound.setOnPlaybackStatusUpdate(async (status) => {
+          if (!status.isLoaded) {
             this.effectPlayingMap[effectId] = false;
             return;
           }
+
+          if (status.didJustFinish) {
+            this.effectPlayingMap[effectId] = false;
+            await this.restoreEffectBgmVolume(effectId);
+            return;
+          }
+
           this.effectPlayingMap[effectId] = status.isPlaying;
         });
         this.effectSoundList[effectId] = sound;
         this.effectPlayingMap[effectId] = false;
+        this.effectRestoreBgmVolumeMap[effectId] = null;
       }
 
       return true;
@@ -201,9 +240,12 @@ export default class Amp {
       sound.setOnPlaybackStatusUpdate(null);
       await sound.unloadAsync();
       this.effectPlayingMap[effectId] = false;
+      this.effectRestoreBgmVolumeMap[effectId] = null;
     }
     this.effectSoundList = {};
     this.effectPlayingMap = {};
+    this.effectRestoreBgmVolumeMap = {};
+    this.bgmVolume = 1.0;
   }
 
   /**
@@ -216,7 +258,7 @@ export default class Amp {
       // pause current voice
       await this.stopCurrentVoice();
 
-      this.bgmSound?.setVolumeAsync(0.2);
+      await this.setBgmVolume(0.2);
 
       const { lecture_audio_id } = this.audiosMap[elapsedTime];
       const sound = this.voiceSoundList[lecture_audio_id];
@@ -277,13 +319,17 @@ export default class Amp {
     this.isPlaying = false;
   }
 
-  async playEffect(effectId: string, option: { restart?: boolean } = {}) {
+  async playEffect(effectId: string, option: EffectPlaybackOption = {}) {
     const sound = this.effectSoundList[effectId];
     if (!sound) {
       return false;
     }
 
     const restart = option.restart ?? false;
+    const currentBgmVolume = this.bgmVolume;
+    const bgmVolumeWhilePlaying = this.normalizeVolume(option.bgmVolumeWhilePlaying ?? 0.2);
+    const restoreBgmVolume = option.restoreBgmVolume ?? currentBgmVolume;
+
     if (this.effectPlayingMap[effectId] && !restart) {
       return true;
     }
@@ -300,11 +346,15 @@ export default class Amp {
       }
 
       this.effectPlayingMap[effectId] = true;
+      this.effectRestoreBgmVolumeMap[effectId] = restoreBgmVolume;
+      await this.setBgmVolume(bgmVolumeWhilePlaying);
+
       await sound.replayAsync();
       return true;
     } catch (e) {
       console.error(e);
       this.effectPlayingMap[effectId] = false;
+      await this.restoreEffectBgmVolume(effectId);
       return false;
     }
   }
@@ -321,6 +371,7 @@ export default class Amp {
       // no-op
     } finally {
       this.effectPlayingMap[effectId] = false;
+      await this.restoreEffectBgmVolume(effectId);
     }
   }
 
@@ -358,14 +409,10 @@ export default class Amp {
 
     if (!hasAudio) {
       // 실행중인 오디오가 없으면 배경음악 풀 볼륨으로 조절
-      if (this.bgmSound) {
-        await this.bgmSound.setVolumeAsync(1);
-      }
+      await this.setBgmVolume(1);
     } else {
       // 실행중인 오디오가 있으면 배경음악 0.2 볼륨으로 조절
-      if (this.bgmSound) {
-        await this.bgmSound.setVolumeAsync(0.2);
-      }
+      await this.setBgmVolume(0.2);
     }
   }
 
@@ -392,9 +439,7 @@ export default class Amp {
           this.currentVoiceSound.playAsync();
 
           // 배경음악 볼륨 조절
-          if (this.bgmSound) {
-            await this.bgmSound.setVolumeAsync(0.2);
-          }
+          await this.setBgmVolume(0.2);
         }, delay);
 
         // 타이머 ID 저장
