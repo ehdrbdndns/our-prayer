@@ -12,8 +12,13 @@
     "lint": "expo lint",
     "test": "jest",
     "e2e:ios:build": "eas build --platform ios --profile e2e-ios-simulator",
+    "e2e:android:build": "eas build --platform android --profile e2e-android-emulator",
     "e2e:smoke": "maestro test e2e/maestro/smoke.yaml",
-    "e2e:slow": "maestro test e2e/maestro/slow.yaml"
+    "e2e:slow": "maestro test e2e/maestro/slow.yaml",
+    "e2e:ios:smoke": "maestro test -p ios e2e/maestro/smoke.yaml",
+    "e2e:ios:slow": "maestro test -p ios e2e/maestro/slow.yaml",
+    "e2e:android:smoke": "maestro test -p android e2e/maestro/smoke.yaml",
+    "e2e:android:slow": "maestro test -p android e2e/maestro/slow.yaml"
   },
   "dependencies": {
     "@expo-google-fonts/ibm-plex-mono": "^0.2.3",

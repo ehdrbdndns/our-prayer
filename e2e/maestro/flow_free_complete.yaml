@@ -1,20 +1,15 @@
 appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 ---
 - launchApp:
-    clearState: true
-
-- runFlow: subflows/login_start_only.yaml
+    clearState: false
 
 - tapOn:
     point: "92%,43%"
 
-- tapOn:
-    text: ".*시작하기.*"
-    optional: true
-
-- tapOn:
-    text: ".*나중에.*"
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: ".*기도 플랜.*"
+    timeout: 20000
 
 - tapOn: ".*기도 플랜.*"
 

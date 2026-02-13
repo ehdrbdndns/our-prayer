@@ -8,8 +8,6 @@ appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 
 - inputText: ${output.recordNote}
 
-- hideKeyboard
-
 - tapOn:
     text: ".*저장하기.*"
     optional: true
