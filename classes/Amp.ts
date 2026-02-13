@@ -300,6 +300,8 @@ export default class Amp {
       }
 
       this.effectPlayingMap[effectId] = true;
+      this.bgmSound?.setVolumeAsync(0.2);
+
       await sound.replayAsync();
       return true;
     } catch (e) {
