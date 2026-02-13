@@ -171,7 +171,10 @@ export default function FreePrayerPage() {
 
       isEndingTriggeringRef.current = true;
       try {
-        hasPlayedEndingRef.current = await amp.playEffect("ending", { restart: false });
+        hasPlayedEndingRef.current = await amp.playEffect("ending", {
+          restart: false,
+          bgmVolumeWhilePlaying: 0.5,
+        });
       } catch (error) {
         hasPlayedEndingRef.current = false;
         console.error(error);

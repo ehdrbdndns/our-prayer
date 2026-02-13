@@ -144,7 +144,13 @@ describe("FreePrayerPage", () => {
     });
 
     await waitFor(() => {
-      expect(amp.playEffect).toHaveBeenCalledWith("ending", { restart: false });
+      expect(amp.playEffect).toHaveBeenCalledWith(
+        "ending",
+        expect.objectContaining({
+          restart: false,
+          bgmVolumeWhilePlaying: 0.5,
+        })
+      );
       expect(amp.playEffect).toHaveBeenCalledTimes(1);
     });
 
