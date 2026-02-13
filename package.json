@@ -10,7 +10,10 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest"
+    "test": "jest",
+    "e2e:ios:build": "eas build --platform ios --profile e2e-ios-simulator",
+    "e2e:smoke": "maestro test e2e/maestro/smoke.yaml",
+    "e2e:slow": "maestro test e2e/maestro/slow.yaml"
   },
   "dependencies": {
     "@expo-google-fonts/ibm-plex-mono": "^0.2.3",

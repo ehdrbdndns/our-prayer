@@ -1,0 +1,23 @@
+appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
+---
+- runFlow:
+    when:
+      visible: "나중에"
+    commands:
+      - tapOn: "나중에"
+
+- runFlow:
+    when:
+      visible: "시작하기"
+    commands:
+      - tapOn: "시작하기"
+
+- runFlow:
+    when:
+      visible: "나중에"
+    commands:
+      - tapOn: "나중에"
+
+- extendedWaitUntil:
+    visible: "기도 플랜"
+    timeout: 120000

@@ -1,0 +1,41 @@
+appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
+---
+- launchApp:
+    clearState: true
+
+- runFlow: subflows/login_start_only.yaml
+
+- tapOn:
+    id: "plan-tab-free"
+
+- tapOn:
+    id: "plan-card-free-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "free-prayer-setup-start"
+    timeout: 120000
+
+- tapOn:
+    id: "free-prayer-setup-start"
+
+- extendedWaitUntil:
+    visible:
+      id: "timer-complete"
+    timeout: 120000
+
+- tapOn:
+    id: "timer-complete"
+
+- extendedWaitUntil:
+    visible:
+      id: "prayer-record-input"
+    timeout: 120000
+
+- tapOn:
+    id: "prayer-record-input"
+
+- inputText: "테스트라고 기록"
+
+- tapOn:
+    id: "prayer-record-save"
