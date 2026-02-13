@@ -6,6 +6,24 @@ appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 - runFlow: subflows/login_start_only.yaml
 
 - tapOn:
+    point: "92%,43%"
+
+- tapOn:
+    text: ".*시작하기.*"
+    optional: true
+
+- tapOn:
+    text: ".*나중에.*"
+    optional: true
+
+- tapOn: ".*기도 플랜.*"
+
+- extendedWaitUntil:
+    visible:
+      id: "plan-tab-all"
+    timeout: 20000
+
+- tapOn:
     id: "plan-tab-topic"
 
 - tapOn:
@@ -14,17 +32,17 @@ appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 # 이미 다운로드된 플랜이면 Alert가 보이지 않을 수 있습니다.
 - runFlow:
     when:
-      visible: "다운로드"
+      visible: ".*다운로드.*"
     commands:
-      - tapOn: "다운로드"
+      - tapOn:
+          text: ".*다운로드.*"
+          below: ".*플랜을 다운로드 하시겠습니까.*"
+      - assertNotVisible: ".*플랜을 다운로드 하시겠습니까.*"
 
 - extendedWaitUntil:
     visible:
       id: "plan-detail-start"
-    timeout: 240000
-
-- tapOn:
-    id: "plan-detail-lecture-0"
+    timeout: 20000
 
 - tapOn:
     id: "plan-detail-start"
@@ -32,22 +50,18 @@ appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 - extendedWaitUntil:
     visible:
       id: "lecture-prayer-quit"
-    timeout: 120000
+    timeout: 20000
 
 - tapOn:
     id: "lecture-prayer-quit"
 
-- tapOn: "그만두기"
-
-- extendedWaitUntil:
-    visible:
-      id: "prayer-record-input"
-    timeout: 120000
-
 - tapOn:
-    id: "prayer-record-input"
+    text: ".*그만두기.*"
+    below: ".*기도 기록 페이지로 넘어갑니다.*"
 
-- inputText: "테스트라고 기록"
+- waitForAnimationToEnd
 
-- tapOn:
-    id: "prayer-record-save"
+- runFlow:
+    file: subflows/save_and_delete_record.yaml
+    env:
+      NOTE_PREFIX: "SMOKE_NONFREE"

@@ -6,6 +6,24 @@ appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 - runFlow: subflows/login_start_only.yaml
 
 - tapOn:
+    point: "92%,43%"
+
+- tapOn:
+    text: ".*시작하기.*"
+    optional: true
+
+- tapOn:
+    text: ".*나중에.*"
+    optional: true
+
+- tapOn: ".*기도 플랜.*"
+
+- extendedWaitUntil:
+    visible:
+      id: "plan-tab-all"
+    timeout: 20000
+
+- tapOn:
     id: "plan-tab-free"
 
 - tapOn:
@@ -14,7 +32,30 @@ appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 - extendedWaitUntil:
     visible:
       id: "free-prayer-setup-start"
-    timeout: 120000
+    timeout: 20000
+
+- assertVisible:
+    id: "timer-picker-list"
+
+- tapOn:
+    id: "timer-picker-list"
+
+- repeat:
+    times: 40
+    commands:
+      - runFlow:
+          when:
+            notVisible:
+              text: ".*선택한 시간: 0시간 1분.*"
+          commands:
+            - swipe:
+                start: "50%,64%"
+                end: "50%,78%"
+                duration: 220
+            - waitForAnimationToEnd
+
+- assertVisible:
+    text: ".*선택한 시간: 0시간 1분.*"
 
 - tapOn:
     id: "free-prayer-setup-start"
@@ -27,15 +68,9 @@ appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 - tapOn:
     id: "timer-complete"
 
-- extendedWaitUntil:
-    visible:
-      id: "prayer-record-input"
-    timeout: 120000
+- waitForAnimationToEnd
 
-- tapOn:
-    id: "prayer-record-input"
-
-- inputText: "테스트라고 기록"
-
-- tapOn:
-    id: "prayer-record-save"
+- runFlow:
+    file: subflows/save_and_delete_record.yaml
+    env:
+      NOTE_PREFIX: "SLOW_FREE"

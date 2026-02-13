@@ -6,6 +6,15 @@ appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 - runFlow: subflows/login_start_only.yaml
 
 - tapOn:
+    point: "92%,43%"
+
+- tapOn:
+    text: ".*기도 플랜.*"
+    
+- waitForAnimationToEnd:
+    timeout: 20000
+
+- tapOn:
     id: "plan-tab-free"
 
 - tapOn:
@@ -14,11 +23,7 @@ appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 - extendedWaitUntil:
     visible:
       id: "free-prayer-setup-start"
-    timeout: 120000
-
-# 시간 선택 영역 접근 검증
-- tapOn:
-    id: "timer-picker-list"
+    timeout: 20000
 
 - tapOn:
     id: "free-prayer-setup-start"
@@ -26,22 +31,18 @@ appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 - extendedWaitUntil:
     visible:
       id: "free-prayer-quit"
-    timeout: 120000
+    timeout: 20000
 
 - tapOn:
     id: "free-prayer-quit"
 
-- tapOn: "그만두기"
-
-- extendedWaitUntil:
-    visible:
-      id: "prayer-record-input"
-    timeout: 120000
-
 - tapOn:
-    id: "prayer-record-input"
+    text: ".*그만두기.*"
+    below: ".*기도 기록 페이지로 넘어갑니다.*"
 
-- inputText: "테스트라고 기록"
+- waitForAnimationToEnd
 
-- tapOn:
-    id: "prayer-record-save"
+- runFlow:
+    file: subflows/save_and_delete_record.yaml
+    env:
+      NOTE_PREFIX: "SMOKE_FREE"

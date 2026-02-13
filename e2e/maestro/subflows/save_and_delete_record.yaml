@@ -1,0 +1,65 @@
+appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
+---
+- evalScript: ${output.recordNote = NOTE_PREFIX + "-" + Date.now()}
+
+# prayerRecord 입력/저장
+- tapOn:
+    point: "50%,35%"
+
+- inputText: ${output.recordNote}
+
+- hideKeyboard
+
+- tapOn:
+    text: ".*저장하기.*"
+    optional: true
+
+- tapOn:
+    point: "78%,91%"
+
+# calendar 진입 후 방금 저장한 기록 찾기
+- extendedWaitUntil:
+    visible: ".*홈.*"
+    timeout: 20000
+
+- tapOn:
+    point: "8%,7%"
+
+- tapOn:
+    text: ".*Not Now.*"
+    optional: true
+
+- extendedWaitUntil:
+    visible: ".*기도 기록.*"
+    timeout: 20000
+
+- tapOn:
+    text: ".*기도 기록.*"
+
+- extendedWaitUntil:
+    visible: ".*(오전|오후).*기도했습니다.*"
+    timeout: 20000
+
+- tapOn:
+    text: ".*(오전|오후).*기도했습니다.*"
+    index: 0
+
+# historyDetail 삭제
+- extendedWaitUntil:
+    visible: ".*캘린더.*"
+    timeout: 20000
+
+- tapOn:
+    point: "24%,91%"
+
+- extendedWaitUntil:
+    visible: ".*삭제된 내용은 되돌릴 수 없습니다.*"
+    timeout: 20000
+
+- tapOn:
+    point: "73%,60%"
+
+# calendar 복귀 후 삭제 확인
+- extendedWaitUntil:
+    visible: ".*홈.*"
+    timeout: 20000

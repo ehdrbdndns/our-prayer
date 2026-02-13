@@ -63,10 +63,12 @@ export default function CalendarPage() {
       if (data.length === 0) {
         setSelectedNoteList([<EmptyNote key="empty" />])
       } else {
+        const sortedData = [...data].sort((a, b) => b.created_date - a.created_date);
         setSelectedNoteList(
-          data.map(
-            (row) => <HistoryNote
+          sortedData.map(
+            (row, index) => <HistoryNote
               key={row.prayer_history_id}
+              testID={index === 0 ? "calendar-note-latest" : `calendar-note-${index}`}
               note={row.note}
               created_date={row.created_date}
               duration={row.duration}
@@ -170,6 +172,7 @@ export default function CalendarPage() {
           prefix={
             <View style={styles.headerPrefix}>
               <TouchableOpacity
+                testID="calendar-header-back"
                 onPress={onPressBack}
                 hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
               >
@@ -272,7 +275,7 @@ export default function CalendarPage() {
           >
             {`${selectedDay.split('-')[0]}년 ${selectedDay.split('-')[1]}월 ${selectedDay.split('-')[2]}일`}
           </MediumText>
-          <View style={styles.noteListContainer}>
+          <View testID="calendar-note-list" style={styles.noteListContainer}>
             {selectedNoteList.map((note) => note)}
           </View>
         </View>
