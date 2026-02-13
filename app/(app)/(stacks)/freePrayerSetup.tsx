@@ -165,7 +165,7 @@ export default function FreePrayerSetupPage() {
           },
         ]}
       >
-        <PrimaryButton onPress={handlePressStartPrayer} style={styles.startButton}>
+        <PrimaryButton testID="free-prayer-setup-start" onPress={handlePressStartPrayer} style={styles.startButton}>
           <MediumText fontSize={14}>기도 시작하기</MediumText>
         </PrimaryButton>
       </View>

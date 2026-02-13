@@ -9,6 +9,7 @@ import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
 import { ASYNC_IS_PRAYING, AsyncIsPrayingType } from "@/storage/asyncStorageKeys";
 import { LectureType } from "@/utils/dataType";
+import { getE2EDurationSeconds } from "@/utils/e2e";
 import { useScreenTransition } from "@/utils/hooks/useScreenTransition";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
@@ -149,7 +150,8 @@ export default function Lecture() {
           return;
         }
 
-        const lectureTimeSeconds = lecture.time === 0 ? 1 : (lecture.time * 60);
+        const baseLectureTimeSeconds = lecture.time === 0 ? 1 : (lecture.time * 60);
+        const lectureTimeSeconds = getE2EDurationSeconds(baseLectureTimeSeconds);
         const isPraying = await AsyncStorage.getItem(ASYNC_IS_PRAYING);
 
         if (!!isReconnect && !!isPraying) {
@@ -437,7 +439,7 @@ export default function Lecture() {
             prefix={
               <CustomButton style={{
                 width: "auto"
-              }} onPress={handlePressLeftArrow}>
+              }} onPress={handlePressLeftArrow} testID="lecture-prayer-quit">
                 <MediumText style={{
                   color: "#959FFF"
                 }} fontSize={14}>

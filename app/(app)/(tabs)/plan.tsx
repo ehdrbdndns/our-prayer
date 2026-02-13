@@ -203,6 +203,7 @@ export default function PlanPage() {
                     Tabs.map(tab => (
                       <TouchableOpacity
                         key={tab.value}
+                        testID={`plan-tab-${tab.value || "all"}`}
                         onPress={() => handlePressTab(tab.value)}
                         style={planType === tab.value ? styles.activeTab : styles.tab}
                       >
@@ -218,7 +219,13 @@ export default function PlanPage() {
               </View>
             </View>
           )}
-          renderItem={({ item }: { item: PlanType }) => <PlanCard refreshing plan={item} />}
+          renderItem={({ item, index }: { item: PlanType; index: number }) => (
+            <PlanCard
+              refreshing
+              plan={item}
+              testID={`plan-card-${item.type}-${index}`}
+            />
+          )}
         />
         {/* Audio Download Modal */}
         <DownloadModal />

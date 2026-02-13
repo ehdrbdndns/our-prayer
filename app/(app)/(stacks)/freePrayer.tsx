@@ -7,6 +7,7 @@ import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
 import { ASYNC_IS_PRAYING } from "@/storage/asyncStorageKeys";
+import { getE2EDurationSeconds } from "@/utils/e2e";
 import { useScreenTransition } from "@/utils/hooks/useScreenTransition";
 import { moderateScale, scaleHeight } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -107,7 +108,7 @@ export default function FreePrayerPage() {
       return;
     }
 
-    const prayerDurationSeconds = selectedMinutes * 60;
+    const prayerDurationSeconds = getE2EDurationSeconds(selectedMinutes * 60);
 
     setIsPlaying(true);
     setDuration(prayerDurationSeconds);
@@ -295,7 +296,11 @@ export default function FreePrayerPage() {
           <Header
             style={styles.header}
             prefix={
-              <CustomButton style={{ width: "auto" }} onPress={handlePressLeftArrow}>
+              <CustomButton
+                testID="free-prayer-quit"
+                style={{ width: "auto" }}
+                onPress={handlePressLeftArrow}
+              >
                 <MediumText style={{ color: "#959FFF" }} fontSize={14}>
                   그만두기
                 </MediumText>

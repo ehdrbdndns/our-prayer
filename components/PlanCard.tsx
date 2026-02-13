@@ -10,7 +10,15 @@ import { useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 import { BoldText } from "./text/BoldText";
 
-export default function PlanCard({ plan, refreshing }: { plan: PlanType, refreshing: boolean }) {
+export default function PlanCard({
+  plan,
+  refreshing,
+  testID,
+}: {
+  plan: PlanType;
+  refreshing: boolean;
+  testID?: string;
+}) {
 
   const { showModal } = useModal();
 
@@ -81,6 +89,7 @@ export default function PlanCard({ plan, refreshing }: { plan: PlanType, refresh
   return (
     <TouchableOpacity
       onPress={handlePressCard}
+      testID={testID}
     >
       <ImageBackground
         style={styles.card}
