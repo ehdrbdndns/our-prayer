@@ -269,9 +269,10 @@ export default function PlanDetailPage() {
             {/* List */}
             <View>
               {
-                lectures.map((row) => (
+                lectures.map((row, index) => (
                   <TouchableOpacity
                     key={row.lecture_id}
+                    testID={`plan-detail-lecture-${index}`}
                     onPress={() => handlePressLecture({ lecture_id: row.lecture_id })}
                     style={[
                       styles.card
@@ -346,6 +347,7 @@ export default function PlanDetailPage() {
       }
       }>
         <PrimaryButton
+          testID="plan-detail-start"
           onPress={handlePressContinueBtn}
           style={{
             paddingVertical: moderateScale(14)

@@ -61,21 +61,28 @@ export default function PlanPage() {
     setSearchQuery("");
   }
 
-  const handlePressPlan = (params: {
-    id: string;
-    title: string;
-    banner: string;
-    isLiked: boolean;
-  }) => {
-    const { id, banner, isLiked } = params;
+  const handlePressPlan = (targetPlan: PlanType) => {
+    if (targetPlan.type === "free") {
+      router.navigate({
+        pathname: `/freePrayerSetup`,
+        params: {
+          plan_id: targetPlan.plan_id,
+          title: targetPlan.title,
+          banner: targetPlan.thumbnail,
+          description: targetPlan.description,
+          backToLink: "/plan",
+        },
+      });
+      return;
+    }
 
     router.navigate({
       pathname: `/planDetail/[plan_id]`,
       params: {
-        plan_id: id,
+        plan_id: targetPlan.plan_id,
         title: "기도 플랜",
-        banner,
-        isLiked: String(isLiked),
+        banner: targetPlan.thumbnail,
+        isLiked: String(targetPlan.is_liked),
       },
     });
   }
@@ -135,12 +142,7 @@ export default function PlanPage() {
 
                     {/* Card */}
                     <TouchableOpacity
-                      onPress={() => handlePressPlan({
-                        id: currentPlan.plan_id,
-                        title: currentPlan.title,
-                        banner: currentPlan.thumbnail,
-                        isLiked: currentPlan.is_liked
-                      })}
+                      onPress={() => handlePressPlan(currentPlan)}
                     >
                       <View style={styles.opacityBackground}>
                         {/* Image */}
@@ -201,6 +203,7 @@ export default function PlanPage() {
                     Tabs.map(tab => (
                       <TouchableOpacity
                         key={tab.value}
+                        testID={`plan-tab-${tab.value || "all"}`}
                         onPress={() => handlePressTab(tab.value)}
                         style={planType === tab.value ? styles.activeTab : styles.tab}
                       >
@@ -216,7 +219,13 @@ export default function PlanPage() {
               </View>
             </View>
           )}
-          renderItem={({ item }: { item: PlanType }) => <PlanCard refreshing plan={item} />}
+          renderItem={({ item, index }: { item: PlanType; index: number }) => (
+            <PlanCard
+              refreshing
+              plan={item}
+              testID={`plan-card-${item.type}-${index}`}
+            />
+          )}
         />
         {/* Audio Download Modal */}
         <DownloadModal />

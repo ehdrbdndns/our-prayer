@@ -9,6 +9,7 @@ import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
 import { ASYNC_IS_PRAYING, AsyncIsPrayingType } from "@/storage/asyncStorageKeys";
 import { LectureType } from "@/utils/dataType";
+import { getE2EDurationSeconds } from "@/utils/e2e";
 import { useScreenTransition } from "@/utils/hooks/useScreenTransition";
 import { useLectureQuery } from "@/utils/queries";
 import { moderateScale, scaleHeight } from "@/utils/style";
@@ -57,6 +58,7 @@ export default function Lecture() {
 
   const lecture = data?.lecture || getDefaultLecture();
   const lectureAudios = data?.lectureAudios || [];
+  const isTextModeAvailable = lectureAudios.length > 0;
 
   const {
     isIntroVisible
@@ -148,7 +150,8 @@ export default function Lecture() {
           return;
         }
 
-        const lectureTimeSeconds = lecture.time === 0 ? 1 : (lecture.time * 60);
+        const baseLectureTimeSeconds = lecture.time === 0 ? 1 : (lecture.time * 60);
+        const lectureTimeSeconds = getE2EDurationSeconds(baseLectureTimeSeconds);
         const isPraying = await AsyncStorage.getItem(ASYNC_IS_PRAYING);
 
         if (!!isReconnect && !!isPraying) {
@@ -436,7 +439,7 @@ export default function Lecture() {
             prefix={
               <CustomButton style={{
                 width: "auto"
-              }} onPress={handlePressLeftArrow}>
+              }} onPress={handlePressLeftArrow} testID="lecture-prayer-quit">
                 <MediumText style={{
                   color: "#959FFF"
                 }} fontSize={14}>
@@ -459,59 +462,63 @@ export default function Lecture() {
           />
 
           {/* Tabs */}
-          <View style={styles.tabList}>
-            <TouchableOpacity onPress={() => handlePressTab('default')}>
-              <View style={[styles.tab, mode === 'default' && styles.activeTab]}>
-                <RegularText
-                  fontSize={14}
-                  lineHeight={21}
-                  color={mode === 'default' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
-                >
-                  기본 모드
-                </RegularText>
-              </View>
-            </TouchableOpacity>
-            {
-              lectureAudios.length > 0 && (
-                <TouchableOpacity onPress={() => handlePressTab('text')}>
-                  <View style={[styles.tab, mode === 'text' && styles.activeTab]}>
-                    <RegularText
-                      fontSize={14}
-                      lineHeight={21}
-                      color={mode === 'text' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
-                    >
-                      텍스트 모드
-                    </RegularText>
-                  </View>
-                </TouchableOpacity>
-              )
-            }
-          </View>
+          {isTextModeAvailable ? (
+            <View style={styles.tabList}>
+              <TouchableOpacity onPress={() => handlePressTab('default')}>
+                <View style={[styles.tab, mode === 'default' && styles.activeTab]}>
+                  <RegularText
+                    fontSize={14}
+                    lineHeight={21}
+                    color={mode === 'default' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
+                  >
+                    기본 모드
+                  </RegularText>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handlePressTab('text')}>
+                <View style={[styles.tab, mode === 'text' && styles.activeTab]}>
+                  <RegularText
+                    fontSize={14}
+                    lineHeight={21}
+                    color={mode === 'text' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
+                  >
+                    텍스트 모드
+                  </RegularText>
+                </View>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View pointerEvents="none" style={styles.modeRemovedSpacer} />
+          )}
 
           {/* Text */}
-          <View style={[styles.textContainer, mode === 'default' && styles.hidden]}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollViewContainer}
-            >
-              <BoldText
-                fontSize={24}
-                lineHeight={40}
-                color="rgba(255, 255, 255, 0.8)"
-                textAlign="left"
-              >
-                {
-                  lectureAudios.sort((a, b) => a.start_time - b.start_time).map((row) => row.caption).join('\n\n')
-                }
-              </BoldText>
-            </ScrollView>
-          </View>
-          <LinearGradient
-            style={[styles.textFilter, mode === 'default' && styles.hidden]}
-            start={{ x: 0.5, y: 0 }}
-            colors={['transparent', 'rgba(43, 47, 58, 1)']}
-            pointerEvents="none"
-          />
+          {isTextModeAvailable && (
+            <>
+              <View style={[styles.textContainer, mode === 'default' && styles.hidden]}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={styles.scrollViewContainer}
+                >
+                  <BoldText
+                    fontSize={24}
+                    lineHeight={40}
+                    color="rgba(255, 255, 255, 0.8)"
+                    textAlign="left"
+                  >
+                    {
+                      lectureAudios.sort((a, b) => a.start_time - b.start_time).map((row) => row.caption).join('\n\n')
+                    }
+                  </BoldText>
+                </ScrollView>
+              </View>
+              <LinearGradient
+                style={[styles.textFilter, mode === 'default' && styles.hidden]}
+                start={{ x: 0.5, y: 0 }}
+                colors={['transparent', 'rgba(43, 47, 58, 1)']}
+                pointerEvents="none"
+              />
+            </>
+          )}
 
           {/* Timer */}
           <View style={[styles.timer, mode === 'text' && styles.hidden]}>
@@ -556,6 +563,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: moderateScale(24),
+  },
+  modeRemovedSpacer: {
+    height: moderateScale(69),
   },
   tab: {
     paddingVertical: moderateScale(12),

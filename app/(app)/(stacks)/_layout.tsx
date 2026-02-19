@@ -24,6 +24,8 @@ export default function StackLayout() {
       <Stack.Screen name="calendar" />
       <Stack.Screen name="requestQuestion" />
       <Stack.Screen name="introducePastor" />
+      <Stack.Screen name="freePrayerSetup" />
+      <Stack.Screen name="freePrayer" options={{ animation: 'fade' }} />
     </Stack>
   )
 }

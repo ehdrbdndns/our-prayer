@@ -1,0 +1,46 @@
+appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
+---
+- launchApp:
+    clearState: false
+
+- tapOn:
+    point: "92%,43%"
+
+- tapOn:
+    text: ".*기도 플랜.*"
+    
+- waitForAnimationToEnd:
+    timeout: 20000
+
+- tapOn:
+    id: "plan-tab-free"
+
+- tapOn:
+    id: "plan-card-free-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "free-prayer-setup-start"
+    timeout: 20000
+
+- tapOn:
+    id: "free-prayer-setup-start"
+
+- extendedWaitUntil:
+    visible:
+      id: "free-prayer-quit"
+    timeout: 20000
+
+- tapOn:
+    id: "free-prayer-quit"
+
+- tapOn:
+    text: ".*그만두기.*"
+    below: ".*기도 기록 페이지로 넘어갑니다.*"
+
+- waitForAnimationToEnd
+
+- runFlow:
+    file: subflows/save_and_delete_record.yaml
+    env:
+      NOTE_PREFIX: "SMOKE_FREE"

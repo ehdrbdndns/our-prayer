@@ -150,6 +150,7 @@ export default function Timer(props: TimerProps) {
           ? (
             <View style={[styles.controller, { width: moderateScale(320) }]}>
               <PrimaryButton
+                testID="timer-complete"
                 onPress={() => onPressCompleteBtn(countdown.elapsedTime)}
                 style={styles.completeButton}
               >
@@ -164,6 +165,7 @@ export default function Timer(props: TimerProps) {
           : (
             <View style={styles.controller}>
               <TouchableOpacity
+                testID="timer-play-toggle"
                 style={styles.controllerButton}
                 onPress={handlePressPlay}
                 hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}

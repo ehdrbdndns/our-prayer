@@ -7,12 +7,12 @@ import { useSession } from '@/contexts/AuthContext';
 import { ASYNC_LECTURE_HISTORY } from '@/storage/asyncStorageKeys';
 import { useHistoryMutation, useUpdateHistoryMutation } from "@/utils/mutation";
 import { scheduleStreakReminderForTomorrow } from '@/utils/notification';
-import { moderateScale, normalizeFontSize } from "@/utils/style";
+import { moderateScale } from "@/utils/style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableWithoutFeedback, View } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAppContext } from '@/contexts/AppContext';
 
@@ -20,8 +20,6 @@ export default function PrayerRecord() {
 
   const { setShouldRequestReview } = useAppContext();
   const { session } = useSession();
-
-  const insets = useSafeAreaInsets();
 
   const {
     lecture_id, duration
@@ -34,7 +32,6 @@ export default function PrayerRecord() {
   const [isSaving, setIsSaving] = useState(false);
   const [isCreating, setIsCreating] = useState(true);
   const [historyId, setHistoryId] = useState<string | null>(null);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const textInputRef = useRef<TextInput>(null); // TextInput의 참조 생성
   const hasCreatedRef = useRef(false);
 
@@ -126,23 +123,8 @@ export default function PrayerRecord() {
     await submitPrayerRecord("");
   }
 
-  const handleComplete = () => {
-    if (textInputRef.current) {
-      textInputRef.current.blur(); // TextInput에 포커스 잃게 하기
-    }
-  }
-
   const handleChangeNote = (text: string) => {
-    if (text.length > 1500) {
-      Alert.alert('길이를 초과했습니다.', `최대 1500자까지 입력 가능합니다.`, [
-        {
-          text: '확인',
-          style: 'cancel'
-        }
-      ])
-    } else {
-      setNote(text)
-    }
+    setNote(text);
   }
 
   return (
@@ -150,19 +132,20 @@ export default function PrayerRecord() {
       <View
         style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(15, 20, 26, 0.4)' }}
       />
-      <TouchableWithoutFeedback onPress={() => {
-        if (!textInputRef.current) return;
+      <TouchableWithoutFeedback
+        onPress={() => {
+          if (!textInputRef.current) return;
 
-        if (Keyboard.isVisible()) {
-          textInputRef.current.blur();
-        } else {
-          textInputRef.current.focus();
-        }
-      }}>
+          if (Keyboard.isVisible()) {
+            textInputRef.current.blur();
+          } else {
+            textInputRef.current.focus();
+          }
+        }}
+      >
         <KeyboardAvoidingView
-          style={styles.container}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.container}
         >
           <SafeAreaView style={{ flex: 1 }}>
             <Header
@@ -170,7 +153,7 @@ export default function PrayerRecord() {
               prefix={<View></View>}
             />
             <BoldText
-              style={[styles.title, { opacity: isKeyboardVisible ? 0.5 : 1 }]} // opacity 상태 적용
+              style={styles.title}
               fontSize={24}
               lineHeight={36}
             >
@@ -179,35 +162,39 @@ export default function PrayerRecord() {
 
             <View style={styles.textInput}>
               <TextInput
+                testID="prayer-record-input"
                 ref={textInputRef}
                 value={note}
-                multiline={true}
+                multiline
                 style={styles.text}
-                scrollEnabled={true}
-                onChangeText={handleChangeNote}
+                onChange={e => handleChangeNote(e.nativeEvent.text)}
                 placeholderTextColor={"#B3B3B3"}
                 placeholder="여기를 탭하여 입력하세요(최대 1500자)"
-                onFocus={() => setIsKeyboardVisible(true)} // TextInput이 포커스될 때 opacity 변경
-                onBlur={() => setIsKeyboardVisible(false)} // TextInput이 포커스를 잃을 때 opacity 복원
+                maxLength={1500}
               />
             </View>
-            <View style={[styles.buttonList, {
-              bottom: insets.bottom + Platform.OS === 'ios' ? 0 : moderateScale(24)
-            }]}>
-              <CustomButton onPress={handlePressCancel} style={[styles.button, styles.secondaryButton]}>
-                <MediumText
-                  fontSize={14}
-                >
-                  괜찮습니다
-                </MediumText>
-              </CustomButton>
-              <PrimaryButton onPress={handlePressSave} style={styles.button}>
-                <MediumText
-                  fontSize={14}
-                >
-                  저장하기
-                </MediumText>
-              </PrimaryButton>
+            <View
+              style={{
+                paddingHorizontal: moderateScale(24),
+                marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(24),
+              }}
+            >
+              <View style={styles.buttonList}>
+                <CustomButton onPress={handlePressCancel} style={[styles.button, styles.secondaryButton]}>
+                  <MediumText
+                    fontSize={14}
+                  >
+                    괜찮습니다
+                  </MediumText>
+                </CustomButton>
+                <PrimaryButton testID="prayer-record-save" onPress={handlePressSave} style={styles.button}>
+                  <MediumText
+                    fontSize={14}
+                  >
+                    저장하기
+                  </MediumText>
+                </PrimaryButton>
+              </View>
             </View>
           </SafeAreaView>
         </KeyboardAvoidingView>
@@ -230,19 +217,21 @@ const styles = StyleSheet.create({
   },
   textInput: {
     paddingHorizontal: moderateScale(24),
+    flex: 1,
+    marginBottom: moderateScale(24),
   },
   text: {
     fontFamily: 'NotoSansKR_400Regular',
-    fontSize: normalizeFontSize(16),
+    fontSize: moderateScale(16),
+    lineHeight: moderateScale(28),
+    maxHeight: '100%',
     color: "#FFFFFF",
-    textAlignVertical: 'top'
+    textAlignVertical: 'top',
+    flex: 1,
   },
   buttonList: {
-    position: 'absolute',
     flexDirection: 'row',
-    paddingHorizontal: moderateScale(20),
     gap: moderateScale(8),
-    marginBottom: Platform.OS === 'ios' ? 0 : moderateScale(24),
   },
   button: {
     flex: 1,
