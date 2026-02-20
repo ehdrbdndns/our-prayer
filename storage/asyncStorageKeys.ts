@@ -31,6 +31,12 @@ export const ASYNC_STREAK_REMINDER_NOTIFICATION_ID = 'streak_reminder_notificati
 // 앱 공지 하루 숨김 키 prefix (appNotice:dismissed:YYYY-MM-DD)
 export const ASYNC_APP_NOTICE_DISMISSED_PREFIX = 'appNotice:dismissed:';
 
+// 기도 제목 목록 저장
+export const ASYNC_PRAYER_TOPIC_LIST = 'prayer-topic:list';
+
+// 기도 제목 체크 상태 저장 prefix (prayer-topic:checked:YYYY-MM-DD)
+export const ASYNC_PRAYER_TOPIC_CHECK_PREFIX = 'prayer-topic:checked:';
+
 export type AsyncIsPrayingType = {
   plan_id: string,
   plan_title: string,

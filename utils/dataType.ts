@@ -98,6 +98,21 @@ export interface QuestionReplyType {
   created_date: number;
   updated_date: number;
 }
+
+export type PrayerTopicPriority = 'high' | 'medium' | 'low';
+
+export interface PrayerTopicType {
+  prayer_topic_id: string;
+  content: string;
+  priority: PrayerTopicPriority;
+  created_date: number;
+  updated_date: number;
+}
+
+export type PrayerTopicDailyCheckType = {
+  [prayer_topic_id: string]: boolean;
+}
+
 export interface AudioFileSystemType {
   [lecture_id: string]: {
     audios: {

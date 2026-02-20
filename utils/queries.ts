@@ -1,5 +1,7 @@
 import api from '@/utils/axios';
-import { AppInfoType, AppNoticeType, BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, QuestionReplyType, QuestionType, UserType } from '@/utils/dataType';
+import { AppInfoType, AppNoticeType, BibleType, HistoryType, LectureResponseType, PlanDetailResponseType, PlanResponseType, PrayerTopicDailyCheckType, PrayerTopicType, QuestionReplyType, QuestionType, UserType } from '@/utils/dataType';
+import { calculateToday } from '@/utils/date';
+import { getPrayerTopicCheckMap, getPrayerTopicList } from '@/utils/prayerTopicStorage';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -208,6 +210,30 @@ export const useQuestionQuery = () => {
     placeholderData: [],
     staleTime: 2 * 60 * 60 * 1000, // 2시간
     gcTime: 2 * 60 * 60 * 1000, // 2시간
+  });
+}
+
+export const usePrayerTopicQuery = () => {
+  return useQuery<PrayerTopicType[]>({
+    queryKey: ['prayerTopic'],
+    queryFn: async () => {
+      return await getPrayerTopicList();
+    },
+    placeholderData: [],
+    staleTime: 2 * 60 * 1000, // 2분
+    gcTime: 2 * 60 * 1000, // 2분
+  });
+}
+
+export const usePrayerTopicCheckQuery = (dateKey: string = calculateToday()) => {
+  return useQuery<PrayerTopicDailyCheckType>({
+    queryKey: ['prayerTopicCheck', dateKey],
+    queryFn: async () => {
+      return await getPrayerTopicCheckMap(dateKey);
+    },
+    placeholderData: {},
+    staleTime: 30 * 1000, // 30초
+    gcTime: 30 * 1000, // 30초
   });
 }
 
