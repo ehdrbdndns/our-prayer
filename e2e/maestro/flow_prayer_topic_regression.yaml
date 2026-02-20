@@ -1,0 +1,77 @@
+appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
+---
+- launchApp:
+    clearState: false
+
+- tapOn:
+    point: "92%,43%"
+
+- extendedWaitUntil:
+    visible: ".*기도 제목.*"
+    timeout: 20000
+
+- tapOn: ".*기도 제목.*"
+
+- extendedWaitUntil:
+    visible:
+      id: "prayer-topic-open-add-modal"
+    timeout: 20000
+
+# Create a unique topic for this run.
+- evalScript: ${output.topicBase = "E2E_REG_TOPIC_" + Date.now()}
+- evalScript: ${output.topicRegex = ".*" + output.topicBase + ".*"}
+
+# Retry opening modal to avoid open->immediate-close race.
+- repeat:
+    times: 3
+    commands:
+      - runFlow:
+          when:
+            notVisible: ".*새로운 기도 제목을 입력하세요.*"
+          commands:
+            - tapOn:
+                id: "prayer-topic-open-add-modal"
+            - waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: ".*새로운 기도 제목을 입력하세요.*"
+    timeout: 20000
+
+- tapOn: ".*새로운 기도 제목을 입력하세요.*"
+
+- inputText: ${output.topicBase}
+
+- tapOn: ".*높음.*"
+
+- tapOn:
+    id: "prayer-topic-add"
+
+- extendedWaitUntil:
+    visible: ${output.topicRegex}
+    timeout: 20000
+
+# Toggle check on and off (position should remain stable in same list).
+- tapOn:
+    id: "prayer-topic-check-.*"
+    index: 0
+- tapOn:
+    id: "prayer-topic-check-.*"
+    index: 0
+
+# Edit topic
+- tapOn:
+    id: "prayer-topic-edit-.*"
+    index: 0
+
+- extendedWaitUntil:
+    visible:
+      id: "prayer-topic-edit-input"
+    timeout: 20000
+
+- tapOn:
+    id: "prayer-topic-edit-input"
+
+- inputText: "_EDIT"
+
+- tapOn:
+    id: "prayer-topic-edit-save"

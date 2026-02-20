@@ -318,6 +318,7 @@ export default function PrayerTopicPage() {
             numberOfLines={4}
             textAlignVertical="top"
             inputAccessoryViewID={Platform.OS === 'ios' ? PRAYER_TOPIC_INPUT_ACCESSORY_ID : undefined}
+            testID="prayer-topic-edit-input"
           />
 
           <MediumText style={styles.selectorLabel} fontSize={12} lineHeight={18} color="#B3B3B3">
@@ -329,13 +330,14 @@ export default function PrayerTopicPage() {
           })}
 
           <View style={styles.editActionRow}>
-            <TouchableOpacity onPress={resetEditor} style={styles.secondaryActionButton}>
+            <TouchableOpacity onPress={resetEditor} style={styles.secondaryActionButton} testID="prayer-topic-edit-cancel">
               <MediumText fontSize={13} color="#B3B3B3">취소</MediumText>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handlePressSaveEdit}
               style={styles.primaryActionButton}
               disabled={isUpdating}
+              testID="prayer-topic-edit-save"
             >
               <MediumText fontSize={13} color="#FFFFFF">저장</MediumText>
             </TouchableOpacity>
@@ -505,6 +507,7 @@ export default function PrayerTopicPage() {
                     accessibilityRole="button"
                     accessibilityLabel="기도 제목 추가 모달 닫기"
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    testID="prayer-topic-close-add-modal"
                   >
                     <Feather name="x" size={moderateScale(18)} color="#B3B3B3" />
                   </TouchableOpacity>
@@ -521,6 +524,7 @@ export default function PrayerTopicPage() {
                   numberOfLines={4}
                   textAlignVertical="top"
                   inputAccessoryViewID={Platform.OS === 'ios' ? PRAYER_TOPIC_INPUT_ACCESSORY_ID : undefined}
+                  testID="prayer-topic-create-input"
                 />
 
                 <MediumText style={styles.selectorLabel} fontSize={12} lineHeight={18} color="#B3B3B3">
