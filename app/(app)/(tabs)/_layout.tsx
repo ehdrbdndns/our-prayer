@@ -18,9 +18,9 @@ export default function TabLayout() {
         <Icon src={<VectorIcon family={Feather} name="book-open" />} />
         <Label>기도 플랜</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="question">
-        <Icon src={<VectorIcon family={Feather} name="message-square" />} />
-        <Label>질문</Label>
+      <NativeTabs.Trigger name="prayer-topic">
+        <Icon src={<VectorIcon family={Feather} name="check-square" />} />
+        <Label>기도 제목</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="mypage">
         <Icon src={<VectorIcon family={Feather} name="settings" />} />
