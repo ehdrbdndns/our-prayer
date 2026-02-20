@@ -3,6 +3,7 @@ import Mute from "@/assets/images/icon/mute.svg";
 import Amp from "@/classes/Amp";
 import CustomButton from "@/components/button/CustomButton";
 import Header from "@/components/Header";
+import PrayerTopicChecklist from "@/components/prayer/PrayerTopicChecklist";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
 import Timer from "@/components/timer/Timer";
@@ -14,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useKeepAwake } from "expo-keep-awake";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Animated, AppState, Pressable, StyleSheet, View } from "react-native";
+import { Alert, Animated, AppState, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function FreePrayerPage() {
@@ -49,6 +50,7 @@ export default function FreePrayerPage() {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBgmMute, setIsBgmMute] = useState(false);
+  const [mode, setMode] = useState<"timer" | "topic">("timer");
 
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
@@ -272,6 +274,10 @@ export default function FreePrayerPage() {
     ]);
   };
 
+  const handlePressTab = (nextMode: "timer" | "topic") => {
+    setMode(nextMode);
+  }
+
   const handleCompleteTimer = () => {
     setRepeatCount(prev => prev + 1);
     return { shouldRepeat: true };
@@ -282,7 +288,7 @@ export default function FreePrayerPage() {
   };
 
   return (
-    <View style={{ paddingTop: insets.top }}>
+    <View style={{ flex: 1, paddingTop: insets.top }}>
       {isIntroVisible && (
         <Animated.View style={[styles.intro, { opacity: introOpacity }]}>
           <RegularText style={styles.introText} fontSize={16} lineHeight={24}>
@@ -295,7 +301,7 @@ export default function FreePrayerPage() {
       )}
 
       {isContentVisible && (
-        <Animated.View style={{ opacity: contentOpacity }}>
+        <Animated.View style={[styles.content, { opacity: contentOpacity }]}>
           <Header
             style={styles.header}
             prefix={
@@ -316,10 +322,35 @@ export default function FreePrayerPage() {
             }
           />
 
-          {/* 텍스트 모드 탭이 있던 영역의 레이아웃 간격을 유지합니다. */}
-          <View pointerEvents="none" style={styles.modeRemovedSpacer} />
+          <View style={styles.tabList}>
+            <TouchableOpacity onPress={() => handlePressTab("timer")} testID="free-prayer-tab-timer">
+              <View style={[styles.tab, mode === "timer" && styles.activeTab]}>
+                <RegularText
+                  fontSize={14}
+                  lineHeight={21}
+                  color={mode === "timer" ? "#FFFFFF" : "rgba(255, 255, 255, 0.8)"}
+                >
+                  타이머
+                </RegularText>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handlePressTab("topic")} testID="free-prayer-tab-topic">
+              <View style={[styles.tab, mode === "topic" && styles.activeTab]}>
+                <RegularText
+                  fontSize={14}
+                  lineHeight={21}
+                  color={mode === "topic" ? "#FFFFFF" : "rgba(255, 255, 255, 0.8)"}
+                >
+                  기도 제목
+                </RegularText>
+              </View>
+            </TouchableOpacity>
+          </View>
 
-          <View style={styles.timer}>
+          <View
+            style={[styles.timer, mode !== "timer" && styles.timerHidden]}
+            pointerEvents={mode === "timer" ? "auto" : "none"}
+          >
             <Timer
               key={timerKey}
               planTitle={plan_title || "자유 기도"}
@@ -336,6 +367,10 @@ export default function FreePrayerPage() {
               onPressCompleteBtn={handlePressCompleteBtn}
             />
           </View>
+
+          {mode === "topic" && (
+            <PrayerTopicChecklist style={styles.topicChecklist} />
+          )}
         </Animated.View>
       )}
     </View>
@@ -356,11 +391,34 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: moderateScale(8),
   },
-  modeRemovedSpacer: {
-    height: moderateScale(69),
+  content: {
+    flex: 1,
+  },
+  tabList: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: moderateScale(24),
+  },
+  tab: {
+    paddingVertical: moderateScale(12),
+    paddingHorizontal: moderateScale(14),
+  },
+  activeTab: {
+    borderRadius: moderateScale(100),
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
   },
   timer: {
     marginTop: scaleHeight(48),
     alignItems: "center",
+  },
+  timerHidden: {
+    height: 0,
+    marginTop: 0,
+    opacity: 0,
+    overflow: "hidden",
+  },
+  topicChecklist: {
+    flex: 1,
+    paddingTop: moderateScale(8),
   },
 });

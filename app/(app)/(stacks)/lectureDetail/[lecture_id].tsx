@@ -3,6 +3,7 @@ import Mute from "@/assets/images/icon/mute.svg";
 import Amp from "@/classes/Amp";
 import CustomButton from "@/components/button/CustomButton";
 import Header from "@/components/Header";
+import PrayerTopicChecklist from "@/components/prayer/PrayerTopicChecklist";
 import { BoldText } from "@/components/text/BoldText";
 import { MediumText } from "@/components/text/MediumText";
 import { RegularText } from "@/components/text/RegularText";
@@ -88,7 +89,7 @@ export default function Lecture() {
 
   const [amp, setAmp] = useState<Amp>();
 
-  const [mode, setMode] = useState<"default" | "text">('default');
+  const [mode, setMode] = useState<"timer" | "topic" | "text">('timer');
 
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
@@ -304,6 +305,12 @@ export default function Lecture() {
     playVoice();
   }, [elapsedTime])
 
+  useEffect(() => {
+    if (!isTextModeAvailable && mode === 'text') {
+      setMode('timer');
+    }
+  }, [isTextModeAvailable, mode]);
+
   const handleAdjustElapsedTime = async (elapsedTime: number, newDuration?: number) => {
     const currentDuration = newDuration ?? duration;
 
@@ -369,8 +376,8 @@ export default function Lecture() {
     )
   }
 
-  const handlePressTab = (mode: "default" | "text") => {
-    setMode(mode);
+  const handlePressTab = (nextMode: "timer" | "topic" | "text") => {
+    setMode(nextMode);
   }
 
   // Timer event handlers
@@ -408,7 +415,7 @@ export default function Lecture() {
   }
 
   return (
-    <View style={{ paddingTop: insets.top }}>
+    <View style={{ flex: 1, paddingTop: insets.top }}>
       {/* Intro */}
       {isIntroVisible && (
         <Animated.View style={[styles.intro, { opacity: introOpacity }]}>
@@ -433,7 +440,7 @@ export default function Lecture() {
 
       {/* Content */}
       {isContentVisible && (
-        <Animated.View style={{ opacity: contentOpacity }}>
+        <Animated.View style={[styles.content, { opacity: contentOpacity }]}>
           <Header
             style={styles.header}
             prefix={
@@ -462,39 +469,48 @@ export default function Lecture() {
           />
 
           {/* Tabs */}
-          {isTextModeAvailable ? (
-            <View style={styles.tabList}>
-              <TouchableOpacity onPress={() => handlePressTab('default')}>
-                <View style={[styles.tab, mode === 'default' && styles.activeTab]}>
-                  <RegularText
-                    fontSize={14}
-                    lineHeight={21}
-                    color={mode === 'default' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
-                  >
-                    기본 모드
-                  </RegularText>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handlePressTab('text')}>
+          <View style={styles.tabList}>
+            <TouchableOpacity onPress={() => handlePressTab('timer')} testID="lecture-prayer-tab-timer">
+              <View style={[styles.tab, mode === 'timer' && styles.activeTab]}>
+                <RegularText
+                  fontSize={14}
+                  lineHeight={21}
+                  color={mode === 'timer' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
+                >
+                  타이머
+                </RegularText>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handlePressTab('topic')} testID="lecture-prayer-tab-topic">
+              <View style={[styles.tab, mode === 'topic' && styles.activeTab]}>
+                <RegularText
+                  fontSize={14}
+                  lineHeight={21}
+                  color={mode === 'topic' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
+                >
+                  기도 제목
+                </RegularText>
+              </View>
+            </TouchableOpacity>
+            {isTextModeAvailable && (
+              <TouchableOpacity onPress={() => handlePressTab('text')} testID="lecture-prayer-tab-text">
                 <View style={[styles.tab, mode === 'text' && styles.activeTab]}>
                   <RegularText
                     fontSize={14}
                     lineHeight={21}
                     color={mode === 'text' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
                   >
-                    텍스트 모드
+                    텍스트
                   </RegularText>
                 </View>
               </TouchableOpacity>
-            </View>
-          ) : (
-            <View pointerEvents="none" style={styles.modeRemovedSpacer} />
-          )}
+            )}
+          </View>
 
           {/* Text */}
-          {isTextModeAvailable && (
+          {isTextModeAvailable && mode === 'text' && (
             <>
-              <View style={[styles.textContainer, mode === 'default' && styles.hidden]}>
+              <View style={styles.textContainer}>
                 <ScrollView
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.scrollViewContainer}
@@ -512,7 +528,7 @@ export default function Lecture() {
                 </ScrollView>
               </View>
               <LinearGradient
-                style={[styles.textFilter, mode === 'default' && styles.hidden]}
+                style={styles.textFilter}
                 start={{ x: 0.5, y: 0 }}
                 colors={['transparent', 'rgba(43, 47, 58, 1)']}
                 pointerEvents="none"
@@ -521,7 +537,10 @@ export default function Lecture() {
           )}
 
           {/* Timer */}
-          <View style={[styles.timer, mode === 'text' && styles.hidden]}>
+          <View
+            style={[styles.timer, mode !== 'timer' && styles.timerHidden]}
+            pointerEvents={mode === 'timer' ? 'auto' : 'none'}
+          >
             <Timer
               key={timerKey}
               planTitle={plan_title}
@@ -538,6 +557,10 @@ export default function Lecture() {
               onPressCompleteBtn={handlePressCompleteBtn}
             />
           </View>
+
+          {mode === 'topic' && (
+            <PrayerTopicChecklist style={styles.topicChecklist} />
+          )}
         </Animated.View>
       )
       }
@@ -559,13 +582,13 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: moderateScale(8),
   },
+  content: {
+    flex: 1,
+  },
   tabList: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: moderateScale(24),
-  },
-  modeRemovedSpacer: {
-    height: moderateScale(69),
   },
   tab: {
     paddingVertical: moderateScale(12),
@@ -574,9 +597,6 @@ const styles = StyleSheet.create({
   activeTab: {
     borderRadius: moderateScale(100),
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  hidden: {
-    display: 'none',
   },
   scrollViewContainer: {
     paddingBottom: scaleHeight(120),
@@ -596,6 +616,16 @@ const styles = StyleSheet.create({
   timer: {
     marginTop: scaleHeight(48),
     alignItems: 'center'
+  },
+  timerHidden: {
+    height: 0,
+    marginTop: 0,
+    opacity: 0,
+    overflow: 'hidden',
+  },
+  topicChecklist: {
+    flex: 1,
+    paddingTop: moderateScale(8),
   },
   reminaingTime: {
     marginVertical: moderateScale(40),
