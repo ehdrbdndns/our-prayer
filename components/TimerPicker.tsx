@@ -31,7 +31,6 @@ export default function TimerPicker({
   const [previewMinute, setPreviewMinute] = useState(clampedValue);
   const listRef = useRef<FlatList<number>>(null);
   const lastHapticMinuteRef = useRef(clampedValue);
-  const pendingProgrammaticOffsetRef = useRef<number | null>(null);
   const isUserDraggingRef = useRef(false);
   const isMomentumScrollingRef = useRef(false);
   const endDragCommitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -47,10 +46,9 @@ export default function TimerPicker({
     setPreviewMinute(clampedValue);
     lastHapticMinuteRef.current = clampedValue;
     lastCommittedMinuteRef.current = clampedValue;
-    pendingProgrammaticOffsetRef.current = minuteToOffset(clampedValue, safeMin, ITEM_HEIGHT);
     listRef.current?.scrollToOffset({
-      offset: pendingProgrammaticOffsetRef.current,
-      animated: true,
+      offset: minuteToOffset(clampedValue, safeMin, ITEM_HEIGHT),
+      animated: false,
     });
   }, [clampedValue, safeMin]);
 
@@ -67,13 +65,6 @@ export default function TimerPicker({
   };
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const pendingOffset = pendingProgrammaticOffsetRef.current;
-    if (pendingOffset !== null && Math.abs(offsetY - pendingOffset) <= 2) {
-      pendingProgrammaticOffsetRef.current = null;
-      return;
-    }
-
     const nextMinute = getMinuteByEvent(event);
     if (nextMinute !== previewMinute) {
       setPreviewMinute(nextMinute);
@@ -104,7 +95,6 @@ export default function TimerPicker({
   const handleScrollBeginDrag = () => {
     isUserDraggingRef.current = true;
     isMomentumScrollingRef.current = false;
-    pendingProgrammaticOffsetRef.current = null;
     clearEndDragCommitTimeout();
   };
 
