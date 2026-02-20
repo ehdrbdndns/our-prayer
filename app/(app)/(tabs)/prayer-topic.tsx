@@ -19,7 +19,7 @@ const MAX_PRAYER_TOPIC_LENGTH = 120;
 const UNDO_DURATION_MS = 4000;
 const PRIORITY_OPTIONS: PrayerTopicPriority[] = ['high', 'medium', 'low'];
 const PRAYER_TOPIC_INPUT_ACCESSORY_ID = 'prayer-topic-input-accessory';
-const UNDO_BAR_TAB_OFFSET = Platform.OS === 'ios' ? 72 : 64;
+const UNDO_BAR_TAB_OFFSET = Platform.OS === 'ios' ? 72 : 114;
 
 type DeletedTopicState = {
   topic: PrayerTopicType;
@@ -64,6 +64,7 @@ export default function PrayerTopicPage() {
   const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [editingPriority, setEditingPriority] = useState<PrayerTopicPriority>('medium');
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [deletedTopic, setDeletedTopic] = useState<DeletedTopicState | null>(null);
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -99,8 +100,17 @@ export default function PrayerTopicPage() {
   }
 
   useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
     return () => {
       clearUndoTimer();
+      showSubscription.remove();
+      hideSubscription.remove();
     };
   }, []);
 
@@ -239,6 +249,15 @@ export default function PrayerTopicPage() {
 
   const handlePressCloseCreateModal = () => {
     setCreateModalVisible(false);
+  }
+
+  const handlePressCreateModalBackdrop = () => {
+    if (isKeyboardVisible) {
+      Keyboard.dismiss();
+      return;
+    }
+
+    handlePressCloseCreateModal();
   }
 
   const renderPrioritySelector = ({
@@ -466,11 +485,15 @@ export default function PrayerTopicPage() {
           onRequestClose={handlePressCloseCreateModal}
         >
           <View style={styles.modalBackdrop}>
-            <Pressable style={StyleSheet.absoluteFill} onPress={handlePressCloseCreateModal} />
+            <Pressable style={StyleSheet.absoluteFill} onPress={handlePressCreateModalBackdrop} />
 
             <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-              style={styles.modalKeyboardContainer}
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              keyboardVerticalOffset={Platform.OS === 'android' ? moderateScale(8) : 0}
+              style={[
+                styles.modalKeyboardContainer,
+                Platform.OS === 'android' && isKeyboardVisible && styles.modalKeyboardContainerKeyboardVisible,
+              ]}
             >
               <View style={styles.modalCard}>
                 <View style={styles.modalHeader}>
@@ -639,7 +662,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.78)',
   },
   modalKeyboardContainer: {
+    flex: 1,
     width: '100%',
+    justifyContent: 'center',
+  },
+  modalKeyboardContainerKeyboardVisible: {
+    justifyContent: 'flex-end',
+    paddingBottom: moderateScale(12),
   },
   modalCard: {
     borderRadius: moderateScale(14),
