@@ -500,7 +500,7 @@ export default function Lecture() {
                     lineHeight={21}
                     color={mode === 'text' ? 'white' : 'rgba(255, 255, 255, 0.8)'}
                   >
-                    텍스트
+                    본문
                   </RegularText>
                 </View>
               </TouchableOpacity>
