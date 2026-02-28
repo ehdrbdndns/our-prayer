@@ -1,8 +1,10 @@
 import Chat from '@/assets/images/icon/chat.svg';
 import Edit from '@/assets/images/icon/edit.svg';
+import LeftArrow from '@/assets/images/icon/leftArrow.svg';
 import Send from "@/assets/images/icon/send.svg";
 import Star from '@/assets/images/icon/star.svg';
 import Trash from '@/assets/images/icon/trash.svg';
+import Header from '@/components/Header';
 import ScreenLayout from '@/components/ScreenLayout';
 import { BoldText } from "@/components/text/BoldText";
 import CustomText from '@/components/text/CustomText';
@@ -83,9 +85,30 @@ export default function QuestionPage() {
     router.navigate('/requestQuestion');
   }
 
+  const onPressBack = () => {
+    router.back();
+  }
+
   return (
     <ScreenLayout>
       <SafeAreaView style={styles.container}>
+        <Header
+          style={styles.header}
+          prefix={(
+            <View style={styles.headerPrefix}>
+              <TouchableOpacity
+                hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
+                onPress={onPressBack}
+              >
+                <LeftArrow width={moderateScale(24)} height={moderateScale(24)} />
+              </TouchableOpacity>
+              <MediumText color="#FFF" fontSize={16}>
+                신앙 상담
+              </MediumText>
+            </View>
+          )}
+        />
+
         {/* Title */}
         <BoldText
           style={styles.title}
@@ -270,8 +293,16 @@ const styles = StyleSheet.create({
   hidden: {
     display: 'none'
   },
+  header: {
+    marginBottom: moderateScale(8),
+  },
+  headerPrefix: {
+    gap: moderateScale(16),
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   title: {
-    marginTop: moderateScale(40),
+    marginTop: moderateScale(16),
     marginBottom: moderateScale(12),
     paddingHorizontal: moderateScale(24)
   },

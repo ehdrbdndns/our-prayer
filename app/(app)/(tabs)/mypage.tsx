@@ -198,6 +198,10 @@ export default function MyPage() {
     await WebBrowser.openBrowserAsync('https://open.kakao.com/o/szrml9Lh');
   }
 
+  const handlePressQuestion = () => {
+    router.navigate('/question');
+  }
+
   // 도움 주신 분들
   const handlePressSupporterList = () => {
     router.navigate('/supportersList');
@@ -405,6 +409,19 @@ export default function MyPage() {
                 letterSpacingPercent={-1}
               >
                 기도 시간 설정하기
+              </BoldText>
+            </CustomButton>
+            <CustomButton
+              onPress={handlePressQuestion}
+              style={styles.button}
+            >
+              <BoldText
+                color="#FFFFFF"
+                fontSize={14}
+                lineHeight={22}
+                letterSpacingPercent={-1}
+              >
+                신앙 상담 신청하기
               </BoldText>
             </CustomButton>
             {/* <CustomButton style={styles.button}>

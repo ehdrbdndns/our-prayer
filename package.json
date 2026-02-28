@@ -18,7 +18,10 @@
     "e2e:ios:smoke": "maestro test -p ios e2e/maestro/smoke.yaml",
     "e2e:ios:slow": "maestro test -p ios e2e/maestro/slow.yaml",
     "e2e:android:smoke": "maestro test -p android e2e/maestro/smoke.yaml",
-    "e2e:android:slow": "maestro test -p android e2e/maestro/slow.yaml"
+    "e2e:android:slow": "maestro test -p android e2e/maestro/slow.yaml",
+    "e2e:regression": "maestro test e2e/maestro/regression.yaml",
+    "e2e:ios:regression": "maestro test -p ios e2e/maestro/regression.yaml",
+    "e2e:android:regression": "maestro test -p android e2e/maestro/regression.yaml"
   },
   "dependencies": {
     "@expo-google-fonts/ibm-plex-mono": "^0.2.3",

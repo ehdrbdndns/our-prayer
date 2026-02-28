@@ -1,5 +1,6 @@
 import api from '@/utils/axios';
-import { HistoryType, PlanResponseType, PlanType, QuestionType } from '@/utils/dataType';
+import { HistoryType, PlanResponseType, PlanType, PrayerTopicPriority, PrayerTopicType, QuestionType } from '@/utils/dataType';
+import { createPrayerTopic, deletePrayerTopic, restorePrayerTopic, togglePrayerTopicChecked, updatePrayerTopic } from '@/utils/prayerTopicStorage';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
@@ -403,4 +404,123 @@ export const useUpdateQuestionMutation = ({
       onError();
     },
   })
+}
+
+export const useCreatePrayerTopicMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      content,
+      priority,
+    }: {
+      content: string;
+      priority: PrayerTopicPriority;
+    }) => {
+      return await createPrayerTopic({ content, priority });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['prayerTopic'] });
+      await queryClient.invalidateQueries({ queryKey: ['prayerTopicCheck'] });
+    },
+    onError: (error, newTopic, context) => {
+      console.error('onError', error, newTopic, context);
+    },
+  });
+}
+
+export const useUpdatePrayerTopicMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      prayer_topic_id,
+      content,
+      priority,
+    }: {
+      prayer_topic_id: string;
+      content: string;
+      priority: PrayerTopicPriority;
+    }) => {
+      return await updatePrayerTopic({ prayer_topic_id, content, priority });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['prayerTopic'] });
+    },
+    onError: (error, newTopic, context) => {
+      console.error('onError', error, newTopic, context);
+    },
+  });
+}
+
+export const useDeletePrayerTopicMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (prayer_topic_id: string) => {
+      return await deletePrayerTopic(prayer_topic_id);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['prayerTopic'] });
+      await queryClient.invalidateQueries({ queryKey: ['prayerTopicCheck'] });
+    },
+    onError: (error, topicId, context) => {
+      console.error('onError', error, topicId, context);
+    },
+  });
+}
+
+export const useTogglePrayerTopicCheckMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      prayer_topic_id,
+      checked,
+      dateKey,
+    }: {
+      prayer_topic_id: string;
+      checked: boolean;
+      dateKey?: string;
+    }) => {
+      return await togglePrayerTopicChecked({ prayer_topic_id, checked, dateKey });
+    },
+    onSuccess: async (_, variables) => {
+      if (variables.dateKey) {
+        await queryClient.invalidateQueries({ queryKey: ['prayerTopicCheck', variables.dateKey] });
+      }
+      await queryClient.invalidateQueries({ queryKey: ['prayerTopicCheck'] });
+    },
+    onError: (error, params, context) => {
+      console.error('onError', error, params, context);
+    },
+  });
+}
+
+export const useRestorePrayerTopicMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      topic,
+      checked,
+      dateKey,
+    }: {
+      topic: PrayerTopicType;
+      checked?: boolean;
+      dateKey?: string;
+    }) => {
+      return await restorePrayerTopic({ topic, checked, dateKey });
+    },
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({ queryKey: ['prayerTopic'] });
+      if (variables.dateKey) {
+        await queryClient.invalidateQueries({ queryKey: ['prayerTopicCheck', variables.dateKey] });
+      }
+      await queryClient.invalidateQueries({ queryKey: ['prayerTopicCheck'] });
+    },
+    onError: (error, params, context) => {
+      console.error('onError', error, params, context);
+    },
+  });
 }

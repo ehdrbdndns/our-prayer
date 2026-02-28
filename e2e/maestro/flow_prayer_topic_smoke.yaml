@@ -1,0 +1,44 @@
+appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
+---
+- launchApp:
+    clearState: false
+
+- tapOn:
+    point: "92%,43%"
+
+- extendedWaitUntil:
+    visible: ".*기도 제목.*"
+    timeout: 20000
+
+- tapOn: ".*기도 제목.*"
+
+- extendedWaitUntil:
+    visible:
+      id: "prayer-topic-open-add-modal"
+    timeout: 20000
+
+- tapOn:
+    id: "prayer-topic-open-add-modal"
+
+- extendedWaitUntil:
+    visible: ".*새 기도 제목 추가.*"
+    timeout: 20000
+
+- evalScript: ${output.topicText = "E2E_PRAYER_TOPIC_" + Date.now()}
+
+- tapOn: ".*새로운 기도 제목을 입력하세요.*"
+
+- inputText: ${output.topicText}
+
+- tapOn: ".*높음.*"
+
+- tapOn:
+    id: "prayer-topic-add"
+
+- extendedWaitUntil:
+    visible: ".*E2E_PRAYER_TOPIC_.*"
+    timeout: 20000
+
+- tapOn: ".*E2E_PRAYER_TOPIC_.*"
+
+- assertVisible: ".*E2E_PRAYER_TOPIC_.*"
