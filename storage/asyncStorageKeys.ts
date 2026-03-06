@@ -37,11 +37,15 @@ export const ASYNC_PRAYER_TOPIC_LIST = 'prayer-topic:list';
 // 기도 제목 체크 상태 저장 prefix (prayer-topic:checked:YYYY-MM-DD)
 export const ASYNC_PRAYER_TOPIC_CHECK_PREFIX = 'prayer-topic:checked:';
 
+export type AsyncPrayerEntryPath = '/lectureDetail/[lecture_id]' | '/freePrayer';
+
 export type AsyncIsPrayingType = {
   plan_id: string,
   plan_title: string,
   lecture_id: string,
   lecture_title: string,
   repeatCount: number,
-  endTime: number // new Date().getTime() 형태로 저장
+  endTime: number, // new Date().getTime() 형태로 저장
+  entryPath?: AsyncPrayerEntryPath,
+  prayer_minutes?: number,
 }

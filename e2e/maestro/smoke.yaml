@@ -1,5 +1,6 @@
 appId: com.ehdrbdndns.ourprayerwesdlmg8pomqcxfrwnqcj
 ---
 - runFlow: flow_free_smoke.yaml
+- runFlow: flow_free_reconnect_smoke.yaml
 - runFlow: flow_nonfree_smoke.yaml
 - runFlow: flow_prayer_topic_smoke.yaml
