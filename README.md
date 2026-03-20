@@ -32,7 +32,7 @@ iOS와 Android에 실제 배포되어 운영되고 있습니다.
 | Expo Router | ~6.0.15 | 파일 기반 라우팅 |
 
 #### Expo Ecosystem
-| Library | Version | Description |
+| Library | Description |
 |-------|---------|-------------|
 | Expo Router | ~6.0.15 | 파일 기반 라우팅 |
 | expo-notifications | ~0.32.13 | 푸시 알림 |
@@ -51,6 +51,9 @@ iOS와 Android에 실제 배포되어 운영되고 있습니다.
 | @react-native-community/netinfo | ^11.4.1 | 네트워크 상태 감지 |
 
 ### 2) Backend
+
+👉 [서버 코드는 여기에 있어요](https://github.com/ehdrbdndns/our-prayer-server)
+
 | Category | Stack | Description |
 |---------|-------|-------------|
 | API | API Gateway + AWS Lambda (Node.js) | REST API 엔드포인트 및 비즈니스 로직 |
