@@ -32,7 +32,7 @@ iOS와 Android에 실제 배포되어 운영되고 있습니다.
 | Expo Router | ~6.0.15 | 파일 기반 라우팅 |
 
 #### Expo Ecosystem
-| Library | Description |
+| Library | Version | Description |
 |-------|---------|-------------|
 | Expo Router | ~6.0.15 | 파일 기반 라우팅 |
 | expo-notifications | ~0.32.13 | 푸시 알림 |
