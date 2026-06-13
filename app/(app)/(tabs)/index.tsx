@@ -22,6 +22,31 @@ import { useEffect, useState } from "react";
 import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const isFiniteNumber = (value: unknown): value is number => {
+  return typeof value === "number" && Number.isFinite(value);
+};
+
+const isAsyncIsPrayingType = (value: unknown): value is AsyncIsPrayingType => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const row = value as Record<string, unknown>;
+
+  return (
+    typeof row.plan_id === "string" &&
+    typeof row.plan_title === "string" &&
+    typeof row.lecture_id === "string" &&
+    typeof row.lecture_title === "string" &&
+    isFiniteNumber(row.repeatCount) &&
+    isFiniteNumber(row.endTime) &&
+    (row.entryPath === undefined || row.entryPath === "/lectureDetail/[lecture_id]" || row.entryPath === "/freePrayer") &&
+    (row.prayer_minutes === undefined || isFiniteNumber(row.prayer_minutes)) &&
+    (row.isPlaying === undefined || typeof row.isPlaying === "boolean") &&
+    (row.remainingSeconds === undefined || isFiniteNumber(row.remainingSeconds))
+  );
+};
+
 export default function Index() {
 
   const { session, isLoading } = useSession();
@@ -51,12 +76,27 @@ export default function Index() {
 
       if (!isPraying) { return }
 
+      let parsedState: unknown;
+      try {
+        parsedState = JSON.parse(isPraying);
+      } catch {
+        await AsyncStorage.removeItem(ASYNC_IS_PRAYING);
+        return;
+      }
+
+      if (!isAsyncIsPrayingType(parsedState)) {
+        await AsyncStorage.removeItem(ASYNC_IS_PRAYING);
+        return;
+      }
+
       const {
-        plan_id
-        , plan_title
-        , lecture_id
-        , endTime
-      } = JSON.parse(isPraying) as AsyncIsPrayingType
+        plan_id,
+        plan_title,
+        lecture_id,
+        endTime,
+        entryPath,
+        prayer_minutes,
+      } = parsedState;
 
       // 3시간 이상 지난 경우 기도 중 상태 초기화
       const now = new Date().getTime();
@@ -80,7 +120,21 @@ export default function Index() {
           {
             text: "이어서 기도하기",
             onPress: () => {
-              // 기도 페이지로 이동
+              if (entryPath === "/freePrayer") {
+                router.navigate({
+                  pathname: "/freePrayer",
+                  params: {
+                    plan_id: plan_id,
+                    plan_title: plan_title,
+                    lecture_id: lecture_id,
+                    prayer_minutes: String(prayer_minutes ?? 1),
+                    isReconnect: "true",
+                  },
+                });
+                return;
+              }
+
+              // 기도 페이지로 이동 (강의 기반)
               router.navigate({
                 pathname: '/lectureDetail/[lecture_id]',
                 params: {

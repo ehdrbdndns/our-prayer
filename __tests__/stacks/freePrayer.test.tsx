@@ -4,6 +4,7 @@
  * 2) 기도 종료 20초 전(remaining <= 20)에 ending 알람을 1회만 재생하는지 검증한다.
  * 3) 완료 버튼/그만두기에서 prayerRecord로 이동하며 lecture_id/duration을 전달하는지 검증한다.
  * 4) lecture_id 누락 시 예외 처리(alert + /plan 복귀)를 검증한다.
+ * 5) 일시정지 저장/복구에서 남은 시간과 저장된 기도 시간을 안정적으로 복원하는지 검증한다.
  */
 import FreePrayerPage from "@/app/(app)/(stacks)/freePrayer";
 import Amp from "@/classes/Amp";
@@ -11,7 +12,7 @@ import { ASYNC_IS_PRAYING } from "@/storage/asyncStorageKeys";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
-import { Alert } from "react-native";
+import { Alert, AppState, AppStateStatus } from "react-native";
 
 jest.mock("@/classes/Amp", () => {
   return jest.fn().mockImplementation(() => ({
@@ -22,6 +23,7 @@ jest.mock("@/classes/Amp", () => {
     playEffect: jest.fn(() => Promise.resolve(true)),
     stopEffect: jest.fn(() => Promise.resolve()),
     pause: jest.fn(() => Promise.resolve()),
+    resumeAudio: jest.fn(() => Promise.resolve()),
   }));
 });
 
@@ -39,13 +41,23 @@ jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
-let mockParams = {
+type MockParams = {
+  plan_id?: string;
+  lecture_id?: string;
+  plan_title?: string;
+  prayer_minutes?: string;
+  isReconnect?: string;
+};
+
+let mockParams: MockParams = {
   lecture_id: "lecture-1",
   plan_title: "자유 기도",
   prayer_minutes: "1",
 };
 const mockReplace = jest.fn();
 const mockDismissTo = jest.fn();
+let appStateHandler: ((nextAppState: AppStateStatus) => void) | undefined;
+const originalAppStateCurrentState = AppState.currentState;
 
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => mockParams,
@@ -90,6 +102,17 @@ jest.mock("@/assets/images/icon/mute.svg", () => {
   };
 });
 
+const createDeferred = <T,>() => {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+
+  return { promise, resolve, reject };
+};
+
 describe("FreePrayerPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -99,6 +122,17 @@ describe("FreePrayerPage", () => {
       plan_title: "자유 기도",
       prayer_minutes: "1",
     };
+    AppState.currentState = "active";
+    appStateHandler = undefined;
+    jest.spyOn(AppState, "addEventListener").mockImplementation((_eventName, handler) => {
+      appStateHandler = handler as (nextAppState: AppStateStatus) => void;
+      return { remove: jest.fn() } as never;
+    });
+  });
+
+  afterEach(() => {
+    AppState.currentState = originalAppStateCurrentState;
+    jest.restoreAllMocks();
   });
 
   const getAmpInstance = () => (Amp as unknown as jest.Mock).mock.results[0]?.value;
@@ -248,5 +282,238 @@ describe("FreePrayerPage", () => {
     expect(mockDismissTo).toHaveBeenCalledWith("/plan");
 
     alertSpy.mockRestore();
+  });
+
+  it("stores paused free prayer state without counting paused wall-clock time", async () => {
+    const startTime = new Date("2026-06-13T00:00:00.000Z").getTime();
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(startTime);
+
+    render(<FreePrayerPage />);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(true);
+    });
+
+    act(() => {
+      timerProps.setElapsedTime(12);
+    });
+
+    await act(async () => {
+      await timerProps.onPressPlay();
+    });
+
+    await waitFor(() => {
+      expect(timerProps.isPlaying).toBe(false);
+    });
+
+    nowSpy.mockReturnValue(startTime + 5 * 60_000);
+    expect(appStateHandler).toBeDefined();
+    const handleAppStateChange = appStateHandler!;
+
+    await act(async () => {
+      handleAppStateChange("background");
+    });
+
+    await waitFor(() => {
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(ASYNC_IS_PRAYING, expect.any(String));
+    });
+
+    const savedPayload = JSON.parse((AsyncStorage.setItem as jest.Mock).mock.calls.at(-1)?.[1]);
+    expect(savedPayload).toEqual(
+      expect.objectContaining({
+        lecture_id: "lecture-1",
+        entryPath: "/freePrayer",
+        prayer_minutes: 1,
+        repeatCount: 0,
+        isPlaying: false,
+        remainingSeconds: 48,
+      })
+    );
+  });
+
+  it("persists paused state before audio pause resolves when backgrounded immediately", async () => {
+    const pauseDeferred = createDeferred<void>();
+
+    render(<FreePrayerPage />);
+    const amp = getAmpInstance();
+    amp.pause.mockReturnValueOnce(pauseDeferred.promise);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(true);
+    });
+
+    act(() => {
+      timerProps.setElapsedTime(12);
+    });
+
+    let pauseAction: Promise<void> | undefined;
+    act(() => {
+      pauseAction = timerProps.onPressPlay();
+    });
+
+    expect(amp.pause).toHaveBeenCalled();
+    expect(appStateHandler).toBeDefined();
+
+    await act(async () => {
+      appStateHandler!("background");
+    });
+
+    await waitFor(() => {
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(ASYNC_IS_PRAYING, expect.any(String));
+    });
+
+    const savedPayload = JSON.parse((AsyncStorage.setItem as jest.Mock).mock.calls.at(-1)?.[1]);
+    expect(savedPayload).toEqual(
+      expect.objectContaining({
+        lecture_id: "lecture-1",
+        entryPath: "/freePrayer",
+        prayer_minutes: 1,
+        repeatCount: 0,
+        isPlaying: false,
+        remainingSeconds: 48,
+      })
+    );
+
+    await act(async () => {
+      pauseDeferred.resolve();
+      await pauseAction;
+    });
+  });
+
+  it("rolls back optimistic pause state when audio pause rejects", async () => {
+    const pauseError = new Error("pause failed");
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    render(<FreePrayerPage />);
+    const amp = getAmpInstance();
+    amp.pause.mockRejectedValueOnce(pauseError);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(true);
+    });
+
+    await act(async () => {
+      await timerProps.onPressPlay();
+    });
+
+    expect(amp.pause).toHaveBeenCalled();
+    expect(timerProps.isPlaying).toBe(true);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(pauseError);
+  });
+
+  it("restores paused reconnect state as paused with saved remaining time", async () => {
+    const now = new Date("2026-06-13T00:00:00.000Z").getTime();
+    jest.spyOn(Date, "now").mockReturnValue(now);
+
+    mockParams = {
+      lecture_id: "lecture-1",
+      plan_title: "자유 기도",
+      prayer_minutes: "1",
+      isReconnect: "true",
+    };
+
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+      JSON.stringify({
+        plan_id: "",
+        plan_title: "자유 기도",
+        lecture_id: "lecture-1",
+        lecture_title: "자유 기도",
+        repeatCount: 1,
+        endTime: now - 5 * 60_000,
+        entryPath: "/freePrayer",
+        prayer_minutes: 1,
+        isPlaying: false,
+        remainingSeconds: 42,
+      })
+    );
+
+    render(<FreePrayerPage />);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(false);
+      expect(timerProps.repeatCount).toBe(1);
+      expect(timerProps.duration).toBe(60);
+      expect(timerProps.initialRemainingTime).toBe(42);
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith(ASYNC_IS_PRAYING);
+    });
+  });
+
+  it("keeps running reconnect based on saved endTime", async () => {
+    mockParams = {
+      lecture_id: "lecture-1",
+      plan_title: "자유 기도",
+      prayer_minutes: "1",
+      isReconnect: "true",
+    };
+
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000_000);
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+      JSON.stringify({
+        plan_id: "",
+        plan_title: "자유 기도",
+        lecture_id: "lecture-1",
+        lecture_title: "자유 기도",
+        repeatCount: 0,
+        endTime: 1_000_000 + 45_000,
+        entryPath: "/freePrayer",
+        prayer_minutes: 1,
+        isPlaying: true,
+        remainingSeconds: 55,
+      })
+    );
+
+    render(<FreePrayerPage />);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(true);
+      expect(timerProps.repeatCount).toBe(0);
+      expect(timerProps.duration).toBe(60);
+      expect(timerProps.initialRemainingTime).toBe(45);
+    });
+
+    nowSpy.mockRestore();
+  });
+
+  it("normalizes invalid saved free prayer minutes during paused reconnect restore", async () => {
+    const now = new Date("2026-06-13T00:00:00.000Z").getTime();
+    jest.spyOn(Date, "now").mockReturnValue(now);
+
+    mockParams = {
+      lecture_id: "lecture-1",
+      plan_title: "자유 기도",
+      prayer_minutes: "1",
+      isReconnect: "true",
+    };
+
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+      JSON.stringify({
+        plan_id: "",
+        plan_title: "자유 기도",
+        lecture_id: "lecture-1",
+        lecture_title: "자유 기도",
+        repeatCount: 2,
+        endTime: now - 5 * 60_000,
+        entryPath: "/freePrayer",
+        prayer_minutes: 0,
+        isPlaying: false,
+        remainingSeconds: 42,
+      })
+    );
+
+    render(<FreePrayerPage />);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(false);
+      expect(timerProps.repeatCount).toBe(2);
+      expect(timerProps.duration).toBe(60);
+      expect(timerProps.initialRemainingTime).toBe(42);
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith(ASYNC_IS_PRAYING);
+    });
   });
 });
