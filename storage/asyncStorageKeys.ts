@@ -48,4 +48,6 @@ export type AsyncIsPrayingType = {
   endTime: number, // new Date().getTime() 형태로 저장
   entryPath?: AsyncPrayerEntryPath,
   prayer_minutes?: number,
+  isPlaying?: boolean,
+  remainingSeconds?: number,
 }

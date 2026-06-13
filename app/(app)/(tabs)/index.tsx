@@ -41,7 +41,9 @@ const isAsyncIsPrayingType = (value: unknown): value is AsyncIsPrayingType => {
     isFiniteNumber(row.repeatCount) &&
     isFiniteNumber(row.endTime) &&
     (row.entryPath === undefined || row.entryPath === "/lectureDetail/[lecture_id]" || row.entryPath === "/freePrayer") &&
-    (row.prayer_minutes === undefined || isFiniteNumber(row.prayer_minutes))
+    (row.prayer_minutes === undefined || isFiniteNumber(row.prayer_minutes)) &&
+    (row.isPlaying === undefined || typeof row.isPlaying === "boolean") &&
+    (row.remainingSeconds === undefined || isFiniteNumber(row.remainingSeconds))
   );
 };
 
