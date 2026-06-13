@@ -56,6 +56,7 @@ let mockParams: MockParams = {
 const mockReplace = jest.fn();
 const mockDismissTo = jest.fn();
 let appStateHandler: ((nextAppState: AppStateStatus) => void) | undefined;
+const originalAppStateCurrentState = AppState.currentState;
 
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => mockParams,
@@ -118,6 +119,7 @@ describe("FreePrayerPage", () => {
   });
 
   afterEach(() => {
+    AppState.currentState = originalAppStateCurrentState;
     jest.restoreAllMocks();
   });
 
@@ -271,6 +273,9 @@ describe("FreePrayerPage", () => {
   });
 
   it("stores paused free prayer state without counting paused wall-clock time", async () => {
+    const startTime = new Date("2026-06-13T00:00:00.000Z").getTime();
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(startTime);
+
     render(<FreePrayerPage />);
 
     await waitFor(() => {
@@ -290,8 +295,12 @@ describe("FreePrayerPage", () => {
       expect(timerProps.isPlaying).toBe(false);
     });
 
+    nowSpy.mockReturnValue(startTime + 5 * 60_000);
+    expect(appStateHandler).toBeDefined();
+    const handleAppStateChange = appStateHandler!;
+
     await act(async () => {
-      appStateHandler?.("background");
+      handleAppStateChange("background");
     });
 
     await waitFor(() => {
@@ -312,6 +321,9 @@ describe("FreePrayerPage", () => {
   });
 
   it("restores paused reconnect state as paused with saved remaining time", async () => {
+    const now = new Date("2026-06-13T00:00:00.000Z").getTime();
+    jest.spyOn(Date, "now").mockReturnValue(now);
+
     mockParams = {
       lecture_id: "lecture-1",
       plan_title: "자유 기도",
@@ -326,7 +338,7 @@ describe("FreePrayerPage", () => {
         lecture_id: "lecture-1",
         lecture_title: "자유 기도",
         repeatCount: 1,
-        endTime: Date.now() + 42_000,
+        endTime: now - 5 * 60_000,
         entryPath: "/freePrayer",
         prayer_minutes: 1,
         isPlaying: false,
