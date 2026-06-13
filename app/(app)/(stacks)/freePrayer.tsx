@@ -465,10 +465,18 @@ export default function FreePrayerPage() {
   const handlePressPlay = async () => {
     if (isPlaying) {
       const now = Date.now();
+      const previousPausedTime = pausedTime;
       isPlayingRef.current = false;
       setIsPlaying(false);
       setPausedTime(now);
-      await ampRef.current?.pause();
+      try {
+        await ampRef.current?.pause();
+      } catch (error) {
+        isPlayingRef.current = true;
+        setIsPlaying(true);
+        setPausedTime(previousPausedTime);
+        console.error(error);
+      }
       return;
     }
 

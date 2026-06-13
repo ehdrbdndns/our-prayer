@@ -382,6 +382,28 @@ describe("FreePrayerPage", () => {
     });
   });
 
+  it("rolls back optimistic pause state when audio pause rejects", async () => {
+    const pauseError = new Error("pause failed");
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    render(<FreePrayerPage />);
+    const amp = getAmpInstance();
+    amp.pause.mockRejectedValueOnce(pauseError);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(true);
+    });
+
+    await act(async () => {
+      await timerProps.onPressPlay();
+    });
+
+    expect(amp.pause).toHaveBeenCalled();
+    expect(timerProps.isPlaying).toBe(true);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(pauseError);
+  });
+
   it("restores paused reconnect state as paused with saved remaining time", async () => {
     const now = new Date("2026-06-13T00:00:00.000Z").getTime();
     jest.spyOn(Date, "now").mockReturnValue(now);
