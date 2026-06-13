@@ -58,6 +58,15 @@ const calculateElapsedTimeFromSavedState = (
   return timeOffsetFromEnd + (savedRepeatCount + 1) * prayerDurationMillis;
 };
 
+const calculateRemainingSeconds = (durationSeconds: number, elapsedSeconds: number) => {
+  if (durationSeconds <= 0) {
+    return 0;
+  }
+
+  const currentCycleElapsedSeconds = Math.max(0, Math.floor(elapsedSeconds % durationSeconds));
+  return Math.max(0, durationSeconds - currentCycleElapsedSeconds);
+};
+
 export default function FreePrayerPage() {
   useKeepAwake();
 
@@ -308,6 +317,9 @@ export default function FreePrayerPage() {
         endTimeRef.current = Date.now() + Math.max(0, currentDuration - elapsedTimeRef.current) * 1000;
       }
 
+      const wasPlaying = isPlayingRef.current;
+      const remainingSeconds = calculateRemainingSeconds(currentDuration, elapsedTimeRef.current);
+
       const prayingState: AsyncIsPrayingType = {
         plan_id: plan_id || "",
         plan_title: plan_title || FREE_PRAYER_LECTURE_TITLE,
@@ -317,6 +329,8 @@ export default function FreePrayerPage() {
         endTime: endTimeRef.current,
         entryPath: FREE_PRAYER_ENTRY_PATH,
         prayer_minutes: selectedMinutes,
+        isPlaying: wasPlaying,
+        remainingSeconds,
       };
 
       await AsyncStorage.setItem(ASYNC_IS_PRAYING, JSON.stringify(prayingState));
