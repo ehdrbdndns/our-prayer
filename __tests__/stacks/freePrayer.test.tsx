@@ -102,6 +102,17 @@ jest.mock("@/assets/images/icon/mute.svg", () => {
   };
 });
 
+const createDeferred = <T,>() => {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+
+  return { promise, resolve, reject };
+};
+
 describe("FreePrayerPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -319,6 +330,56 @@ describe("FreePrayerPage", () => {
         remainingSeconds: 48,
       })
     );
+  });
+
+  it("persists paused state before audio pause resolves when backgrounded immediately", async () => {
+    const pauseDeferred = createDeferred<void>();
+
+    render(<FreePrayerPage />);
+    const amp = getAmpInstance();
+    amp.pause.mockReturnValueOnce(pauseDeferred.promise);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(true);
+    });
+
+    act(() => {
+      timerProps.setElapsedTime(12);
+    });
+
+    let pauseAction: Promise<void> | undefined;
+    act(() => {
+      pauseAction = timerProps.onPressPlay();
+    });
+
+    expect(amp.pause).toHaveBeenCalled();
+    expect(appStateHandler).toBeDefined();
+
+    await act(async () => {
+      appStateHandler!("background");
+    });
+
+    await waitFor(() => {
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(ASYNC_IS_PRAYING, expect.any(String));
+    });
+
+    const savedPayload = JSON.parse((AsyncStorage.setItem as jest.Mock).mock.calls.at(-1)?.[1]);
+    expect(savedPayload).toEqual(
+      expect.objectContaining({
+        lecture_id: "lecture-1",
+        entryPath: "/freePrayer",
+        prayer_minutes: 1,
+        repeatCount: 0,
+        isPlaying: false,
+        remainingSeconds: 48,
+      })
+    );
+
+    await act(async () => {
+      pauseDeferred.resolve();
+      await pauseAction;
+    });
   });
 
   it("restores paused reconnect state as paused with saved remaining time", async () => {
