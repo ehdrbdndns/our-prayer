@@ -67,6 +67,15 @@ const calculateRemainingSeconds = (durationSeconds: number, elapsedSeconds: numb
   return Math.max(0, durationSeconds - currentCycleElapsedSeconds);
 };
 
+const normalizePrayerMinutes = (value: unknown) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return 1;
+  }
+
+  return Math.max(1, Math.min(300, Math.round(parsed)));
+};
+
 const calculateElapsedSecondsFromRemainingSeconds = (
   savedRepeatCount: number,
   savedRemainingSeconds: number,
@@ -98,14 +107,7 @@ export default function FreePrayerPage() {
     isReconnect?: string;
   }>();
 
-  const selectedMinutes = useMemo(() => {
-    const parsed = Number(prayer_minutes);
-    if (!Number.isFinite(parsed)) {
-      return 1;
-    }
-
-    return Math.max(1, Math.min(300, Math.round(parsed)));
-  }, [prayer_minutes]);
+  const selectedMinutes = useMemo(() => normalizePrayerMinutes(prayer_minutes), [prayer_minutes]);
 
   const { isIntroVisible, isContentVisible, introOpacity, contentOpacity } = useScreenTransition({
     isDataLoaded: true,
@@ -282,7 +284,10 @@ export default function FreePrayerPage() {
           return;
         }
 
-        const restoredMinutes = parsedState.prayer_minutes ?? selectedMinutes;
+        const restoredMinutes =
+          parsedState.prayer_minutes === undefined
+            ? selectedMinutes
+            : normalizePrayerMinutes(parsedState.prayer_minutes);
         const restoredDurationSeconds = getE2EDurationSeconds(restoredMinutes * 60);
 
         if (cancelled) {

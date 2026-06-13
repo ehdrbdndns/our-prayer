@@ -4,6 +4,7 @@
  * 2) 기도 종료 20초 전(remaining <= 20)에 ending 알람을 1회만 재생하는지 검증한다.
  * 3) 완료 버튼/그만두기에서 prayerRecord로 이동하며 lecture_id/duration을 전달하는지 검증한다.
  * 4) lecture_id 누락 시 예외 처리(alert + /plan 복귀)를 검증한다.
+ * 5) 일시정지 저장/복구에서 남은 시간과 저장된 기도 시간을 안정적으로 복원하는지 검증한다.
  */
 import FreePrayerPage from "@/app/(app)/(stacks)/freePrayer";
 import Amp from "@/classes/Amp";
@@ -352,6 +353,44 @@ describe("FreePrayerPage", () => {
       expect(timerProps).toBeDefined();
       expect(timerProps.isPlaying).toBe(false);
       expect(timerProps.repeatCount).toBe(1);
+      expect(timerProps.duration).toBe(60);
+      expect(timerProps.initialRemainingTime).toBe(42);
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith(ASYNC_IS_PRAYING);
+    });
+  });
+
+  it("normalizes invalid saved free prayer minutes during paused reconnect restore", async () => {
+    const now = new Date("2026-06-13T00:00:00.000Z").getTime();
+    jest.spyOn(Date, "now").mockReturnValue(now);
+
+    mockParams = {
+      lecture_id: "lecture-1",
+      plan_title: "자유 기도",
+      prayer_minutes: "1",
+      isReconnect: "true",
+    };
+
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+      JSON.stringify({
+        plan_id: "",
+        plan_title: "자유 기도",
+        lecture_id: "lecture-1",
+        lecture_title: "자유 기도",
+        repeatCount: 2,
+        endTime: now - 5 * 60_000,
+        entryPath: "/freePrayer",
+        prayer_minutes: 0,
+        isPlaying: false,
+        remainingSeconds: 42,
+      })
+    );
+
+    render(<FreePrayerPage />);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(false);
+      expect(timerProps.repeatCount).toBe(2);
       expect(timerProps.duration).toBe(60);
       expect(timerProps.initialRemainingTime).toBe(42);
       expect(AsyncStorage.removeItem).toHaveBeenCalledWith(ASYNC_IS_PRAYING);
