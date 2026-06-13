@@ -617,7 +617,7 @@ git commit -m "test: cover running free prayer reconnect"
 `app/(app)/(stacks)/freePrayer.tsx`에서 아래 코드를:
 
 ```tsx
-        <Animated.View style={[styles.intro, { opacity: introOpacity }]}> 
+        <Animated.View style={[styles.intro, { opacity: introOpacity }]}>
 ```
 
 아래 코드로 교체한다.
@@ -629,9 +629,8 @@ git commit -m "test: cover running free prayer reconnect"
 그리고 아래 코드를:
 
 ```tsx
-        <Animated.View style={[styles.content, { opacity: contentOpacity }]}> 
+        <Animated.View style={[styles.content, { opacity: contentOpacity }]}>
 ```
-
 아래 코드로 교체한다.
 
 ```tsx
@@ -719,4 +718,3 @@ git commit -m "fix: prevent paused free prayer reconnect time drift"
 **Placeholder scan:** 각 단계에는 정확한 파일 경로, 테스트 코드, 구현 코드, 실행 명령, 예상 결과가 포함되어 있다.
 
 **Type consistency:** 새 필드명은 `AsyncIsPrayingType`, 두 runtime guard, 저장 payload, 복구 로직, 테스트에서 모두 `isPlaying`, `remainingSeconds`로 일관된다.
-

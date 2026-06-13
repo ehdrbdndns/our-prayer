@@ -560,7 +560,7 @@ export default function FreePrayerPage() {
   return (
     <View style={{ flex: 1, paddingTop: insets.top }}>
       {isIntroVisible && (
-        <Animated.View style={[styles.intro, { opacity: introOpacity }]}> 
+        <Animated.View style={[styles.intro, { opacity: introOpacity }]}>
           <RegularText style={styles.introText} fontSize={16} lineHeight={24}>
             그러므로 내가 너희에게 말하노니 무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라
           </RegularText>
@@ -571,7 +571,7 @@ export default function FreePrayerPage() {
       )}
 
       {isContentVisible && (
-        <Animated.View style={[styles.content, { opacity: contentOpacity }]}> 
+        <Animated.View style={[styles.content, { opacity: contentOpacity }]}>
           <Header
             style={styles.header}
             prefix={
