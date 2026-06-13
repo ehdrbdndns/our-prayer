@@ -67,6 +67,19 @@ const calculateRemainingSeconds = (durationSeconds: number, elapsedSeconds: numb
   return Math.max(0, durationSeconds - currentCycleElapsedSeconds);
 };
 
+const calculateElapsedSecondsFromRemainingSeconds = (
+  savedRepeatCount: number,
+  savedRemainingSeconds: number,
+  prayerDurationSeconds: number
+) => {
+  if (prayerDurationSeconds <= 0) {
+    return 0;
+  }
+
+  const clampedRemainingSeconds = Math.max(0, Math.min(prayerDurationSeconds, Math.ceil(savedRemainingSeconds)));
+  return savedRepeatCount * prayerDurationSeconds + (prayerDurationSeconds - clampedRemainingSeconds);
+};
+
 export default function FreePrayerPage() {
   useKeepAwake();
 
@@ -276,18 +289,41 @@ export default function FreePrayerPage() {
           return;
         }
 
-        setIsPlaying(true);
+        const shouldRestorePlaying = parsedState.isPlaying ?? true;
+        setIsPlaying(shouldRestorePlaying);
         setDuration(restoredDurationSeconds);
         setInitialRemainingTime(restoredDurationSeconds);
         endTimeRef.current = parsedState.endTime;
 
-        const totalElapsedTimeInMillis = calculateElapsedTimeFromSavedState(
-          parsedState.repeatCount,
-          parsedState.endTime,
-          restoredDurationSeconds
-        );
+        if (shouldRestorePlaying) {
+          const totalElapsedTimeInMillis = calculateElapsedTimeFromSavedState(
+            parsedState.repeatCount,
+            parsedState.endTime,
+            restoredDurationSeconds
+          );
 
-        await handleAdjustElapsedTime(totalElapsedTimeInMillis / 1000, restoredDurationSeconds);
+          await handleAdjustElapsedTime(totalElapsedTimeInMillis / 1000, restoredDurationSeconds);
+        } else {
+          const savedRemainingSeconds =
+            parsedState.remainingSeconds ?? calculateRemainingSeconds(restoredDurationSeconds, 0);
+          const totalElapsedSeconds = calculateElapsedSecondsFromRemainingSeconds(
+            parsedState.repeatCount,
+            savedRemainingSeconds,
+            restoredDurationSeconds
+          );
+          const clampedRemainingSeconds = Math.max(
+            0,
+            Math.min(restoredDurationSeconds, Math.ceil(savedRemainingSeconds))
+          );
+
+          setRepeatCount(parsedState.repeatCount);
+          setElapsedTime(totalElapsedSeconds % restoredDurationSeconds);
+          setInitialRemainingTime(clampedRemainingSeconds);
+          setPausedTime(Date.now());
+          endTimeRef.current = Date.now() + clampedRemainingSeconds * 1000;
+          setTimerKey(prev => prev + 1);
+        }
+
         await AsyncStorage.removeItem(ASYNC_IS_PRAYING);
       } catch {
         await AsyncStorage.removeItem(ASYNC_IS_PRAYING);
