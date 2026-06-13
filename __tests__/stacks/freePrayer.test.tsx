@@ -11,7 +11,7 @@ import { ASYNC_IS_PRAYING } from "@/storage/asyncStorageKeys";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
-import { Alert } from "react-native";
+import { Alert, AppState, AppStateStatus } from "react-native";
 
 jest.mock("@/classes/Amp", () => {
   return jest.fn().mockImplementation(() => ({
@@ -22,6 +22,7 @@ jest.mock("@/classes/Amp", () => {
     playEffect: jest.fn(() => Promise.resolve(true)),
     stopEffect: jest.fn(() => Promise.resolve()),
     pause: jest.fn(() => Promise.resolve()),
+    resumeAudio: jest.fn(() => Promise.resolve()),
   }));
 });
 
@@ -39,13 +40,22 @@ jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
-let mockParams = {
+type MockParams = {
+  plan_id?: string;
+  lecture_id?: string;
+  plan_title?: string;
+  prayer_minutes?: string;
+  isReconnect?: string;
+};
+
+let mockParams: MockParams = {
   lecture_id: "lecture-1",
   plan_title: "자유 기도",
   prayer_minutes: "1",
 };
 const mockReplace = jest.fn();
 const mockDismissTo = jest.fn();
+let appStateHandler: ((nextAppState: AppStateStatus) => void) | undefined;
 
 jest.mock("expo-router", () => ({
   useLocalSearchParams: () => mockParams,
@@ -99,6 +109,16 @@ describe("FreePrayerPage", () => {
       plan_title: "자유 기도",
       prayer_minutes: "1",
     };
+    AppState.currentState = "active";
+    appStateHandler = undefined;
+    jest.spyOn(AppState, "addEventListener").mockImplementation((_eventName, handler) => {
+      appStateHandler = handler as (nextAppState: AppStateStatus) => void;
+      return { remove: jest.fn() } as never;
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   const getAmpInstance = () => (Amp as unknown as jest.Mock).mock.results[0]?.value;
@@ -248,5 +268,81 @@ describe("FreePrayerPage", () => {
     expect(mockDismissTo).toHaveBeenCalledWith("/plan");
 
     alertSpy.mockRestore();
+  });
+
+  it("stores paused free prayer state without counting paused wall-clock time", async () => {
+    render(<FreePrayerPage />);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(true);
+    });
+
+    act(() => {
+      timerProps.setElapsedTime(12);
+    });
+
+    await act(async () => {
+      await timerProps.onPressPlay();
+    });
+
+    await waitFor(() => {
+      expect(timerProps.isPlaying).toBe(false);
+    });
+
+    await act(async () => {
+      appStateHandler?.("background");
+    });
+
+    await waitFor(() => {
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(ASYNC_IS_PRAYING, expect.any(String));
+    });
+
+    const savedPayload = JSON.parse((AsyncStorage.setItem as jest.Mock).mock.calls.at(-1)?.[1]);
+    expect(savedPayload).toEqual(
+      expect.objectContaining({
+        lecture_id: "lecture-1",
+        entryPath: "/freePrayer",
+        prayer_minutes: 1,
+        repeatCount: 0,
+        isPlaying: false,
+        remainingSeconds: 48,
+      })
+    );
+  });
+
+  it("restores paused reconnect state as paused with saved remaining time", async () => {
+    mockParams = {
+      lecture_id: "lecture-1",
+      plan_title: "자유 기도",
+      prayer_minutes: "1",
+      isReconnect: "true",
+    };
+
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+      JSON.stringify({
+        plan_id: "",
+        plan_title: "자유 기도",
+        lecture_id: "lecture-1",
+        lecture_title: "자유 기도",
+        repeatCount: 1,
+        endTime: Date.now() + 42_000,
+        entryPath: "/freePrayer",
+        prayer_minutes: 1,
+        isPlaying: false,
+        remainingSeconds: 42,
+      })
+    );
+
+    render(<FreePrayerPage />);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(false);
+      expect(timerProps.repeatCount).toBe(1);
+      expect(timerProps.duration).toBe(60);
+      expect(timerProps.initialRemainingTime).toBe(42);
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith(ASYNC_IS_PRAYING);
+    });
   });
 });
