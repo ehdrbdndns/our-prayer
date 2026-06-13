@@ -359,6 +359,43 @@ describe("FreePrayerPage", () => {
     });
   });
 
+  it("keeps running reconnect based on saved endTime", async () => {
+    mockParams = {
+      lecture_id: "lecture-1",
+      plan_title: "자유 기도",
+      prayer_minutes: "1",
+      isReconnect: "true",
+    };
+
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000_000);
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+      JSON.stringify({
+        plan_id: "",
+        plan_title: "자유 기도",
+        lecture_id: "lecture-1",
+        lecture_title: "자유 기도",
+        repeatCount: 0,
+        endTime: 1_000_000 + 45_000,
+        entryPath: "/freePrayer",
+        prayer_minutes: 1,
+        isPlaying: true,
+        remainingSeconds: 55,
+      })
+    );
+
+    render(<FreePrayerPage />);
+
+    await waitFor(() => {
+      expect(timerProps).toBeDefined();
+      expect(timerProps.isPlaying).toBe(true);
+      expect(timerProps.repeatCount).toBe(0);
+      expect(timerProps.duration).toBe(60);
+      expect(timerProps.initialRemainingTime).toBe(45);
+    });
+
+    nowSpy.mockRestore();
+  });
+
   it("normalizes invalid saved free prayer minutes during paused reconnect restore", async () => {
     const now = new Date("2026-06-13T00:00:00.000Z").getTime();
     jest.spyOn(Date, "now").mockReturnValue(now);
